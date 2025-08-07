@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username    String       @unique
+  email       String
+  password    String
+  assignments Assignment[]
+  Note        Note[]
+}
+
+model Assignment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  text      String
+  dueDate   DateTime
+  lesson    String
+  teacher   String
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId String   @db.Uuid
+}
+
+model Note {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  text      String
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String  @db.Uuid
+}
