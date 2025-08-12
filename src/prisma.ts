@@ -8,15 +8,11 @@ const main = async () => {
     include: { assignments: true },
   });
 
-  console.log(user);
-
   if (user) {
     const newUser = await client.student.update({
       data: { username: "Updated Name" },
       where: { id: user?.id },
     });
-
-    console.log("Updated User:", newUser);
   }
 
   client.$disconnect();

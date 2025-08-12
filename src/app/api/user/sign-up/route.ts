@@ -1,7 +1,6 @@
-import { PrismaClient } from "@/generated/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new PrismaClient();
+import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/hash";
 
 export async function POST(req: NextRequest) {
   const { username, email, password } = await req.json();
@@ -11,17 +10,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const existingUser = await client.student.findUnique({
-      where: {
-        username,
-      },
+    const existingUser = await prisma.student.findUnique({
+      where: { username },
     });
+
     if (!existingUser) {
-      const user = await client.student.create({
+      const hashedPassword = await hashPassword(password);
+      const user = await prisma.student.create({
         data: {
           username,
           email,
-          password,
+          password: hashedPassword,
         },
       });
       return NextResponse.json(user);

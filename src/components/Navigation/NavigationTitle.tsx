@@ -19,13 +19,13 @@ export default function NavigationTitle({
           (className ?? "")
         }
       >
-        <h2 className="text-main-dark">{title}</h2>
+        <h2 className="text-foreground">{title}</h2>
         <span
           className="
             block h-[2px] mt-1 w-full
             bg-transparent translate-y-0
             transition-all duration-300 ease-in-out
-            group-hover:-translate-y-[5px] group-hover:bg-underline
+            group-hover:-translate-y-[5px] group-hover:bg-foreground
           "
         />
       </div>

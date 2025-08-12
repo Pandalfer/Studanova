@@ -23,15 +23,16 @@ model Assignment {
   text      String
   dueDate   DateTime
   lesson    String
+  studentId String   @db.Uuid
   teacher   String
   student   Student  @relation(fields: [studentId], references: [id])
-  studentId String   @db.Uuid
 }
 
 model Note {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title     String
-  text      String
-  student   Student @relation(fields: [studentId], references: [id])
-  studentId String  @db.Uuid
+  studentId String   @db.Uuid
+  content   String
+  createdAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  student   Student  @relation(fields: [studentId], references: [id])
 }

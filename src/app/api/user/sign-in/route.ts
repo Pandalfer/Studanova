@@ -1,7 +1,6 @@
-import { PrismaClient } from "@/generated/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new PrismaClient();
+import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/hash";
 
 export async function POST(req: NextRequest) {
   const { username, password } = await req.json();
@@ -11,17 +10,16 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const user = await client.student.findUnique({
-      where: {
-        username,
-      },
+    const user = await prisma.student.findUnique({
+      where: { username },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (user.password !== password) {
+    const isValid = await verifyPassword(user.password, password);
+    if (!isValid) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 

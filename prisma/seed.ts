@@ -1,52 +1,46 @@
-import { PrismaClient, Student } from "../src/generated/prisma";
-import type { Prisma } from "../src/generated/prisma";
+import { PrismaClient } from "../src/generated/prisma";
 
 const client = new PrismaClient();
 
-const getStudents = (): Prisma.StudentCreateInput[] => [
-  { email: "Test@gmail.com", username: "name", password: "password" },
-  { email: "Test2@gmail.com", username: "name2", password: "password2" },
-];
+async function createNotesForStudent(studentId: string) {
+  const notesData = [
+    {
+      title: "Biology Revision",
+      content: "Review chapters on cell structure and photosynthesis.",
+      createdAt: BigInt(Date.now()),
+    },
+    {
+      title: "History Notes",
+      content: "Key points on World War II causes and consequences.",
+      createdAt: BigInt(Date.now()),
+    },
+    {
+      title: "Math Formulas",
+      content: "List of essential algebra and geometry formulas.",
+      createdAt: BigInt(Date.now()),
+    },
+  ];
 
-const getAssignments = (
-  students: Student[],
-): Prisma.AssignmentCreateInput[] => [
-  {
-    student: { connect: { id: students[0].id } },
-    text: "Read Chapter 1",
-    title: "English Assignment",
-    dueDate: new Date("2023-10-01T12:00:00Z"),
-    teacher: "Mr. Smith",
-    lesson: "Introduction to Literature",
-  },
-  {
-    student: { connect: { id: students[1].id } },
-    text: "Finish Exercise 3",
-    title: "Math Assignment",
-    dueDate: new Date("2023-10-02T12:00:00Z"),
-    teacher: "Ms. Johnson",
-    lesson: "Algebra Basics",
-  },
-];
-
-const main = async () => {
-  const users = await Promise.all(
-    getStudents().map((student) => client.student.create({ data: student })),
-  );
-
-  await Promise.all(
-    getAssignments(users).map((assignment) =>
-      client.assignment.create({ data: assignment }),
+  const createdNotes = await Promise.all(
+    notesData.map((note) =>
+      client.note.create({
+        data: {
+          ...note,
+          student: {
+            connect: { id: studentId },
+          },
+        },
+      }),
     ),
   );
-};
 
-main()
-  .then(() => {
-    console.log("✅ Seeding complete");
-  })
+  console.log("Created notes:", createdNotes);
+}
+
+createNotesForStudent("6490c886-d273-43d6-9c42-8d519b1ed433")
   .catch((e) => {
-    console.error("❌ Seeding error:", e);
-    process.exit(1);
+    console.error("Error creating notes:", e);
   })
-  .finally(() => client.$disconnect());
+  .finally(async () => {
+    await client.$disconnect();
+  });

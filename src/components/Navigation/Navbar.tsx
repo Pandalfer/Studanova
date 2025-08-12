@@ -15,7 +15,7 @@ export default function Navbar() {
 
   return (
     <>
-      <div className="sticky top-0 z-40 flex justify-center p-3 bg-dark backdrop-blur-sm">
+      <div className="sticky top-0 z-40 flex justify-center p-3 bg-background">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           {/* Left */}
           <div className="flex-shrink-0">
@@ -23,15 +23,14 @@ export default function Navbar() {
           </div>
 
           {/* Middle */}
-          <div className="hidden md:flex flex-1 justify-center gap-20">
+          <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-20">
             <NavigationTitle title="Notes" destination="notes" />
-            <NavigationTitle title="Tasks" />
-            <NavigationTitle title="Tools" />
-            <NavigationTitle title="Time Table" />
+            <NavigationTitle title="Tasks" destination={"tasks"} />
+            <NavigationTitle title="Tools" destination={"tools"} />
           </div>
 
           {/* Right */}
-          <div className="hidden md:flex flex-shrink-0 flex-row gap-7 text-main-dark items-center">
+          <div className="hidden md:flex flex-shrink-0 flex-row gap-7 items-center">
             <NavigationTitle title="Log In" destination="sign-in" />
             <Link href={"/sign-up"}>
               <PrimaryActionButton text="Sign Up" destination="" />
@@ -41,7 +40,7 @@ export default function Navbar() {
           {/* Hamburger */}
           <div className="visible md:hidden">
             <span
-              className="material-symbols-outlined transition-transform duration-300 ease-in-out cursor-pointer text-3xl text-main-dark"
+              className="material-symbols-outlined transition-transform duration-300 ease-in-out cursor-pointer text-3xl text-foreground"
               onClick={toggleMenu}
             >
               menu
@@ -52,7 +51,7 @@ export default function Navbar() {
 
       {/* Hamburger menu */}
       <div
-        className={`fixed inset-0 z-50 bg-gradient-to-b from-black/70 to-black/50 backdrop-blur-sm transition-opacity ${
+        className={`fixed inset-0 z-50 bg-gradient-to-b from-black/70 to-black/50 transition-opacity ${
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -60,14 +59,14 @@ export default function Navbar() {
       >
         {/* Slide-in Menu */}
         <div
-          className={`absolute top-0 right-0 h-full w-3/4 sm:w-1/2 bg-dark text-white shadow-lg transform transition-transform duration-300 ease-in-out ${
+          className={`absolute top-0 right-0 h-full w-3/4 sm:w-1/2 bg-background text-white shadow-lg transform transition-transform duration-300 ease-in-out ${
             open ? "translate-x-0" : "translate-x-full"
           }`}
         >
           {/* Close Button */}
           <button
             onClick={toggleMenu}
-            className="absolute top-5 right-5 text-3xl text-muted-dark hover:text-white tranisiton duration-300 cursor-pointer"
+            className="absolute top-5 right-5 text-3xl text-muted hover:text-white tranisiton duration-300 cursor-pointer"
           >
             &times;
           </button>
@@ -79,16 +78,23 @@ export default function Navbar() {
               className="text-lg"
               destination="notes"
             />
-            <NavigationTitle title="Tasks" className="text-lg" />
-            <NavigationTitle title="Tools" className="text-lg" />
-            <NavigationTitle title="Time Table" className="text-lg" />
+            <NavigationTitle
+              title="Tasks"
+              className="text-lg"
+              destination={"tasks"}
+            />
+            <NavigationTitle
+              title="Tools"
+              className="text-lg"
+              destination={"tools"}
+            />
           </div>
 
           {/* Action Buttons */}
           <div className="flex flex-col items-center mt-10 space-y-3 px-6">
             <NavigationTitle
               title="Log In"
-              className="text-base text-main-dark"
+              className="text-base"
               destination="sign-in"
             />
             <Link href={"/sign-up"}>

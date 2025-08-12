@@ -1,5 +1,10 @@
 # Make a unique solution that isnt on the market
 
+Google and github login options
+Remember me
+Sidebar
+actual stuff to do
+
 # 🧭 Suggested Pages & Features
 
 ---
@@ -51,7 +56,7 @@ This helps visitors know they’re in the right place.
 
 Even a few quotes from early users or fake placeholder reviews like:
 
-> “Studaro has literally saved my grades.” – Student A
+> “Studanova has literally saved my grades.” – Student A
 
 This builds trust and makes your product feel legit.
 

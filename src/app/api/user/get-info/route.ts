@@ -1,7 +1,5 @@
-import { PrismaClient } from "@/generated/prisma";
 import { NextRequest, NextResponse } from "next/server";
-
-const client = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   const { uuid } = await req.json();
@@ -11,7 +9,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const user = await client.student.findFirst({
+    const user = await prisma.student.findFirst({
       where: { id: uuid },
     });
     return NextResponse.json(user);
