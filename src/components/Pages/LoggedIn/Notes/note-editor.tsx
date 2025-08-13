@@ -46,7 +46,7 @@ export default function NoteEditor({
 
 
   return (
-    <Card className={"h-full flex flex-col"}>
+    <Card className="h-[calc(100vh-125px)] flex flex-col">
       <CardHeader>
         <Input
           value={title}

@@ -22,11 +22,11 @@ export default function NotesSidebar({
   activeNoteId,
 }: NotesSidebarProps) {
   return (
-    <Card className={"h-full"}>
+    <Card className="h-[calc(100vh-125px)] flex flex-col">
       <CardHeader>
         <CardTitle>My Notes</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className={"flex-1"}>
         {notes.length === 0 ? (
           <NotesEmptyState
             message={"No notes yet"}
