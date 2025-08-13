@@ -92,6 +92,7 @@ export function Sidebar({
         username={username}
         isCollapsed={isCollapsed}
         onToggle={() => setIsCollapsed(!isCollapsed)}
+        isDemo={true}
       />
     );
   } else {

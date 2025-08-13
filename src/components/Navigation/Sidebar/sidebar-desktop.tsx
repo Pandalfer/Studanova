@@ -19,6 +19,7 @@ interface SidebarDesktopProps {
   username: string;
   isCollapsed: boolean;
   onToggle: () => void;
+  isDemo?: boolean; // Optional prop for demo mode
 }
 
 export function SidebarDesktop({
@@ -26,6 +27,7 @@ export function SidebarDesktop({
   username,
   isCollapsed,
   onToggle,
+  isDemo = false, // Default to false if not provided
 }: SidebarDesktopProps) {
   const pathname = usePathname();
 
@@ -88,11 +90,14 @@ export function SidebarDesktop({
             </PopoverTrigger>
             <PopoverContent className="mb-2 w-56 p-3 rounded-[1rem]">
               <div className="flex flex-col space-y-1">
-                <Link href={"/public"}>
-                  <SidebarButton size="sm" icon={Settings} className="w-full">
-                    Account Settings
-                  </SidebarButton>
-                </Link>
+                {!isDemo && (
+                  <Link href={"/public"}>
+                    <SidebarButton size="sm" icon={Settings} className="w-full">
+                      Account Settings
+                    </SidebarButton>
+                  </Link>
+                )}
+
                 <Link href={"/sign-in"}>
                   <SidebarButton size="sm" icon={LogOut} className="w-full">
                     Log Out

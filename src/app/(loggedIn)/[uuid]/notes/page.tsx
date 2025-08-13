@@ -60,18 +60,17 @@ export default function NotesPage({ params }: PageProps) {
     try {
       const savedNote = await saveNoteToDb(updatedNote, uuid);
 
-      if (!savedNote || !savedNote.id) {
+      if (!savedNote) {
         throw new Error("Saved note is invalid");
       }
 
-      setNotes((prev) =>
-        prev.map((note) =>
-          note.id === updatedNote.id ? savedNote : note
-        )
+      setNotes(prev =>
+        prev.map(note => (note.id === updatedNote.id ? savedNote : note))
       );
 
       setIsEditing(false);
       setActiveNote(savedNote);
+      setIsDirty(false);
     } catch (error) {
       console.error("Error saving note:", error);
     }
@@ -79,7 +78,7 @@ export default function NotesPage({ params }: PageProps) {
 
   const createNewNote = () => {
     const newNote: Note = {
-      id: `temp-${Date.now()}-${Math.random()}`,  // unique temp id
+      id: `temp-${Date.now()}-${Math.random()}`, // temp id
       title: "New Note",
       content: "",
       createdAt: Date.now(),

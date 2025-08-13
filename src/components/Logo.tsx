@@ -14,7 +14,7 @@ export default function Logo({ size }: { size: number }) {
         width={size}
         height={size}
         quality={100}
-        src="/logo.svg"
+        src="/Logo.svg"
         alt="Logo"
       />
     </Link>

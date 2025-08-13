@@ -10,29 +10,21 @@ export async function POST(req: NextRequest) {
 		}
 
 		let note;
-
-		if (id) {
-			// Update existing note (you probably want to update the date too? If not, just skip createdAt)
+		if (id && !isNaN(Number(id))) {
 			note = await prisma.note.update({
 				where: { id: Number(id) },
 				data: { title, content },
 			});
 		} else {
-			// Create new note
 			note = await prisma.note.create({
-				data: {
-					title,
-					content,
-					createdAt: createdAt ? new Date(createdAt) : new Date(),
-					studentId,
-				},
+				data: { title, content, createdAt: createdAt ? new Date(createdAt) : new Date(), studentId },
 			});
 		}
 
 		return NextResponse.json({
 			note: {
 				...note,
-				createdAt: note.createdAt.toISOString(), // returns standard ISO string
+				createdAt: note.createdAt.toISOString(),
 			},
 		});
 	} catch (error) {
