@@ -1,6 +1,6 @@
-# Make a unique solution that isnt on the market
+# Make a unique solution that isn't on the market
 
-Google and github login options
+Google and GitHub login options
 Remember me
 Sidebar
 actual stuff to do
@@ -48,7 +48,7 @@ _Use icons or step numbers to keep it visual._
 
 Make it relatable:
 
-> “Perfect for GCSE, A-Level, and Uni students who want to stay organised and productive without the overwhelm.”
+> “Perfect for GCSE, A-Level, and Uni students who want to stay organised and productive without being overwhelmed.”
 
 This helps visitors know they’re in the right place.
 

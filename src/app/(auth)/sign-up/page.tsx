@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Github, Mail } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import PrimaryActionButton from "@/components/PrimaryActionButton";
 import { toast } from "sonner";
 
@@ -37,8 +37,8 @@ export default function SignUp() {
   }
 
   function checkPassword(pwd: string) {
-    let strength = "";
-    let color = "";
+    let strength: string;
+    let color: string;
 
     if (pwd.length < 6) {
       strength = "Too Short";

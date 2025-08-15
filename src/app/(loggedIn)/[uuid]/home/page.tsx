@@ -7,52 +7,49 @@ interface PageProps {
 }
 
 export default function LoggedInHome({ params }: PageProps) {
-  const { uuid } = React.use(params); // ✅ unwrap params
+  const { uuid } = React.use(params);
 
   const [username, setUsername] = useState<string | null>(null);
-  const [error, setError] = useState("");
   const [numberOfNotes, setNumberOfNotes] = useState<number | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function fetchUser() {
+    (async () => {
       try {
-        const response = await fetch("/api/user/get-info", {
+        // Fetch user info
+        const userResponse = await fetch("/api/user/get-info", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ uuid }),
         });
 
-        if (!response.ok) throw new Error("User fetch failed");
-        const data = await response.json();
-        setUsername(data.username);
-      } catch (err) {
-        setError("Failed to load user");
-      }
-    }
+        if (!userResponse.ok) {
+          setError("Failed to load user info");
+          return;
+        }
 
-    fetchUser();
+        const userData = await userResponse.json();
+        setUsername(userData.username);
+
+        // Fetch notes
+        const notesResponse = await fetch("/api/notes/load-notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uuid }),
+        });
+
+        if (!notesResponse.ok) {
+          console.error("Failed to load notes");
+          return;
+        }
+
+        const notesData = await notesResponse.json();
+        setNumberOfNotes(notesData.notes.length);
+      } catch {
+        setError("An unexpected error occurred");
+      }
+    })();
   }, [uuid]);
-
-  useEffect(() => {
-    async function fetchDemoNotes() {
-      try {
-        const response = await fetch("/api/notes/load-notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uuid }),
-        });
-
-        if (!response.ok) throw new Error("Notes fetch failed");
-        const data = await response.json();
-        setNumberOfNotes(data.notes.length);
-      } catch (err) {
-        console.error("Failed to load demo notes", err);
-      }
-    }
-
-    fetchDemoNotes();
-
-  });
 
   if (error) return <div>{error}</div>;
   if (!username) return <div>Loading...</div>;
@@ -62,7 +59,7 @@ export default function LoggedInHome({ params }: PageProps) {
       <h1 className="text-white text-3xl font-bold">
         Welcome back, {username}!
       </h1>
-      <p className="text-gray-400 mt-2">
+      <p className="text-muted mt-2">
         You have {numberOfNotes !== null ? numberOfNotes : "loading..."} notes.
       </p>
     </div>

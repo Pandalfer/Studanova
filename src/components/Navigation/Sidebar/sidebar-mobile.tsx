@@ -12,11 +12,6 @@ import {
 } from "@/components/Navigation/Sidebar/sidebar-button";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 

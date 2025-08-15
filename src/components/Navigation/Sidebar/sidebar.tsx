@@ -3,15 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { SidebarDesktop } from "@/components/Navigation/Sidebar/sidebar-desktop";
-import {
-  Home,
-  User,
-  Layers,
-  CheckSquare,
-  Calendar,
-  Notebook,
-  Timer,
-} from "lucide-react";
+import { Home, Notebook } from "lucide-react";
 import { useMediaQuery } from "usehooks-ts";
 import { SidebarMobile } from "@/components/Navigation/Sidebar/sidebar-mobile";
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
@@ -24,11 +16,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({
-                          uuid,
-                          isCollapsed,
-                          setIsCollapsed,
-                          isDemo = false,
-                        }: SidebarProps) {
+  uuid,
+  isCollapsed,
+  setIsCollapsed,
+  isDemo = false,
+}: SidebarProps) {
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
   });
@@ -37,14 +29,13 @@ export function Sidebar({
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    // If demo mode, skip fetch and set Guest immediately
-    if (isDemo) {
-      setUsername("Guest");
-      setError("");
-      return;
-    }
+    (async () => {
+      if (isDemo) {
+        setUsername("Guest");
+        setError("");
+        return;
+      }
 
-    async function fetchUser() {
       try {
         const res = await fetch("/api/user/get-info", {
           method: "POST",
@@ -52,7 +43,10 @@ export function Sidebar({
           body: JSON.stringify({ uuid }),
         });
 
-        if (!res.ok) throw new Error("Failed to fetch user info");
+        if (!res.ok) {
+          console.log("Failed to fetch user info");
+          return;
+        }
 
         const data = await res.json();
         setUsername(data.username || "Unknown User");
@@ -60,9 +54,7 @@ export function Sidebar({
         setError("Failed to load user");
         setUsername("Unknown");
       }
-    }
-
-    fetchUser();
+    })();
   }, [uuid, isDemo]);
 
   const basePath = isDemo ? "/demo" : `/${uuid}`;
@@ -81,8 +73,10 @@ export function Sidebar({
     ),
   };
 
-  if (isDemo === false && error) return <div className="text-red-500 p-3">{error}</div>;
-  if (isDemo === false && !username) return <div className="p-3">Loading user info...</div>;
+  if (isDemo === false && error)
+    return <div className="text-red-500 p-3">{error}</div>;
+  if (isDemo === false && !username)
+    return <div className="p-3">Loading user info...</div>;
 
   // In demo mode we already have username = "Guest", so render normally
   if (isDesktop) {

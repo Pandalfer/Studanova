@@ -9,13 +9,16 @@ const main = async () => {
   });
 
   if (user) {
-    const newUser = await client.student.update({
+    await client.student.update({
       data: { username: "Updated Name" },
-      where: { id: user?.id },
+      where: { id: user.id },
     });
   }
 
   client.$disconnect();
 };
 
-main();
+main().catch((err) => {
+  console.error(err);
+  client.$disconnect(); // ensure disconnection even on error
+});

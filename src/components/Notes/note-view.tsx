@@ -1,4 +1,3 @@
-
 import { Note } from "@/types";
 import {
   Card,
@@ -18,7 +17,7 @@ interface NoteViewProps {
 
 export default function NoteView({ note, onEdit }: NoteViewProps) {
   return (
-    <Card className="h-[calc(100vh-125px)] flex flex-col">
+    <Card className="h-[calc(100vh-125px)] flex flex-col relative">
       <CardHeader>
         <CardTitle>{note.title}</CardTitle>
         <p className="text-sm text-muted-foreground">
@@ -26,8 +25,13 @@ export default function NoteView({ note, onEdit }: NoteViewProps) {
         </p>
       </CardHeader>
       <CardContent className="flex-1">
-        <ScrollArea className="h-full">
-          <div className="pr-4 whitespace-pre-wrap">{note.content}</div>
+        <ScrollArea className="h-[calc(100vh-350px)]">
+          <div className="pr-4">
+            <div
+              className="pr-4 w-full min-h-full break-words whitespace-pre-wrap"
+              dangerouslySetInnerHTML={{ __html: note.content }}
+            />
+          </div>
         </ScrollArea>
       </CardContent>
       <CardFooter className="flex justify-end">

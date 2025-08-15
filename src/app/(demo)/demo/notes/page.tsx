@@ -1,28 +1,47 @@
 "use client";
 
 import { Note } from "@/types";
-import NotesSidebar from "@/components/Pages/LoggedIn/Notes/notes-sidebar";
-import NotesHeader from "@/components/Pages/LoggedIn/Notes/note-header";
-import {useEffect, useState} from "react";
-import NoteView from "@/components/Pages/LoggedIn/Notes/note-view";
-import NoteEditor from "@/components/Pages/LoggedIn/Notes/note-editor";
-import NotesEmptyState from "@/components/Pages/LoggedIn/Notes/empty-state";
-import {loadDemoNotes, saveDemoNotes} from "@/lib/note-storage";
-
+import NotesSidebar from "@/components/Notes/notes-sidebar";
+import NotesHeader from "@/components/Notes/note-header";
+import { useEffect, useState } from "react";
+import NoteView from "@/components/Notes/note-view";
+import NoteEditor from "@/components/Notes/note-editor";
+import NotesEmptyState from "@/components/Notes/empty-state";
+import { loadDemoNotes, saveDemoNotes } from "@/lib/note-storage";
+import { v4 as uuidv4 } from "uuid";
 
 export default function DemoNotesPage() {
+  const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>(() => loadDemoNotes());
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
     setNotes(loadDemoNotes());
+    setMounted(true); // wait for client
   }, []);
 
   useEffect(() => {
-    saveDemoNotes(notes);
-  }, [notes]);
+    if (mounted) saveDemoNotes(notes);
+  }, [notes, mounted]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        return "You have unsaved changes!";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
+  if (!mounted) {
+    // Render nothing or a loading state on server
+    return null;
+  }
 
   const selectNote = (note: Note) => {
     setActiveNote(note);
@@ -39,16 +58,17 @@ export default function DemoNotesPage() {
     );
     setIsEditing(false);
     setActiveNote(updatedNote);
+    setIsDirty(false);
   };
 
   const createNewNote = () => {
     const newNote: Note = {
-      id: Date.now().toString(),
+      id: uuidv4(), // unique, not time-based
       title: "New Note",
       content: "",
-      createdAt: Date.now(),
+      createdAt: Date.now(), // optional: timestamp only on client after mount
     };
-    setNotes([...notes, newNote]);
+    setNotes((prev) => [...prev, newNote]);
     setActiveNote(newNote);
     setIsEditing(true);
   };
@@ -62,15 +82,20 @@ export default function DemoNotesPage() {
   };
 
   const renderNoteContent = () => {
-    if (!activeNote && notes.length === 0) {
-      return (
-        <NotesEmptyState message={"Create your first note to get started"} />
-      );
+    if (!activeNote) {
+      return notes.length === 0 ? (
+        <NotesEmptyState message="Create your first note to get started" />
+      ) : null;
     }
 
     if (activeNote && isEditing) {
       return (
-        <NoteEditor note={activeNote} onSave={saveNote} onCancel={cancelEdit} />
+        <NoteEditor
+          note={activeNote}
+          onSave={saveNote}
+          onCancel={cancelEdit}
+          onDirtyChange={setIsDirty}
+        />
       );
     }
 

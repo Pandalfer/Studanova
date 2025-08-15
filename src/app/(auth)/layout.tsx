@@ -1,8 +1,8 @@
-// src/app/layout.tsx
 import "../globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import Logo from "@/components/Logo";
+import React from "react";
 
 export const metadata: Metadata = {
   title: "Studanova",
@@ -16,12 +16,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
-      </head>
       <body className="dark">
         <div className="fixed top-0 left-0 z-50 w-full p-4">
           <Logo size={50} />

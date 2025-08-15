@@ -19,12 +19,6 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
   return (
     <html lang="en">
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-        />
-      </head>
       <body className="dark">
         <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
         <Toaster richColors position="top-center" />

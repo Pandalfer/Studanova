@@ -7,17 +7,17 @@ async function createNotesForStudent(studentId: string) {
     {
       title: "Biology Revision",
       content: "Review chapters on cell structure and photosynthesis.",
-      createdAt: BigInt(Date.now()),
+      createdAt: new Date(),
     },
     {
       title: "History Notes",
       content: "Key points on World War II causes and consequences.",
-      createdAt: BigInt(Date.now()),
+      createdAt: new Date(),
     },
     {
       title: "Math Formulas",
       content: "List of essential algebra and geometry formulas.",
-      createdAt: BigInt(Date.now()),
+      createdAt: new Date(),
     },
   ];
 

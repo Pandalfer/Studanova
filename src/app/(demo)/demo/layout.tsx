@@ -3,32 +3,29 @@ import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import React from "react";
 import { ClientLayoutWrapper } from "./client-layout-wrapper";
+import { Roboto } from "next/font/google";
 
-interface LayoutProps {
-  children: React.ReactNode;
-  params: Promise<{ uuid: string }>; // params is a Promise now
-}
+const roboto = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
 export const metadata: Metadata = {
   title: "Studanova",
   description: "The best productivity tool for students",
 };
 
+interface LayoutProps {
+  children: React.ReactNode;
+  params: Promise<{ uuid: string }>;
+}
+
 export default async function RootLayout({ children, params }: LayoutProps) {
-  const { uuid } = await params; // await params here
+  const { uuid } = await params;
 
   return (
-    <html lang="en">
-    <head>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-      />
-    </head>
-    <body className="dark">
-    <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
-    <Toaster richColors position="top-center" />
-    </body>
+    <html lang="en" className={roboto.className}>
+      <body className="dark">
+        <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
+        <Toaster richColors position="top-center" />
+      </body>
     </html>
   );
 }

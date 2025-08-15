@@ -1,13 +1,13 @@
 "use client";
 
 import { Note } from "@/types";
-import NotesSidebar from "@/components/Pages/LoggedIn/Notes/notes-sidebar";
-import NotesHeader from "@/components/Pages/LoggedIn/Notes/note-header";
-import React, {useEffect, useState} from "react";
-import NoteView from "@/components/Pages/LoggedIn/Notes/note-view";
-import NoteEditor from "@/components/Pages/LoggedIn/Notes/note-editor";
-import NotesEmptyState from "@/components/Pages/LoggedIn/Notes/empty-state";
-import {loadNotes, saveNoteToDb, deleteNoteFromDb} from "@/lib/note-storage";
+import NotesSidebar from "@/components/Notes/notes-sidebar";
+import NotesHeader from "@/components/Notes/note-header";
+import React, { useEffect, useState } from "react";
+import NoteView from "@/components/Notes/note-view";
+import NoteEditor from "@/components/Notes/note-editor";
+import NotesEmptyState from "@/components/Notes/empty-state";
+import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -37,14 +37,11 @@ export default function NotesPage({ params }: PageProps) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = "";
-        return "";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
-
 
   const selectNote = (note: Note) => {
     setActiveNote(note);
@@ -61,11 +58,12 @@ export default function NotesPage({ params }: PageProps) {
       const savedNote = await saveNoteToDb(updatedNote, uuid);
 
       if (!savedNote) {
-        throw new Error("Saved note is invalid");
+        console.error("Save note is invalid!");
+        return;
       }
 
-      setNotes(prev =>
-        prev.map(note => (note.id === updatedNote.id ? savedNote : note))
+      setNotes((prev) =>
+        prev.map((note) => (note.id === updatedNote.id ? savedNote : note)),
       );
 
       setIsEditing(false);
@@ -116,7 +114,7 @@ export default function NotesPage({ params }: PageProps) {
           note={activeNote}
           onSave={saveNote}
           onCancel={cancelEdit}
-          onDirtyChange={setIsDirty}  // <== Pass it here
+          onDirtyChange={setIsDirty} // <== Pass it here
         />
       );
     }

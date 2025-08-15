@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import NotesEmptyState from "@/components/Pages/LoggedIn/Notes/empty-state";
+import NotesEmptyState from "@/components/Notes/empty-state";
 import { Note } from "@/types";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/note-storage";
@@ -39,11 +39,11 @@ export default function NotesSidebar({
               {notes.map((note) => (
                 <div
                   key={note.id ?? note.createdAt.toString()}
-                  className={
-                    `p-3 rounded-md cursor-pointer transition-colors ${
-                      activeNoteId === note.id ? "bg-primary text-primary-foreground shadow-xs" : "dark:hover:bg-accent/50"
-                    }`
-                  }
+                  className={`p-3 rounded-md cursor-pointer transition-colors ${
+                    activeNoteId === note.id
+                      ? "bg-primary text-primary-foreground shadow-xs"
+                      : "dark:hover:bg-accent/50"
+                  }`}
                   onClick={() => onSelectNote(note)}
                 >
                   <div className={"flex justify-between items-center"}>
@@ -59,20 +59,8 @@ export default function NotesSidebar({
                             : "text-muted-foreground"
                         }`}
                       >
-                        {note.content.substring(0, 40)}
-                        {note.content.length > 40 ? "..." : ""}
-                      </p>
-
-                      <p
-                        className={`text-sm ${
-                          activeNoteId === note.id
-                            ? "text-primary-foreground"
-                            : "text-muted-foreground"
-                        }`}
-                      >
                         {formatDate(note.createdAt)}
                       </p>
-
                     </div>
                     <Button
                       onClick={(e) => {
