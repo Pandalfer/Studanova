@@ -11,9 +11,9 @@ interface NotesToolbarProps {
 }
 
 export default function NotesToolbar({
-  editorRef,
-  setContent,
-}: NotesToolbarProps) {
+                                       editorRef,
+                                       setContent,
+                                     }: NotesToolbarProps) {
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [selectionRect, setSelectionRect] = useState<DOMRect | null>(null);
@@ -56,11 +56,9 @@ export default function NotesToolbar({
     };
   }, [editorRef]);
 
-  // Position toolbar
   useLayoutEffect(() => {
-    if (!selectionRect || !toolbarRef.current || !editorRef.current) return;
+    if (!selectionRect || !toolbarRef.current) return;
 
-    const editorRect = editorRef.current.getBoundingClientRect();
     const toolbarWidth = toolbarRef.current.offsetWidth;
     const toolbarHeight = toolbarRef.current.offsetHeight;
 
@@ -69,25 +67,24 @@ export default function NotesToolbar({
 
     if (!isDesktop) {
       // Mobile: below selection
-      left =
-        selectionRect.left -
-        editorRect.left +
-        selectionRect.width / 2 -
-        toolbarWidth / 2;
-      top = selectionRect.bottom - editorRect.top + 8;
-      left = Math.max(0, Math.min(left, editorRect.width - toolbarWidth));
+      left = selectionRect.left + selectionRect.width / 2 - toolbarWidth / 2;
+      top = selectionRect.bottom + 8;
     } else {
       // Desktop: center above selection
-      top = selectionRect.top - editorRect.top - toolbarHeight + 80; // 8px margin above selection
-      left =
-        selectionRect.left -
-        editorRect.left +
-        selectionRect.width / 2 -
-        toolbarWidth / 2;
+      left = selectionRect.left + selectionRect.width / 2 - toolbarWidth / 2;
+      top = selectionRect.top - toolbarHeight - 8;
     }
 
     setPos({ top, left });
-  }, [selectionRect, isDesktop, editorRef]);
+  }, [
+    isDesktop,
+    selectionRect?.top,
+    selectionRect?.left,
+    selectionRect?.width,
+    selectionRect?.height,
+    selectionRect?.bottom,
+  ]);
+
 
   if (!visible) return null;
 
@@ -108,8 +105,12 @@ export default function NotesToolbar({
   return (
     <div
       ref={toolbarRef}
-      className="absolute z-50 bg-popover text-popover-foreground shadow-lg rounded-md px-3 py-2 flex space-x-2"
-      style={{ top: pos.top, left: pos.left }}
+      className="fixed z-50 bg-popover text-popover-foreground shadow-lg rounded-md px-3 py-2 flex space-x-2"
+      style={{
+        top: pos.top,
+        left: pos.left,
+        transform: "translateY(-4px)",
+      }}
       id="notes-toolbar"
     >
       <Button size="sm" variant="ghost" onClick={boldText}>

@@ -27,10 +27,12 @@ export default function NoteView({ note, onEdit }: NoteViewProps) {
       <CardContent className="flex-1">
         <ScrollArea className="h-[calc(100vh-350px)]">
           <div className="pr-4">
-            <div
-              className="pr-4 w-full min-h-full break-words whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: note.content }}
-            />
+            <div className="pr-4 w-full min-h-full break-words whitespace-pre-wrap">
+              {note.content && note.content.replace(/<[^>]*>/g, "").trim()
+                ? <div dangerouslySetInnerHTML={{ __html: note.content }} />
+                : <em className="text-muted-foreground">No Note Content</em>
+              }
+            </div>
           </div>
         </ScrollArea>
       </CardContent>
