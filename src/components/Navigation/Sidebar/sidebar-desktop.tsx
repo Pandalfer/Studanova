@@ -13,53 +13,57 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
+import clsx from "clsx";
 
 interface SidebarDesktopProps {
   sidebarItems: SidebarItems;
   username: string;
   isCollapsed: boolean;
   onToggle: () => void;
-  isDemo?: boolean; // Optional prop for demo mode
+  isDemo?: boolean;
 }
 
 export function SidebarDesktop({
-  sidebarItems,
-  username,
-  isCollapsed,
-  onToggle,
-  isDemo = false, // Default to false if not provided
-}: SidebarDesktopProps) {
+                                 sidebarItems,
+                                 username,
+                                 isCollapsed,
+                                 onToggle,
+                                 isDemo = false,
+                               }: SidebarDesktopProps) {
   const pathname = usePathname();
 
-  // Collapsed View
-  if (isCollapsed) {
-    return (
-      <aside className="w-[60px] h-screen fixed left-0 top-0 z-40 border-r flex flex-col items-center py-4">
-        <Button variant="ghost" size="icon" className="mb-4" onClick={onToggle}>
-          <Library size={24} />
-        </Button>
-      </aside>
-    );
-  }
-
-  // Expanded View
   return (
-    <aside className="w-[270px] max-w-xs h-screen fixed left-0 top-0 z-40 border-r">
-      <div className="h-full px-3 py-4">
+    <aside
+      className={clsx(
+        "h-screen fixed left-0 top-0 z-40 border-r bg-background transition-all duration-300 ease-in-out",
+        isCollapsed ? "w-[60px]" : "w-[270px]"
+      )}
+    >
+      <div className="h-full px-3 py-4 flex flex-col">
+        {/* Header */}
         <div className="flex justify-between items-center">
-          <h3 className="mx-3 text-lg font-semibold text-foreground">
-            Studanova
-          </h3>
+          {!isCollapsed && (
+            <h3
+              className={clsx(
+                "mx-3 text-lg font-semibold text-foreground transition-all duration-300 ease-in-out",
+                isCollapsed ? "opacity-0 translate-x-[-20px] pointer-events-none" : "opacity-100 translate-x-0"
+              )}
+            >
+              Studanova
+            </h3>
+          )}
           <Button variant="ghost" size="icon" onClick={onToggle}>
-            <X size={20} />
+            {isCollapsed ? <Library size={24}/> : <X size={20}/>}
           </Button>
         </div>
 
-        <div className="mt-5 flex flex-col gap-1 w-full">
+        {/* Links */}
+        <div className="mt-5 flex flex-col gap-1 w-full flex-1">
           {sidebarItems.links.map((link, index) => (
             <Link key={index} href={link.href}>
               <SidebarButton
                 icon={link.icon}
+                collapsed={isCollapsed} // pass this!
                 className="w-full"
                 variant={pathname === link.href ? "secondary" : "ghost"}
               >
@@ -68,27 +72,38 @@ export function SidebarDesktop({
             </Link>
           ))}
 
-          {sidebarItems.extras}
+
+          {!isCollapsed && sidebarItems.extras}
         </div>
 
         <div className="absolute left-0 bottom-3 w-full px-3">
-          <Separator className="absolute -top-3 left-0 w-full" />
+          {!isCollapsed && (
+            <Separator className="absolute -top-3 left-0 w-full"/>
+          )}
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="w-full flex justify-between items-center"
+                className={clsx(
+                  "w-full flex items-center",
+                  isCollapsed ? "justify-center" : "justify-between"
+                )}
               >
                 <div className="flex gap-2 items-center">
-                  <Avatar className="h-5 w-5">
+                  <Avatar className="h-6 w-6">
                     <AvatarFallback>{username[0] ?? "U"}</AvatarFallback>
                   </Avatar>
-                  <span>{username}</span>
+                  {!isCollapsed && <span>{username}</span>}
                 </div>
-                <MoreHorizontal size={20} />
+                {!isCollapsed && <MoreHorizontal size={20}/>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="mb-2 w-56 p-3 rounded-[1rem]">
+            <PopoverContent
+              className={clsx(
+                "mb-2 w-56 p-3 rounded-[1rem]",
+                isCollapsed ? "w-40" : "w-56"
+              )}
+            >
               <div className="flex flex-col space-y-1">
                 {!isDemo && (
                   <Link href={"/public"}>
@@ -97,7 +112,6 @@ export function SidebarDesktop({
                     </SidebarButton>
                   </Link>
                 )}
-
                 <Link href={"/sign-in"}>
                   <SidebarButton size="sm" icon={LogOut} className="w-full">
                     Log Out

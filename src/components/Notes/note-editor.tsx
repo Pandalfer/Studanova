@@ -19,6 +19,7 @@ interface NoteEditorProps {
   onCancel: () => void;
   onSave: (note: Note) => void;
   onDirtyChange?: (dirty: boolean) => void;
+  editorRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function NoteEditor({
@@ -26,18 +27,20 @@ export default function NoteEditor({
   onCancel,
   onSave,
   onDirtyChange = () => {},
+  editorRef,
 }: NoteEditorProps) {
   const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState(note.content);
-  const editorRef = useRef<HTMLDivElement>(null);
-  const editableRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement>(null);
 
-  // Sync editable div with state without breaking cursor
+  const refToUse = editorRef || internalRef;
+
+  // Sync editable div with state
   useEffect(() => {
-    if (editableRef.current && editableRef.current.innerHTML !== content) {
-      editableRef.current.innerHTML = content;
+    if (refToUse.current && refToUse.current.innerHTML !== content) {
+      refToUse.current.innerHTML = content;
     }
-  }, [content]);
+  }, [content, refToUse]);
 
   // Track dirty state
   useEffect(() => {
@@ -49,16 +52,13 @@ export default function NoteEditor({
     onSave({
       ...note,
       title: title.trim() || "Untitled Note",
-      content,
+      content: refToUse.current?.innerHTML ?? content,
     });
   };
 
   return (
-    <Card
-      className="h-[calc(100vh-125px)] flex flex-col relative"
-      ref={editorRef}
-    >
-      <NotesToolbar editorRef={editableRef} setContent={setContent} />
+    <Card className="h-[calc(100vh-125px)] flex flex-col relative">
+      <NotesToolbar editorRef={refToUse} setContent={setContent} />
 
       <CardHeader>
         <Input
@@ -70,17 +70,17 @@ export default function NoteEditor({
       </CardHeader>
 
       <CardContent
-        className="flex-1 flex flex-col cursor-text"
-        onClick={() => editableRef.current?.focus()} // focus on click anywhere in content
+        className="flex-1 flex flex-col cursor-text overflow-hidden"
+        onClick={() => refToUse.current?.focus()}
       >
-        <ScrollArea className="flex-1">
-          <div className="pr-4 h-full">
+        <ScrollArea className="h-full w-full">
+          <div className="pr-4">
             <div
-              ref={editableRef}
+              ref={refToUse}
               contentEditable
               suppressContentEditableWarning
               onInput={(e) => setContent(e.currentTarget.innerHTML ?? "")}
-              className="w-full h-full outline-none break-words whitespace-pre-wrap"
+              className="w-full min-h-full outline-none break-words whitespace-pre-wrap"
             />
           </div>
         </ScrollArea>

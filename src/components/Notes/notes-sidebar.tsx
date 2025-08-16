@@ -10,7 +10,7 @@ interface NotesSidebarProps {
   notes: Note[];
   onSelectNote: (note: Note) => void;
   createNewNote?: () => void;
-  onDeleteNote: (id: string) => void;
+  onDeletePopup: (id: string) => void;
   activeNoteId?: string;
 }
 
@@ -18,7 +18,7 @@ export default function NotesSidebar({
   notes,
   onSelectNote,
   createNewNote,
-  onDeleteNote,
+  onDeletePopup,
   activeNoteId,
 }: NotesSidebarProps) {
   return (
@@ -65,7 +65,7 @@ export default function NotesSidebar({
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onDeleteNote(note.id);
+                        onDeletePopup(note.id);
                       }}
                       variant="plain"
                       size="icon"

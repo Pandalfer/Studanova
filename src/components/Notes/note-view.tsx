@@ -24,18 +24,20 @@ export default function NoteView({ note, onEdit }: NoteViewProps) {
           {formatDate(note.createdAt)}
         </p>
       </CardHeader>
-      <CardContent className="flex-1">
-        <ScrollArea className="h-[calc(100vh-350px)]">
-          <div className="pr-4">
-            <div className="pr-4 w-full min-h-full break-words whitespace-pre-wrap">
-              {note.content && note.content.replace(/<[^>]*>/g, "").trim()
-                ? <div dangerouslySetInnerHTML={{ __html: note.content }} />
-                : <em className="text-muted-foreground">No Note Content</em>
-              }
-            </div>
+
+      {/* Make CardContent fill remaining space and allow scroll inside */}
+      <CardContent className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          <div className="pr-4 w-full break-words whitespace-pre-wrap">
+            {note.content && note.content.replace(/<[^>]*>/g, "").trim() ? (
+              <div dangerouslySetInnerHTML={{ __html: note.content }} />
+            ) : (
+              <em className="text-muted-foreground">No Note Content</em>
+            )}
           </div>
         </ScrollArea>
       </CardContent>
+
       <CardFooter className="flex justify-end">
         <Button onClick={onEdit}>Edit Note</Button>
       </CardFooter>
