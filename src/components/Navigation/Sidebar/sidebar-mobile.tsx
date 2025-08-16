@@ -8,7 +8,6 @@ import { LogOut, Menu, MoreHorizontal, Settings, X } from "lucide-react";
 import Link from "next/link";
 import {
   SidebarButton,
-  SidebarButtonSheet,
 } from "@/components/Navigation/Sidebar/sidebar-button";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
@@ -51,13 +50,13 @@ export function SidebarMobile({ sidebarItems, username }: SidebarMobileProps) {
           <div className={"mt-5 flex flex-col w-full gap-1"}>
             {sidebarItems.links.map((link, index) => (
               <Link key={index} href={link.href}>
-                <SidebarButtonSheet
+                <SidebarButton
                   icon={link.icon}
-                  className={"w-full"}
+                  className="w-full"
                   variant={pathname === link.href ? "secondary" : "ghost"}
                 >
                   {link.label}
-                </SidebarButtonSheet>
+                </SidebarButton>
               </Link>
             ))}
             {sidebarItems.extras}
