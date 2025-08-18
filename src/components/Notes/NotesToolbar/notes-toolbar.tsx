@@ -7,14 +7,17 @@ import { useSelectionRect } from "@/lib/notesToolbar/use-selection-rect";
 import { useToolbarPosition } from "@/lib/notesToolbar/use-toolbar-position";
 import {
   applyBold,
+  applyColour,
   applyItalic,
+  applyStrikethrough,
   applyUnderline,
   isBold,
   isItalic,
-  isUnderline
+  isStrikethrough,
+  isUnderline,
 } from "@/lib/notesToolbar/toolbar-actions";
-import {Italic, Underline} from "lucide-react";
-
+import { Italic, Strikethrough, Underline } from "lucide-react";
+import NotesToolbarColorPicker from "@/components/Notes/NotesToolbar/notes-toolbar-colorpicker";
 
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
@@ -44,7 +47,7 @@ export default function NotesToolbar({
   return (
     <div
       ref={toolbarRef}
-      className="fixed z-50 bg-popover text-popover-foreground shadow-lg rounded-md px-3 py-2 flex space-x-2"
+      className="fixed z-50 bg-popover text-popover-foreground border-1 border-border shadow-lg rounded-md px-3 py-2 flex space-x-2"
       style={{ top: pos.top, left: pos.left, transform: "translateY(-4px)" }}
       id="notes-toolbar"
     >
@@ -53,7 +56,7 @@ export default function NotesToolbar({
           size="sm"
           variant="ghost"
           className="text-primary"
-          onClick={() => applyBold(editorRef, setContent)}
+          onClick={() => applyBold({ editorRef, setContent })}
         >
           B
         </Button>
@@ -61,7 +64,7 @@ export default function NotesToolbar({
         <Button
           size="sm"
           variant="ghost"
-          onClick={() => applyBold(editorRef, setContent)}
+          onClick={() => applyBold({ editorRef, setContent })}
         >
           B
         </Button>
@@ -71,7 +74,7 @@ export default function NotesToolbar({
           size="sm"
           variant="ghost"
           className="text-primary"
-          onClick={() => applyItalic(editorRef, setContent)}
+          onClick={() => applyItalic({ editorRef, setContent })}
         >
           <Italic />
         </Button>
@@ -79,7 +82,7 @@ export default function NotesToolbar({
         <Button
           size="sm"
           variant="ghost"
-          onClick={() => applyItalic(editorRef, setContent)}
+          onClick={() => applyItalic({ editorRef, setContent })}
         >
           <Italic />
         </Button>
@@ -89,7 +92,7 @@ export default function NotesToolbar({
           size="sm"
           variant="ghost"
           className="text-primary"
-          onClick={() => applyUnderline(editorRef, setContent)}
+          onClick={() => applyUnderline({ editorRef, setContent })}
         >
           <Underline />
         </Button>
@@ -97,12 +100,34 @@ export default function NotesToolbar({
         <Button
           size="sm"
           variant="ghost"
-          onClick={() => applyUnderline(editorRef, setContent)}
+          onClick={() => applyUnderline({ editorRef, setContent })}
         >
           <Underline />
         </Button>
       )}
+      {isStrikethrough() ? (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-primary"
+          onClick={() => applyStrikethrough({ editorRef, setContent })}
+        >
+          <Strikethrough />
+        </Button>
+      ) : (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => applyStrikethrough({ editorRef, setContent })}
+        >
+          <Strikethrough />
+        </Button>
+      )}
 
+      <NotesToolbarColorPicker
+        editorRef={editorRef}
+        setContent={setContent}
+      />
     </div>
   );
 }

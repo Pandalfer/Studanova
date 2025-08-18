@@ -24,19 +24,19 @@ interface SidebarDesktopProps {
 }
 
 export function SidebarDesktop({
-                                 sidebarItems,
-                                 username,
-                                 isCollapsed,
-                                 onToggle,
-                                 isDemo = false,
-                               }: SidebarDesktopProps) {
+  sidebarItems,
+  username,
+  isCollapsed,
+  onToggle,
+  isDemo = false,
+}: SidebarDesktopProps) {
   const pathname = usePathname();
 
   return (
     <aside
       className={clsx(
         "h-screen fixed left-0 top-0 z-40 border-r bg-background transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[60px]" : "w-[270px]"
+        isCollapsed ? "w-[60px]" : "w-[270px]",
       )}
     >
       <div className="h-full px-3 py-4 flex flex-col">
@@ -46,14 +46,16 @@ export function SidebarDesktop({
             <h3
               className={clsx(
                 "mx-3 text-lg font-semibold text-foreground transition-all duration-300 ease-in-out",
-                isCollapsed ? "opacity-0 translate-x-[-20px] pointer-events-none" : "opacity-100 translate-x-0"
+                isCollapsed
+                  ? "opacity-0 translate-x-[-20px] pointer-events-none"
+                  : "opacity-100 translate-x-0",
               )}
             >
               Studanova
             </h3>
           )}
           <Button variant="ghost" size="icon" onClick={onToggle}>
-            {isCollapsed ? <Library size={24}/> : <X size={20}/>}
+            {isCollapsed ? <Library size={24} /> : <X size={20} />}
           </Button>
         </div>
 
@@ -72,13 +74,12 @@ export function SidebarDesktop({
             </Link>
           ))}
 
-
           {!isCollapsed && sidebarItems.extras}
         </div>
 
         <div className="absolute left-0 bottom-3 w-full px-3">
           {!isCollapsed && (
-            <Separator className="absolute -top-3 left-0 w-full"/>
+            <Separator className="absolute -top-3 left-0 w-full" />
           )}
           <Popover>
             <PopoverTrigger asChild>
@@ -86,7 +87,7 @@ export function SidebarDesktop({
                 variant="ghost"
                 className={clsx(
                   "w-full flex items-center",
-                  isCollapsed ? "justify-center" : "justify-between"
+                  isCollapsed ? "justify-center" : "justify-between",
                 )}
               >
                 <div className="flex gap-2 items-center">
@@ -95,13 +96,13 @@ export function SidebarDesktop({
                   </Avatar>
                   {!isCollapsed && <span>{username}</span>}
                 </div>
-                {!isCollapsed && <MoreHorizontal size={20}/>}
+                {!isCollapsed && <MoreHorizontal size={20} />}
               </Button>
             </PopoverTrigger>
             <PopoverContent
               className={clsx(
                 "mb-2 w-56 p-3 rounded-[1rem]",
-                isCollapsed ? "w-40" : "w-56"
+                isCollapsed ? "w-40" : "w-56",
               )}
             >
               <div className="flex flex-col space-y-1">

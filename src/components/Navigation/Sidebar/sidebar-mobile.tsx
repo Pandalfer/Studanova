@@ -6,9 +6,7 @@ import { SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, MoreHorizontal, Settings, X } from "lucide-react";
 import Link from "next/link";
-import {
-  SidebarButton,
-} from "@/components/Navigation/Sidebar/sidebar-button";
+import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
 import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

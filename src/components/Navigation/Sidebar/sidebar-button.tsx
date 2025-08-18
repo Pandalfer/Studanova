@@ -9,19 +9,19 @@ interface SidebarButtonProps extends ButtonProps {
 }
 
 export function SidebarButton({
-                                icon: Icon,
-                                className,
-                                children,
-                                collapsed = false,
-                                ...props
-                              }: SidebarButtonProps) {
+  icon: Icon,
+  className,
+  children,
+  collapsed = false,
+  ...props
+}: SidebarButtonProps) {
   return (
     <Button
       variant={"ghost"}
       className={cn(
         "gap-2 rounded-[2rem] flex items-center transition-all",
         collapsed ? "justify-center px-0" : "justify-start px-3",
-        className
+        className,
       )}
       {...props}
     >

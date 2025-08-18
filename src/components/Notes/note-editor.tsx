@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Save, X } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import NotesToolbar from "@/components/Notes/notes-toolbar";
+import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
 
 interface NoteEditorProps {
   note: Note;

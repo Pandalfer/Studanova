@@ -9,7 +9,10 @@ interface ClientLayoutWrapperProps {
   uuid: string;
 }
 
-export function ClientLayoutWrapper({ children, uuid }: ClientLayoutWrapperProps) {
+export function ClientLayoutWrapper({
+  children,
+  uuid,
+}: ClientLayoutWrapperProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
@@ -22,7 +25,7 @@ export function ClientLayoutWrapper({ children, uuid }: ClientLayoutWrapperProps
       <main
         className={clsx(
           "mx-5 mt-16 sm:mt-3 transition-all duration-300 ease-in-out",
-          isCollapsed ? "sm:ml-[80px]" : "sm:ml-[300px]"
+          isCollapsed ? "sm:ml-[80px]" : "sm:ml-[300px]",
         )}
       >
         {children}

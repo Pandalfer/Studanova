@@ -10,11 +10,14 @@ import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadDemoNotes, saveDemoNotes } from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter,
+  AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 export default function DemoNotesPage() {
@@ -80,7 +83,6 @@ export default function DemoNotesPage() {
   };
 
   const createNewNote = async () => {
-
     if (isDirty && activeNote) {
       saveNote({
         ...activeNote,
@@ -105,7 +107,6 @@ export default function DemoNotesPage() {
   const onDeletePopup = (id: string) => {
     setShowDeletePopup(true);
     setDeleteNoteId(id);
-
   };
 
   const deleteNote = (id: string) => {
@@ -114,7 +115,7 @@ export default function DemoNotesPage() {
       setActiveNote(null);
       setIsEditing(false);
     }
-  }
+  };
 
   const renderNoteContent = () => {
     if (!activeNote) {
@@ -143,13 +144,16 @@ export default function DemoNotesPage() {
   return (
     <div className={"flex flex-col min-h-screen"}>
       <NotesHeader onNewNote={createNewNote} />
-      <AlertDialog open={showDeletePopup ?? false} onOpenChange={setShowDeletePopup}>
+      <AlertDialog
+        open={showDeletePopup ?? false}
+        onOpenChange={setShowDeletePopup}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete your note
-              and remove your data from our servers.
+              This action cannot be undone. This will permanently delete your
+              note and remove your data from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
