@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/note-storage";
 import { Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -62,21 +63,28 @@ export default function NotesSidebar({
                         {formatDate(note.createdAt)}
                       </p>
                     </div>
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeletePopup(note.id);
-                      }}
-                      variant="plain"
-                      size="icon"
-                      className={`h-8 w-8 cursor-pointer hover:bg-none ${
-                        activeNoteId === note.id
-                          ? "text-primary-foreground hover:text-destructive"
-                          : "text-muted-foreground hover:text-destructive"
-                      }`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeletePopup(note.id);
+                          }}
+                          variant="plain"
+                          size="icon"
+                          className={`h-8 w-8 cursor-pointer hover:bg-none ${
+                            activeNoteId === note.id
+                              ? "text-primary-foreground hover:text-destructive"
+                              : "text-muted-foreground hover:text-destructive"
+                          }`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="text-xs">Delete Note</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
               ))}

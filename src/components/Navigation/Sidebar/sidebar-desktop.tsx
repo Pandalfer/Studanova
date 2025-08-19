@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface SidebarDesktopProps {
   sidebarItems: SidebarItems;
@@ -54,23 +55,52 @@ export function SidebarDesktop({
               Studanova
             </h3>
           )}
-          <Button variant="ghost" size="icon" onClick={onToggle}>
-            {isCollapsed ? <Library size={24} /> : <X size={20} />}
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={onToggle}>
+                {isCollapsed ? <Library size={24} /> : <X size={20} />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>{isCollapsed ? "Open Sidebar" : "Close Sidebar"}</p>
+            </TooltipContent>
+          </Tooltip>
+
         </div>
 
-        {/* Links */}
         <div className="mt-5 flex flex-col gap-1 w-full flex-1">
           {sidebarItems.links.map((link, index) => (
             <Link key={index} href={link.href}>
-              <SidebarButton
-                icon={link.icon}
-                collapsed={isCollapsed} // pass this!
-                className="w-full"
-                variant={pathname === link.href ? "secondary" : "ghost"}
-              >
-                {link.label}
-              </SidebarButton>
+              {isCollapsed ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <SidebarButton
+                      icon={link.icon}
+                      collapsed={isCollapsed}
+                      className="w-full"
+                      variant={pathname === link.href ? "secondary" : "ghost"}
+                    >
+                      {link.label}
+                    </SidebarButton>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>
+                      {String(link.label).charAt(0).toUpperCase() +
+                        String(link.label).slice(1)}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              ) : (
+                <SidebarButton
+                  icon={link.icon}
+                  collapsed={isCollapsed}
+                  className="w-full"
+                  variant={pathname === link.href ? "secondary" : "ghost"}
+                >
+                  {link.label}
+                </SidebarButton>
+              )}
+
             </Link>
           ))}
 
