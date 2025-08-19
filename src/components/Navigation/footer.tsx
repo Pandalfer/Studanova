@@ -1,5 +1,5 @@
-import NavigationTitle from "@/components/Navigation/NavigationTitle";
-import Logo from "@/components/Logo";
+import NavigationTitle from "@/components/Navigation/navigation-title";
+import Logo from "@/components/logo";
 
 export default function Footer() {
   return (

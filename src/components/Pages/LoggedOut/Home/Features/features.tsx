@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import BentoCard from "@/components/Pages/LoggedOut/Home/Features/BentoCard";
+import BentoCard from "@/components/Pages/LoggedOut/Home/Features/bento-card";
 
 export default function Features() {
   const carouselRef = useRef<HTMLDivElement>(null);

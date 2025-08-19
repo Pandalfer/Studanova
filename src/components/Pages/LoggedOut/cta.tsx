@@ -1,4 +1,4 @@
-import PrimaryActionButton from "@/components/PrimaryActionButton";
+import PrimaryActionButton from "@/components/primary-action-button";
 import Link from "next/link";
 
 export default function CTA({

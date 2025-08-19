@@ -1,4 +1,4 @@
-import CTA from "@/components/Pages/LoggedOut/CTA";
+import CTA from "@/components/Pages/LoggedOut/cta";
 
 export default function Tasks() {
   return (

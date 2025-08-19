@@ -1,5 +1,5 @@
-import CTAHOME from "@/components/Pages/LoggedOut/Home/CallToAction/CTA-HOME";
-import Features from "@/components/Pages/LoggedOut/Home/Features/Features";
+import CTAHOME from "@/components/Pages/LoggedOut/Home/CallToAction/cta-home";
+import Features from "@/components/Pages/LoggedOut/Home/Features/features";
 
 export default async function Home() {
   return (

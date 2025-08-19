@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 
-import NavigationTitle from "@/components/Navigation/NavigationTitle";
-import Logo from "@/components/Logo";
-import PrimaryActionButton from "@/components/PrimaryActionButton";
+import NavigationTitle from "@/components/Navigation/navigation-title";
+import Logo from "@/components/logo";
+import PrimaryActionButton from "@/components/primary-action-button";
 import Link from "next/link";
 
 export default function Navbar() {

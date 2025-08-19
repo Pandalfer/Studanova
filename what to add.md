@@ -2,8 +2,6 @@
 
 Google and GitHub login options
 Remember me
-Sidebar
-actual stuff to do
 
 # 🧭 Suggested Pages & Features
 
@@ -17,23 +15,6 @@ Overview of their day (calendar, tasks, upcoming deadlines)
 
 ## 🧩 Essential Sections of a Strong Homepage
 
-### 1. ✅ Hero / CTAHOME Section (you've got this!)
-
-- **Short punchy headline**
-- **Brief value proposition**
-- **Call-to-action buttons**
-- **Visual** (illustration, mockup, or animation)
-
-### 2. 🎯 Key Features / Benefits
-
-A section with 3–6 main features. Use icons, short headers, and 1-sentence explanations.
-
-Example:
-
-- 📚 **Smart Notes** – Create and organise notes with ease
-- ✅ **Task Manager** – Track homework, deadlines, and revision
-- 🧠 **Study Tools** – Use flashcards and timers to stay productive
-
 ### 3. 🧪 How It Works
 
 A short 3-step process works well:
@@ -43,14 +24,6 @@ A short 3-step process works well:
 3. Study smarter every day
 
 _Use icons or step numbers to keep it visual._
-
-### 4. 🧍 Who It's For
-
-Make it relatable:
-
-> “Perfect for GCSE, A-Level, and Uni students who want to stay organised and productive without being overwhelmed.”
-
-This helps visitors know they’re in the right place.
 
 ### 5. 💬 Testimonials / Social Proof (once you have users)
 
@@ -69,15 +42,6 @@ Covers common objections like:
 - “Will my notes be saved?”
 
 Even 3–5 FAQs can help reduce friction.
-
-### 7. 📩 Footer
-
-Includes:
-
-- Links: Home, Features, Contact, Privacy Policy
-- Light branding
-- Socials (if you have any)
-- Copyright notice
 
 ---
 

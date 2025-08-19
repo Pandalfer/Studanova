@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import PrimaryActionButton from "@/components/PrimaryActionButton";
+import PrimaryActionButton from "@/components/primary-action-button";
 import { toast } from "sonner";
 
 export default function SignIn() {

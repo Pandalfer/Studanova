@@ -1,7 +1,7 @@
 import "../globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
-import Logo from "@/components/Logo";
+import Logo from "@/components/logo";
 import React from "react";
 
 export const metadata: Metadata = {

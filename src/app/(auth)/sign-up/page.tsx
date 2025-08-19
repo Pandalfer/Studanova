@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
-import PrimaryActionButton from "@/components/PrimaryActionButton";
+import PrimaryActionButton from "@/components/primary-action-button";
 import { toast } from "sonner";
 
 export default function SignUp() {
