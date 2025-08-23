@@ -90,10 +90,10 @@ export default function DemoNotesPage() {
       });
     }
     const newNote: Note = {
-      id: uuidv4(), // unique, not time-based
+      id: uuidv4(),
       title: "New Note",
       content: "",
-      createdAt: Date.now(), // optional: timestamp only on client after mount
+      createdAt: Date.now(),
     };
 
     if (editorRef.current) {

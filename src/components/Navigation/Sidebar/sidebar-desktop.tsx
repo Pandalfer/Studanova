@@ -14,7 +14,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SidebarDesktopProps {
   sidebarItems: SidebarItems;
@@ -65,7 +69,6 @@ export function SidebarDesktop({
               <p>{isCollapsed ? "Open Sidebar" : "Close Sidebar"}</p>
             </TooltipContent>
           </Tooltip>
-
         </div>
 
         <div className="mt-5 flex flex-col gap-1 w-full flex-1">
@@ -100,7 +103,6 @@ export function SidebarDesktop({
                   {link.label}
                 </SidebarButton>
               )}
-
             </Link>
           ))}
 

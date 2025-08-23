@@ -33,6 +33,36 @@ html {
   scroll-behavior: smooth;
 }
 
+.editor-content h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.editor-content h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.editor-content h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+.editor-content strong {
+  font-weight: 700;
+}
+
+.editor-content em {
+  font-style: italic;
+}
+
+.editor-content u {
+  text-decoration: underline;
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -80,6 +110,16 @@ html {
   --color-toolbar-grey: var(--toolbar-grey);
   --color-toolbar-pink: var(--toolbar-pink);
   --color-toolbar-teal: var(--toolbar-teal);
+  --color-toolbar-bg-default: var(--toolbar-bg-default);
+  --color-toolbar-bg-green: var(--toolbar-bg-green);
+  --color-toolbar-bg-cyan: var(--toolbar-bg-cyan);
+  --color-toolbar-bg-orange: var(--toolbar-bg-orange);
+  --color-toolbar-bg-purple: var(--toolbar-bg-purple);
+  --color-toolbar-bg-red: var(--toolbar-bg-red);
+  --color-toolbar-bg-yellow: var(--toolbar-bg-yellow);
+  --color-toolbar-bg-grey: var(--toolbar-bg-grey);
+  --color-toolbar-bg-pink: var(--toolbar-bg-pink);
+  --color-toolbar-bg-teal: var(--toolbar-bg-teal);
 }
 
 :root {
@@ -115,6 +155,7 @@ html {
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
   --toolbar-white: #ffffff;
   --toolbar-green: #a8e34b;
   --toolbar-cyan: #64c8ff;
@@ -125,6 +166,16 @@ html {
   --toolbar-grey: #bdbdbd;
   --toolbar-pink: #ff85a2;
   --toolbar-teal: #3ddc97;
+  --toolbar-bg-default: #181818; /* darker white */
+  --toolbar-bg-green: #5a7320; /* darker lime-green */
+  --toolbar-bg-cyan: #2c7ba0; /* darker cyan */
+  --toolbar-bg-orange: #b3621a; /* darker orange */
+  --toolbar-bg-purple: #5a2c91; /* darker purple */
+  --toolbar-bg-red: #8c1c1c; /* darker red */
+  --toolbar-bg-yellow: #b38a0b; /* darker yellow */
+  --toolbar-bg-grey: #4a4a4a; /* darker grey */
+  --toolbar-bg-pink: #a62c4f; /* darker pink */
+  --toolbar-bg-teal: #1c5c45; /* darker teal */
 }
 
 .dark {
@@ -183,6 +234,16 @@ html {
   --toolbar-grey: #bdbdbd;
   --toolbar-pink: #ff85a2;
   --toolbar-teal: #3ddc97;
+  --toolbar-bg-default: #181818;
+  --toolbar-bg-green: #5a7320; /* darker lime-green */
+  --toolbar-bg-cyan: #2c7ba0; /* darker cyan */
+  --toolbar-bg-orange: #b3621a; /* darker orange */
+  --toolbar-bg-purple: #5a2c91; /* darker purple */
+  --toolbar-bg-red: #8c1c1c; /* darker red */
+  --toolbar-bg-yellow: #b38a0b; /* darker yellow */
+  --toolbar-bg-grey: #4a4a4a; /* darker grey */
+  --toolbar-bg-pink: #a62c4f; /* darker pink */
+  --toolbar-bg-teal: #1c5c45; /* darker teal */
 }
 
 @layer base {

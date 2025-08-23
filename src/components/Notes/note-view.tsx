@@ -28,7 +28,7 @@ export default function NoteView({ note, onEdit }: NoteViewProps) {
       {/* Make CardContent fill remaining space and allow scroll inside */}
       <CardContent className="flex-1 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="pr-4 w-full break-words whitespace-pre-wrap">
+          <div className="pr-4 w-full break-words editor-content whitespace-pre-wrap">
             {note.content && note.content.replace(/<[^>]*>/g, "").trim() ? (
               <div dangerouslySetInnerHTML={{ __html: note.content }} />
             ) : (

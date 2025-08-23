@@ -7,7 +7,6 @@ import { useSelectionRect } from "@/lib/notesToolbar/use-selection-rect";
 import { useToolbarPosition } from "@/lib/notesToolbar/use-toolbar-position";
 import {
   applyBold,
-  applyColour,
   applyItalic,
   applyStrikethrough,
   applyUnderline,
@@ -18,6 +17,7 @@ import {
 } from "@/lib/notesToolbar/toolbar-actions";
 import { Italic, Strikethrough, Underline } from "lucide-react";
 import NotesToolbarColorPicker from "@/components/Notes/NotesToolbar/notes-toolbar-colorpicker";
+import NotesToolbarTextFormatter from "@/components/Notes/NotesToolbar/notes-toolbar-text-formatter";
 
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
@@ -51,6 +51,11 @@ export default function NotesToolbar({
       style={{ top: pos.top, left: pos.left, transform: "translateY(-4px)" }}
       id="notes-toolbar"
     >
+      <NotesToolbarTextFormatter
+        editorRef={editorRef}
+        setContent={setContent}
+      />
+
       {isBold() ? (
         <Button
           size="sm"
@@ -124,10 +129,7 @@ export default function NotesToolbar({
         </Button>
       )}
 
-      <NotesToolbarColorPicker
-        editorRef={editorRef}
-        setContent={setContent}
-      />
+      <NotesToolbarColorPicker editorRef={editorRef} setContent={setContent} />
     </div>
   );
 }

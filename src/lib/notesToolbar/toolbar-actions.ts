@@ -1,9 +1,11 @@
 import React from "react";
-
+//region Toolbar types and constants
 interface ToolbarActionProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
   setContent: (html: string) => void;
   colour?: ColorName;
+  backgroundColour?: BackgroundName;
+  blockType?: BlockType;
 }
 
 const colors = {
@@ -19,8 +21,25 @@ const colors = {
   teal: "--toolbar-teal",
 };
 
-export type ColorName = keyof typeof colors;
+const backgrounds = {
+  default: "--toolbar-bg-default",
+  green: "--toolbar-bg-green",
+  cyan: "--toolbar-bg-cyan",
+  orange: "--toolbar-bg-orange",
+  purple: "--toolbar-bg-purple",
+  red: "--toolbar-bg-red",
+  yellow: "--toolbar-bg-yellow",
+  grey: "--toolbar-bg-grey",
+  pink: "--toolbar-bg-pink",
+  teal: "--toolbar-bg-teal",
+};
 
+export type ColorName = keyof typeof colors;
+export type BackgroundName = keyof typeof backgrounds;
+export type BlockType = "p" | "h1" | "h2" | "h3" | "ul" | "ol";
+
+//endregion
+//region Base Toolbar actions
 export function applyBold({ editorRef, setContent }: ToolbarActionProps) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0) return;
@@ -59,8 +78,17 @@ export function applyUnderline({ editorRef, setContent }: ToolbarActionProps) {
 
   document.execCommand("underline");
 
-  // Sync state with editor’s HTML
   if (editorRef.current) {
+    const currentColor = isColor();
+    if (currentColor) {
+      const range = selection.getRangeAt(0);
+      const elements = range.cloneContents().querySelectorAll("u");
+
+      elements.forEach((el) => {
+        (el as HTMLElement).style.textDecorationColor = currentColor;
+      });
+    }
+
     setContent(editorRef.current.innerHTML);
   }
 }
@@ -78,8 +106,17 @@ export function applyStrikethrough({
 
   document.execCommand("strikethrough");
 
-  // Sync state with editor’s HTML
   if (editorRef.current) {
+    const currentColor = isColor();
+    if (currentColor) {
+      const range = selection.getRangeAt(0);
+      const elements = range.cloneContents().querySelectorAll("strike, s");
+
+      elements.forEach((el) => {
+        (el as HTMLElement).style.textDecorationColor = currentColor;
+      });
+    }
+
     setContent(editorRef.current.innerHTML);
   }
 }
@@ -87,8 +124,13 @@ export function applyStrikethrough({
 export function isStrikethrough() {
   return document.queryCommandState("strikethrough");
 }
-
-export function applyColour({ editorRef, setContent, colour }: ToolbarActionProps) {
+//endregion
+//region Colour and Background actions
+export function applyColour({
+  editorRef,
+  setContent,
+  colour,
+}: ToolbarActionProps) {
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || !colour) return;
 
@@ -96,7 +138,9 @@ export function applyColour({ editorRef, setContent, colour }: ToolbarActionProp
   const cssVar = colors[colour];
 
   // Resolve it to an actual hex value from :root
-  const resolved = getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim();
+  const resolved = getComputedStyle(document.documentElement)
+    .getPropertyValue(cssVar)
+    .trim();
 
   if (!resolved) {
     console.warn(`No value found for ${cssVar}`);
@@ -107,13 +151,53 @@ export function applyColour({ editorRef, setContent, colour }: ToolbarActionProp
   document.execCommand("foreColor", false, resolved);
 
   if (editorRef.current) {
+    const range = selection.getRangeAt(0);
+    const elements = Array.from(
+      editorRef.current.querySelectorAll("u, s, strike"),
+    ).filter((el) => range.intersectsNode(el));
+
+    elements.forEach((el) => {
+      (el as HTMLElement).style.textDecorationColor = resolved;
+    });
+
+    setContent(editorRef.current.innerHTML);
+  }
+}
+
+export function applyBackground({
+  editorRef,
+  setContent,
+  backgroundColour,
+}: ToolbarActionProps) {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || !backgroundColour) return;
+
+  // Look up the CSS variable name
+  const cssVar = backgrounds[backgroundColour];
+
+  // Resolve it to an actual hex value from :root
+  const resolved = getComputedStyle(document.documentElement)
+    .getPropertyValue(cssVar)
+    .trim();
+
+  if (!resolved) {
+    console.warn(`No value found for ${cssVar}`);
+    return;
+  }
+
+  // Apply inline foreground colour
+  document.execCommand("backColor", false, resolved);
+
+  if (editorRef.current) {
     setContent(editorRef.current.innerHTML);
   }
 }
 
 function resolveVar(name: string): string {
   if (typeof window === "undefined") return ""; // SSR safe
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
 }
 
 export function getColorMap(): Record<string, string> {
@@ -144,11 +228,7 @@ export function isColor(): string | null {
   }
   while (node && node instanceof HTMLElement) {
     const color = getComputedStyle(node).color;
-    if (
-      color &&
-      color !== "rgb(0, 0, 0)" &&
-      color !== "rgba(0, 0, 0, 0)"
-    ) {
+    if (color && color !== "rgb(0, 0, 0)" && color !== "rgba(0, 0, 0, 0)") {
       return color;
     }
     node = node.parentElement;
@@ -157,6 +237,46 @@ export function isColor(): string | null {
   return null;
 }
 
+export function isBackground(): string | null {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  const range = selection.getRangeAt(0);
+  let node: Node | null = range.startContainer;
+
+  if (node.nodeType === Node.TEXT_NODE) {
+    node = node.parentElement;
+  }
+  while (node && node instanceof HTMLElement) {
+    const bg = getComputedStyle(node).backgroundColor;
+    if (
+      bg &&
+      bg !== "rgba(0, 0, 0, 0)" && // ignore transparent
+      bg !== "transparent"
+    ) {
+      return bg;
+    }
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
+export function getBackgroundMap(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  return {
+    default: resolveVar("--toolbar-bg-default"), // <-- fixed
+    green: resolveVar("--toolbar-bg-green"),
+    cyan: resolveVar("--toolbar-bg-cyan"),
+    orange: resolveVar("--toolbar-bg-orange"),
+    purple: resolveVar("--toolbar-bg-purple"),
+    red: resolveVar("--toolbar-bg-red"),
+    yellow: resolveVar("--toolbar-bg-yellow"),
+    grey: resolveVar("--toolbar-bg-grey"),
+    pink: resolveVar("--toolbar-bg-pink"),
+    teal: resolveVar("--toolbar-bg-teal"),
+  };
+}
 
 export function isColorName(): ColorName | null {
   const current = isColor();
@@ -173,5 +293,73 @@ export function isColorName(): ColorName | null {
 
     if (resolved === current) return name as ColorName;
   }
+  return null;
+}
+
+export function isBackgroundName(): BackgroundName | null {
+  const current = isBackground(); // <-- fixed
+  if (!current) return null;
+
+  const bgMap = getBackgroundMap();
+
+  for (const [name, hex] of Object.entries(bgMap)) {
+    const temp = document.createElement("div");
+    temp.style.backgroundColor = hex;
+    document.body.appendChild(temp);
+    const resolved = getComputedStyle(temp).backgroundColor;
+    document.body.removeChild(temp);
+
+    if (resolved === current) return name as BackgroundName;
+  }
+  return null;
+}
+//endregion
+
+export function applyBlock({
+  blockType,
+  editorRef,
+  setContent,
+}: {
+  blockType: BlockType | undefined;
+  editorRef: React.RefObject<HTMLDivElement | null>;
+  setContent: (html: string) => void;
+}) {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return;
+
+  document.execCommand("formatBlock", false, blockType);
+
+  if (editorRef.current) {
+    setContent(editorRef.current.innerHTML);
+  }
+}
+
+export const blockNameMap: Record<string, string> = {
+  p: "Text",
+  h1: "Heading 1",
+  h2: "Heading 2",
+  h3: "Heading 3",
+  ul: "List",
+  ol: "ListOrdered",
+};
+
+export function isBlock(): string | null {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+
+  let node: Node | null = selection.getRangeAt(0).startContainer;
+
+  if (node.nodeType === Node.TEXT_NODE) {
+    node = node.parentElement;
+  }
+
+  while (node && node instanceof HTMLElement) {
+    const tag = node.tagName.toLowerCase();
+    if (tag in blockNameMap) {
+      return blockNameMap[tag];
+    }
+    node = node.parentElement;
+  }
+
   return null;
 }

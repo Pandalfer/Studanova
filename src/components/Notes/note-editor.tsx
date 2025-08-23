@@ -73,14 +73,14 @@ export default function NoteEditor({
         className="flex-1 flex flex-col cursor-text overflow-hidden"
         onClick={() => refToUse.current?.focus()}
       >
-        <ScrollArea className="h-full w-full">
-          <div className="pr-4">
+        <ScrollArea className="h-full w-full text-toolbar-white">
+          <div className="relative w-full h-full">
             <div
               ref={refToUse}
               contentEditable
               suppressContentEditableWarning
               onInput={(e) => setContent(e.currentTarget.innerHTML ?? "")}
-              className="w-full min-h-full outline-none break-words whitespace-pre-wrap"
+              className="editor-content w-full h-full outline-none break-words whitespace-pre-wrap p-1"
             />
           </div>
         </ScrollArea>

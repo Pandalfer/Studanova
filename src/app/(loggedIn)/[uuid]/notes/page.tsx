@@ -47,8 +47,7 @@ export default function NotesPage({ params }: PageProps) {
       if (isDirty) e.preventDefault();
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () =>
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
 
   const saveNote = async (updatedNote: Note) => {
@@ -57,7 +56,7 @@ export default function NotesPage({ params }: PageProps) {
       const savedNote = await saveNoteToDb(updatedNote, uuid);
       if (!savedNote) return;
       setNotes((prev) =>
-        prev.map((note) => (note.id === updatedNote.id ? savedNote : note))
+        prev.map((note) => (note.id === updatedNote.id ? savedNote : note)),
       );
       setActiveNote(savedNote);
       setIsEditing(false);
@@ -128,7 +127,9 @@ export default function NotesPage({ params }: PageProps) {
 
   const renderNoteContent = () => {
     if (!activeNote && notes.length === 0)
-      return <NotesEmptyState message="Create your first note to get started" />;
+      return (
+        <NotesEmptyState message="Create your first note to get started" />
+      );
 
     if (activeNote && isEditing)
       return (
@@ -141,7 +142,8 @@ export default function NotesPage({ params }: PageProps) {
         />
       );
 
-    if (activeNote) return <NoteView note={activeNote} onEdit={() => setIsEditing(true)} />;
+    if (activeNote)
+      return <NoteView note={activeNote} onEdit={() => setIsEditing(true)} />;
   };
 
   return (
@@ -152,7 +154,8 @@ export default function NotesPage({ params }: PageProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. Your note will be permanently deleted.
+              This action cannot be undone. Your note will be permanently
+              deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

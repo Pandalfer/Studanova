@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/note-storage";
 import { Trash2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NotesSidebarProps {
   notes: Note[];

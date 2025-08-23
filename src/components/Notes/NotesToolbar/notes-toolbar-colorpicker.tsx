@@ -7,27 +7,61 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import NotesToolbarTextColorpicker from "@/components/Notes/NotesToolbar/notes-toolbar-text-colorpicker";
-import { applyColour, ColorName, isColorName } from "@/lib/notesToolbar/toolbar-actions";
+import {
+  applyBackground,
+  applyColour,
+  BackgroundName,
+  ColorName,
+  isColorName,
+  isBackgroundName,
+} from "@/lib/notesToolbar/toolbar-actions";
+import NotesToolbarBackgroundColourpicker from "@/components/Notes/NotesToolbar/notes-toolbar-background-colourpicker";
 
 export default function NotesToolbarColorPicker({
-                                                  editorRef,
-                                                  setContent
-                                                }: {
+  editorRef,
+  setContent,
+}: {
   editorRef: React.RefObject<HTMLDivElement | null>;
   setContent: (html: string) => void;
 }) {
   const [activeColor, setActiveColor] = useState<ColorName | null>(null);
+  const [backgroundColor, setBackgroundColor] = useState<BackgroundName | null>(
+    null,
+  );
 
-  // Detect selection change -> update active colour
   useEffect(() => {
-    const handler = () => setActiveColor(isColorName());
+    const handler = () => {
+      setActiveColor(isColorName());
+      setBackgroundColor(isBackgroundName()); // <-- add this
+    };
     document.addEventListener("selectionchange", handler);
     return () => document.removeEventListener("selectionchange", handler);
   }, []);
 
   const colors: ColorName[] = [
-    "white", "green", "cyan", "orange", "purple",
-    "red", "yellow", "grey", "pink", "teal"
+    "white",
+    "green",
+    "cyan",
+    "orange",
+    "purple",
+    "red",
+    "yellow",
+    "grey",
+    "pink",
+    "teal",
+  ];
+
+  const backgroundColors: BackgroundName[] = [
+    "default",
+    "green",
+    "cyan",
+    "orange",
+    "purple",
+    "red",
+    "yellow",
+    "grey",
+    "pink",
+    "teal",
   ];
 
   return (
@@ -56,8 +90,21 @@ export default function NotesToolbarColorPicker({
           ))}
         </div>
         <h3 className="text-muted-foreground font-bold p-2 text-xs cursor-default">
-          Highlight colour
+          Background colour
         </h3>
+        <div className="grid grid-cols-5 grid-rows-2 gap-2 p-2">
+          {backgroundColors.map((c) => (
+            <NotesToolbarBackgroundColourpicker
+              key={c}
+              color={c}
+              active={backgroundColor === c}
+              onClick={() => {
+                applyBackground({ editorRef, setContent, backgroundColour: c });
+                setBackgroundColor(c);
+              }}
+            />
+          ))}
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

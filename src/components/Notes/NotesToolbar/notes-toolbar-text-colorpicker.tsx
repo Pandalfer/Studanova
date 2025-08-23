@@ -5,14 +5,14 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
 
 export default function NotesToolbarTextColorpicker({
-                                                      color,
-                                                      onClick,
-                                                      className,
-                                                      active,
-                                                    }: {
+  color,
+  onClick,
+  className,
+  active,
+}: {
   color: ColorName;
   onClick?: () => void;
   className?: string;
@@ -23,7 +23,8 @@ export default function NotesToolbarTextColorpicker({
       <TooltipTrigger asChild>
         <DropdownMenuItem
           onClick={onClick}
-          className={`
+          className={
+            `
         cursor-pointer
         col-span-1
         row-span-1
@@ -38,21 +39,29 @@ export default function NotesToolbarTextColorpicker({
         border-[var(--toolbar-color)]/50
         dark:hover:bg-popover
         ring-offset-0
-        ${active
+        ${
+          active
             ? "ring-2 ring-[var(--toolbar-color)]"
-            : "hover:ring-2 hover:ring-[var(--toolbar-color)]/50"}
-      ` + (" " + className || "")}
+            : "hover:ring-2 hover:ring-[var(--toolbar-color)]/50"
+        }
+      ` + (" " + className || "")
+          }
           style={
-            { "--toolbar-color": `var(--toolbar-${color})` } as React.CSSProperties
+            {
+              "--toolbar-color": `var(--toolbar-${color})`,
+            } as React.CSSProperties
           }
         >
           A
         </DropdownMenuItem>
       </TooltipTrigger>
-      <TooltipContent  >
-        <p>{String(color).charAt(0).toUpperCase() + String(color).slice(1) + " text"}</p>
+      <TooltipContent>
+        <p>
+          {String(color).charAt(0).toUpperCase() +
+            String(color).slice(1) +
+            " text"}
+        </p>
       </TooltipContent>
     </Tooltip>
-
   );
 }
