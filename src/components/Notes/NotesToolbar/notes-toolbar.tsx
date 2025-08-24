@@ -1,3 +1,4 @@
+// NotesToolbar.tsx
 "use client";
 
 import React, { useRef, useState } from "react";
@@ -18,20 +19,16 @@ import {
 import { Italic, Strikethrough, Underline } from "lucide-react";
 import NotesToolbarColorPicker from "@/components/Notes/NotesToolbar/notes-toolbar-colorpicker";
 import NotesToolbarTextFormatter from "@/components/Notes/NotesToolbar/notes-toolbar-text-formatter";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
   setContent: (html: string) => void;
 }
 
-export default function NotesToolbar({
-  editorRef,
-  setContent,
-}: NotesToolbarProps) {
+export default function NotesToolbar({ editorRef, setContent }: NotesToolbarProps) {
   const [visible, setVisible] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useMediaQuery("(min-width: 640px)", { initializeWithValue: false });
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const selectionRect = useSelectionRect(editorRef);
@@ -51,83 +48,78 @@ export default function NotesToolbar({
       style={{ top: pos.top, left: pos.left, transform: "translateY(-4px)" }}
       id="notes-toolbar"
     >
-      <NotesToolbarTextFormatter
-        editorRef={editorRef}
-        setContent={setContent}
-      />
+      <NotesToolbarTextFormatter editorRef={editorRef} setContent={setContent} />
 
-      {isBold() ? (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-primary"
-          onClick={() => applyBold({ editorRef, setContent })}
-        >
-          B
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => applyBold({ editorRef, setContent })}
-        >
-          B
-        </Button>
-      )}
-      {isItalic() ? (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-primary"
-          onClick={() => applyItalic({ editorRef, setContent })}
-        >
-          <Italic />
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => applyItalic({ editorRef, setContent })}
-        >
-          <Italic />
-        </Button>
-      )}
-      {isUnderline() ? (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-primary"
-          onClick={() => applyUnderline({ editorRef, setContent })}
-        >
-          <Underline />
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => applyUnderline({ editorRef, setContent })}
-        >
-          <Underline />
-        </Button>
-      )}
-      {isStrikethrough() ? (
-        <Button
-          size="sm"
-          variant="ghost"
-          className="text-primary"
-          onClick={() => applyStrikethrough({ editorRef, setContent })}
-        >
-          <Strikethrough />
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => applyStrikethrough({ editorRef, setContent })}
-        >
-          <Strikethrough />
-        </Button>
-      )}
+      {/* Bold */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={isBold() ? "text-primary" : undefined}
+            onClick={() => applyBold({ editorRef, setContent })}
+          >
+            B
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Bold</p>
+          <p className="text-muted">Ctrl + B</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Italic */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={isItalic() ? "text-primary" : undefined}
+            onClick={() => applyItalic({ editorRef, setContent })}
+          >
+            <Italic />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Italic</p>
+          <p className="text-muted">Ctrl + I</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Underline */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={isUnderline() ? "text-primary" : undefined}
+            onClick={() => applyUnderline({ editorRef, setContent })}
+          >
+            <Underline />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Underline</p>
+          <p className="text-muted">Ctrl + U</p>
+        </TooltipContent>
+      </Tooltip>
+
+      {/* Strikethrough */}
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={isStrikethrough() ? "text-primary" : undefined}
+            onClick={() => applyStrikethrough({ editorRef, setContent })}
+          >
+            <Strikethrough />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Strikethrough</p>
+        </TooltipContent>
+      </Tooltip>
 
       <NotesToolbarColorPicker editorRef={editorRef} setContent={setContent} />
     </div>
