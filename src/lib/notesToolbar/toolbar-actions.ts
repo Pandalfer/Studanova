@@ -360,6 +360,5 @@ export function isBlock(): string | null {
     }
     node = node.parentElement;
   }
-
-  return null;
+  return "Text";
 }

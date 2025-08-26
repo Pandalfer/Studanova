@@ -40,7 +40,7 @@ export function SidebarDesktop({
   return (
     <aside
       className={clsx(
-        "h-screen fixed left-0 top-0 z-40 border-r bg-background transition-all duration-300 ease-in-out",
+        "h-screen fixed left-0 top-0 z-40 border-r bg-card transition-all duration-300 ease-in-out",
         isCollapsed ? "w-[60px]" : "w-[270px]",
       )}
     >

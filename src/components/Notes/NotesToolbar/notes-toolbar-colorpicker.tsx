@@ -68,7 +68,7 @@ export default function NotesToolbarColorPicker({
 
   return (
     <Tooltip>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
         <TooltipTrigger asChild>
           <DropdownMenuTrigger asChild>
             <Button size="sm" variant="ghost">

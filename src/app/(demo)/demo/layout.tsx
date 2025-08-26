@@ -22,10 +22,10 @@ export default async function RootLayout({ children, params }: LayoutProps) {
 
   return (
     <html lang="en" className={roboto.className}>
-      <body className="dark">
-        <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
-        <Toaster richColors position="top-center" />
-      </body>
+    <body className="dark overflow-y-hidden">
+    <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
+    <Toaster richColors position="top-center"/>
+    </body>
     </html>
   );
 }

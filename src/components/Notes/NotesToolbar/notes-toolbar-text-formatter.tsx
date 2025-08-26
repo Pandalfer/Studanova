@@ -1,6 +1,3 @@
-// NotesToolbarTextFormatter.tsx
-"use client";
-
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,6 +6,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import {
+	blockNameMap,
 	BlockType,
 	isBlock,
 } from "@/lib/notesToolbar/toolbar-actions";
@@ -40,8 +38,7 @@ export default function NotesToolbarTextFormatter({
 
 	return (
 		<Tooltip>
-			<DropdownMenu open={open} onOpenChange={setOpen}>
-				{/* Both triggers point to the SAME Button */}
+			<DropdownMenu open={open} onOpenChange={setOpen} modal={false}>
 				<TooltipTrigger asChild>
 					<DropdownMenuTrigger asChild>
 						<Button size="sm" variant="ghost" className="px-2 py-1 rounded flex items-center">
@@ -70,7 +67,9 @@ export default function NotesToolbarTextFormatter({
 								setContent={setContent}
 								blockType={blockType}
 								icon={blockIcons[blockType]}
+								active={blockNameMap[blockType] === isBlock()}
 							/>
+
 						))}
 					</div>
 				</DropdownMenuContent>

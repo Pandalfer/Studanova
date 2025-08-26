@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/Navigation/Sidebar/sidebar";
 import clsx from "clsx";
+import {usePathname} from "next/navigation";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
@@ -10,11 +11,12 @@ interface ClientLayoutWrapperProps {
 }
 
 export function ClientLayoutWrapper({
-  children,
-  uuid,
-}: ClientLayoutWrapperProps) {
-  const [isCollapsed, setIsCollapsed] = useState(true);
+                                      children,
+                                      uuid,
+                                    }: ClientLayoutWrapperProps) {
+  const pathname = usePathname();
 
+  const [isCollapsed, setIsCollapsed] = useState(true);
   return (
     <>
       <Sidebar
@@ -24,8 +26,9 @@ export function ClientLayoutWrapper({
       />
       <main
         className={clsx(
-          "mx-5 mt-16 sm:mt-3 transition-all duration-300 ease-in-out",
-          isCollapsed ? "sm:ml-[80px]" : "sm:ml-[300px]",
+          "transition-all duration-300 ease-in-out overflow-y-auto",
+          isCollapsed ? "sm:ml-[60px]" : "sm:ml-[270px]",
+          pathname === `/${uuid}/notes` ? "mr-[320px]" : "mr-0"
         )}
       >
         {children}

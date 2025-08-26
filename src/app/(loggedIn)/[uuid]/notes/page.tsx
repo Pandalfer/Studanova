@@ -1,64 +1,105 @@
 "use client";
 
 import { Note } from "@/types";
-import NotesSidebar from "@/components/Notes/notes-sidebar";
-import NotesHeader from "@/components/Notes/note-header";
-import React, { useEffect, useState, useRef } from "react";
-import NoteView from "@/components/Notes/note-view";
-import NoteEditor from "@/components/Notes/note-editor";
+import { useEffect, useState, useRef } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { NotesSidebar2 } from "@/components/Notes/Sidebar/notes-sidebar";
+import NoteEditor from "@/components/Notes/note-editor";
+import NoteView from "@/components/Notes/note-view";
+import NotesEditor from "@/components/Notes/notes-editor";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
 
 export default function NotesPage({ params }: PageProps) {
+  const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
+  const [title, setTitle] = useState("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDirty, setIsDirty] = useState(false);
-  const [showDeletePopup, setShowDeletePopup] = useState(false);
-  const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // Mounted check to avoid hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Load notes on mount
   useEffect(() => {
     (async () => {
       const { uuid } = await params;
-      if (uuid) localStorage.removeItem("notes");
+      if (uuid) localStorage.removeItem("notes"); // keep this if you want demo cleanup
       const loadedNotes = await loadNotes(uuid);
       setNotes(loadedNotes);
     })();
   }, [params]);
 
+  // Debounced auto-save
+  useEffect(() => {
+    if (!isDirty || !activeNote) return;
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+
+    debounceTimer.current = setTimeout(async () => {
+      if (!activeNote) return;
+
+      // prepare note for DB save
+      const noteToSave: Note = {
+        ...activeNote,
+        title: title.trim() === "" ? "Untitled Note" : title,
+        content: editorRef.current?.innerHTML ?? activeNote.content,
+      };
+
+      await saveNote(noteToSave); // your existing saveNote function handles DB
+      setIsDirty(false);
+    }, 2000);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [title, editorRef.current?.innerHTML, isDirty, activeNote]);
+
+  // Before unload: persist unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty) e.preventDefault();
+      if (isDirty && activeNote) {
+        saveNote({
+          ...activeNote,
+          title: title.trim() === "" ? "Untitled Note" : title,
+          content: editorRef.current?.innerHTML ?? activeNote.content,
+        });
+        e.preventDefault();
+        e.returnValue = "You have unsaved changes!";
+      }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty]);
+  }, [isDirty, activeNote, title]);
 
   const saveNote = async (updatedNote: Note) => {
     const { uuid } = await params;
     try {
-      const savedNote = await saveNoteToDb(updatedNote, uuid);
+      // clone note but only force title for DB
+      const noteToSave = {
+        ...updatedNote,
+        title: updatedNote.title.trim() === "" ? "Untitled Note" : updatedNote.title,
+      };
+
+      const savedNote = await saveNoteToDb(noteToSave, uuid);
       if (!savedNote) return;
+
       setNotes((prev) =>
         prev.map((note) => (note.id === updatedNote.id ? savedNote : note)),
       );
+
       setActiveNote(savedNote);
+      // ⚠️ Don't overwrite title state! Keep it as user typed:
+      // setTitle(savedNote.title);  <-- REMOVE THIS line
       setIsEditing(false);
       setIsDirty(false);
     } catch (error) {
@@ -66,14 +107,19 @@ export default function NotesPage({ params }: PageProps) {
     }
   };
 
+
   const selectNote = async (note: Note) => {
     if (isDirty && activeNote) {
       await saveNote({
         ...activeNote,
+        title: title.trim() === "" ? "Untitled Note" : title,
         content: editorRef.current?.innerHTML ?? activeNote.content,
       });
     }
+
     setActiveNote(note);
+    setTitle(note.title); // keep blank if blank
+    if (editorRef.current) editorRef.current.innerHTML = note.content;
     setIsEditing(false);
     setIsDirty(false);
   };
@@ -82,56 +128,43 @@ export default function NotesPage({ params }: PageProps) {
     if (isDirty && activeNote) {
       await saveNote({
         ...activeNote,
+        title: title.trim() === "" ? "Untitled Note" : title,
         content: editorRef.current?.innerHTML ?? activeNote.content,
       });
     }
+
     const newNote: Note = {
       id: `temp-${Date.now()}-${Math.random()}`,
-      title: "New Note",
+      title: "Untitled Note", // start blank like demo
       content: "",
       createdAt: Date.now(),
     };
-    if (editorRef.current) editorRef.current.innerHTML = "";
     setNotes((prev) => [...prev, newNote]);
     setActiveNote(newNote);
+    setTitle(newNote.title);
+    if (editorRef.current) editorRef.current.innerHTML = "";
     setIsEditing(true);
     setIsDirty(false);
   };
 
-  const cancelEdit = () => setIsEditing(false);
-
-  // Open delete confirmation popup
-  const onDeletePopup = (id: string) => {
-    setDeleteNoteId(id);
-    setShowDeletePopup(true);
-  };
-
-  // Actually delete the note
-  const onConfirmDelete = async () => {
-    if (!deleteNoteId) return;
-    try {
-      await deleteNoteFromDb(deleteNoteId);
-      setNotes((prev) => prev.filter((note) => note.id !== deleteNoteId));
-      if (activeNote?.id === deleteNoteId) {
-        setActiveNote(null);
-        setIsEditing(false);
-        setIsDirty(false);
-      }
-    } catch (error) {
-      console.error("Failed to delete note:", error);
-    } finally {
-      setShowDeletePopup(false);
-      setDeleteNoteId(null);
+  const deleteNote = async (id: string) => {
+    await deleteNoteFromDb(id);
+    setNotes((prev) => prev.filter((note) => note.id !== id));
+    if (activeNote?.id === id) {
+      setActiveNote(null);
+      setTitle("");
+      if (editorRef.current) editorRef.current.innerHTML = "";
     }
   };
 
-  const renderNoteContent = () => {
-    if (!activeNote && notes.length === 0)
-      return (
-        <NotesEmptyState message="Create your first note to get started" />
-      );
+  const cancelEdit = () => setIsEditing(false);
 
-    if (activeNote && isEditing)
+  const renderNoteContent = () => {
+    if (!activeNote && notes.length === 0) {
+      return <NotesEmptyState message="Create your first note to get started" />;
+    }
+
+    if (activeNote && isEditing) {
       return (
         <NoteEditor
           note={activeNote}
@@ -141,43 +174,38 @@ export default function NotesPage({ params }: PageProps) {
           editorRef={editorRef}
         />
       );
+    }
 
-    if (activeNote)
+    if (activeNote) {
       return <NoteView note={activeNote} onEdit={() => setIsEditing(true)} />;
+    }
   };
 
+
+  if (!mounted) return null;
+
   return (
-    <div className="flex flex-col min-h-screen">
-      <NotesHeader onNewNote={createNewNote} />
-      <AlertDialog open={showDeletePopup} onOpenChange={setShowDeletePopup}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. Your note will be permanently
-              deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmDelete}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <main className="container mx-auto p-4 grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
-        <div className="md:col-span-1">
-          <NotesSidebar
-            notes={notes}
-            onSelectNote={selectNote}
-            createNewNote={createNewNote}
-            onDeletePopup={onDeletePopup}
-            activeNoteId={activeNote?.id}
+    <div className="flex min-h-screen">
+      <NotesSidebar2
+        notes={notes}
+        onSelectNote={selectNote}
+        createNewNote={createNewNote}
+        onDeleteNote={deleteNote}
+        activeNoteId={activeNote?.id}
+      />
+      <div className="flex-1 h-screen">
+        {activeNote ? (
+          <NotesEditor
+            note={activeNote}
+            title={title}
+            setTitle={setTitle}
+            editorRef={editorRef}
+            onDirtyChange={setIsDirty}
           />
-        </div>
-        <div className="md:col-span-2">{renderNoteContent()}</div>
-      </main>
+        ) : (
+          <NotesEmptyState message="Select or create a note to get started"/>
+        )}
+      </div>
     </div>
   );
 }
