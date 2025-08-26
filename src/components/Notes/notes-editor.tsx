@@ -11,6 +11,7 @@ interface NoteEditorProps {
 	setTitle: (title: string) => void; // setter from parent
 	onDirtyChange?: (dirty: boolean) => void;
 	editorRef?: React.RefObject<HTMLDivElement | null>;
+	placeholder?: string;
 }
 
 export default function NotesEditor({
@@ -19,6 +20,7 @@ export default function NotesEditor({
 	                                    setTitle,
 	                                    onDirtyChange = () => {},
 	                                    editorRef,
+	                                    placeholder = "Start writing your note here...",
                                     }: NoteEditorProps) {
 	const [content, setContent] = useState(note.content);
 	const internalRef = useRef<HTMLDivElement>(null);
@@ -32,12 +34,15 @@ export default function NotesEditor({
 		}
 	}, [content, refToUse]);
 
-
 	useEffect(() => {
 		const dirty = title !== note.title || content !== note.content;
 		onDirtyChange(dirty);
 	}, [title, content, note.title, note.content, onDirtyChange]);
 
+	const isEmptyContent = (html: string) => {
+		const trimmed = html.replace(/<br\s*\/?>/gi, "").trim();
+		return trimmed === "";
+	};
 
 	return (
 		<div className="w-190 mx-auto flex flex-col h-full pt-15">
@@ -50,6 +55,11 @@ export default function NotesEditor({
 			/>
 			<ScrollArea className="flex-1 w-full text-toolbar-white">
 				<div className="relative w-full h-full">
+					{isEmptyContent(content) && (
+						<div className="absolute top-1 left-1 pointer-events-none text-muted">
+							{placeholder}
+						</div>
+					)}
 					<div
 						ref={refToUse}
 						contentEditable
