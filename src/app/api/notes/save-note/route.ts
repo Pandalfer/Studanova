@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,14 +11,34 @@ export async function POST(req: NextRequest) {
     }
 
     let note;
-    if (id && !isNaN(Number(id))) {
-      note = await prisma.note.update({
-        where: { id: Number(id) },
-        data: { title, content },
-      });
+
+    if (id) {
+      // Check if note exists first
+      const existing = await prisma.note.findUnique({ where: { id } });
+
+      if (existing) {
+        // update if it exists
+        note = await prisma.note.update({
+          where: { id },
+          data: { title, content },
+        });
+      } else {
+        // otherwise, create a fresh one
+        note = await prisma.note.create({
+          data: {
+            id: id || nanoid(), // keep client ID if passed, else generate
+            title,
+            content,
+            createdAt: createdAt ? new Date(createdAt) : new Date(),
+            studentId,
+          },
+        });
+      }
     } else {
+      // definitely a new note
       note = await prisma.note.create({
         data: {
+          id: nanoid(),
           title,
           content,
           createdAt: createdAt ? new Date(createdAt) : new Date(),

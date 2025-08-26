@@ -5,9 +5,8 @@ import { useEffect, useState, useRef } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
 import { NotesSidebar2 } from "@/components/Notes/Sidebar/notes-sidebar";
-import NoteEditor from "@/components/Notes/note-editor";
-import NoteView from "@/components/Notes/note-view";
 import NotesEditor from "@/components/Notes/notes-editor";
+import {nanoid} from "nanoid";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -18,7 +17,6 @@ export default function NotesPage({ params }: PageProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isDirty, setIsDirty] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
@@ -98,9 +96,6 @@ export default function NotesPage({ params }: PageProps) {
       );
 
       setActiveNote(savedNote);
-      // ⚠️ Don't overwrite title state! Keep it as user typed:
-      // setTitle(savedNote.title);  <-- REMOVE THIS line
-      setIsEditing(false);
       setIsDirty(false);
     } catch (error) {
       console.error("Error saving note:", error);
@@ -120,7 +115,6 @@ export default function NotesPage({ params }: PageProps) {
     setActiveNote(note);
     setTitle(note.title); // keep blank if blank
     if (editorRef.current) editorRef.current.innerHTML = note.content;
-    setIsEditing(false);
     setIsDirty(false);
   };
 
@@ -134,8 +128,8 @@ export default function NotesPage({ params }: PageProps) {
     }
 
     const newNote: Note = {
-      id: `temp-${Date.now()}-${Math.random()}`,
-      title: "Untitled Note", // start blank like demo
+      id: nanoid(),
+      title: "Untitled Note",
       content: "",
       createdAt: Date.now(),
     };
@@ -143,7 +137,6 @@ export default function NotesPage({ params }: PageProps) {
     setActiveNote(newNote);
     setTitle(newNote.title);
     if (editorRef.current) editorRef.current.innerHTML = "";
-    setIsEditing(true);
     setIsDirty(false);
   };
 
@@ -154,30 +147,6 @@ export default function NotesPage({ params }: PageProps) {
       setActiveNote(null);
       setTitle("");
       if (editorRef.current) editorRef.current.innerHTML = "";
-    }
-  };
-
-  const cancelEdit = () => setIsEditing(false);
-
-  const renderNoteContent = () => {
-    if (!activeNote && notes.length === 0) {
-      return <NotesEmptyState message="Create your first note to get started" />;
-    }
-
-    if (activeNote && isEditing) {
-      return (
-        <NoteEditor
-          note={activeNote}
-          onSave={saveNote}
-          onCancel={cancelEdit}
-          onDirtyChange={setIsDirty}
-          editorRef={editorRef}
-        />
-      );
-    }
-
-    if (activeNote) {
-      return <NoteView note={activeNote} onEdit={() => setIsEditing(true)} />;
     }
   };
 

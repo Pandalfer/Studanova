@@ -29,10 +29,10 @@ model Assignment {
 }
 
 model Note {
+  id        String   @id
   title     String
   studentId String   @db.Uuid
   content   String
   createdAt DateTime @default(now())
-  id        Int      @id @default(autoincrement())
   student   Student  @relation(fields: [studentId], references: [id])
 }

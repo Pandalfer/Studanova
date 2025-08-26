@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     }
 
     await prisma.note.delete({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
