@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadDemoNotes, saveDemoNotes } from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
-import { NotesSidebar2 } from "@/components/Notes/Sidebar/notes-sidebar";
+import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 
 export default function DemoNotesPage() {
@@ -137,7 +137,7 @@ export default function DemoNotesPage() {
 
   return (
     <div className="flex min-h-screen">
-      <NotesSidebar2
+      <NotesSidebar
         notes={notes}
         onSelectNote={selectNote}
         createNewNote={createNewNote}

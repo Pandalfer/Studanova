@@ -1,18 +1,22 @@
 "use client";
 
 import { Note } from "@/types";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, use } from "react"; // 👈 import use
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
-import { NotesSidebar2 } from "@/components/Notes/Sidebar/notes-sidebar";
+import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
-import {nanoid} from "nanoid";
+import { nanoid } from "nanoid";
+import { useRouter } from "next/navigation";
 
 interface PageProps {
-  params: Promise<{ uuid: string }>;
+  params: Promise<{ uuid: string }>; // 👈 now params is a Promise
 }
 
 export default function NotesPage({ params }: PageProps) {
+  const router = useRouter();
+  const { uuid } = use(params); // 👈 unwrap params safely
+
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
@@ -22,67 +26,19 @@ export default function NotesPage({ params }: PageProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Mounted check to avoid hydration issues
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load notes on mount
   useEffect(() => {
     (async () => {
-      const { uuid } = await params;
-      if (uuid) localStorage.removeItem("notes"); // keep this if you want demo cleanup
       const loadedNotes = await loadNotes(uuid);
       setNotes(loadedNotes);
     })();
-  }, [params]);
-
-  // Debounced auto-save
-  useEffect(() => {
-    if (!isDirty || !activeNote) return;
-
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-
-    debounceTimer.current = setTimeout(async () => {
-      if (!activeNote) return;
-
-      // prepare note for DB save
-      const noteToSave: Note = {
-        ...activeNote,
-        title: title.trim() === "" ? "Untitled Note" : title,
-        content: editorRef.current?.innerHTML ?? activeNote.content,
-      };
-
-      await saveNote(noteToSave); // your existing saveNote function handles DB
-      setIsDirty(false);
-    }, 2000);
-
-    return () => {
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    };
-  }, [title, editorRef.current?.innerHTML, isDirty, activeNote]);
-
-  // Before unload: persist unsaved changes
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (isDirty && activeNote) {
-        saveNote({
-          ...activeNote,
-          title: title.trim() === "" ? "Untitled Note" : title,
-          content: editorRef.current?.innerHTML ?? activeNote.content,
-        });
-        e.preventDefault();
-        e.returnValue = "You have unsaved changes!";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isDirty, activeNote, title]);
+  }, [uuid]);
 
   const saveNote = async (updatedNote: Note) => {
-    const { uuid } = await params;
     try {
-      // clone note but only force title for DB
       const noteToSave = {
         ...updatedNote,
         title: updatedNote.title.trim() === "" ? "Untitled Note" : updatedNote.title,
@@ -92,7 +48,7 @@ export default function NotesPage({ params }: PageProps) {
       if (!savedNote) return;
 
       setNotes((prev) =>
-        prev.map((note) => (note.id === updatedNote.id ? savedNote : note)),
+        prev.map((note) => (note.id === updatedNote.id ? savedNote : note))
       );
 
       setActiveNote(savedNote);
@@ -101,7 +57,6 @@ export default function NotesPage({ params }: PageProps) {
       console.error("Error saving note:", error);
     }
   };
-
 
   const selectNote = async (note: Note) => {
     if (isDirty && activeNote) {
@@ -113,9 +68,11 @@ export default function NotesPage({ params }: PageProps) {
     }
 
     setActiveNote(note);
-    setTitle(note.title); // keep blank if blank
+    setTitle(note.title);
     if (editorRef.current) editorRef.current.innerHTML = note.content;
     setIsDirty(false);
+
+    router.push(`/${uuid}/notes/${note.id}`); // ✅ redirect works
   };
 
   const createNewNote = async () => {
@@ -138,6 +95,8 @@ export default function NotesPage({ params }: PageProps) {
     setTitle(newNote.title);
     if (editorRef.current) editorRef.current.innerHTML = "";
     setIsDirty(false);
+
+    router.push(`/${uuid}/notes/${newNote.id}`); // ✅ redirect on new note
   };
 
   const deleteNote = async (id: string) => {
@@ -150,12 +109,11 @@ export default function NotesPage({ params }: PageProps) {
     }
   };
 
-
   if (!mounted) return null;
 
   return (
     <div className="flex min-h-screen">
-      <NotesSidebar2
+      <NotesSidebar
         notes={notes}
         onSelectNote={selectNote}
         createNewNote={createNewNote}
@@ -163,17 +121,7 @@ export default function NotesPage({ params }: PageProps) {
         activeNoteId={activeNote?.id}
       />
       <div className="flex-1 h-screen">
-        {activeNote ? (
-          <NotesEditor
-            note={activeNote}
-            title={title}
-            setTitle={setTitle}
-            editorRef={editorRef}
-            onDirtyChange={setIsDirty}
-          />
-        ) : (
-          <NotesEmptyState message="Select or create a note to get started"/>
-        )}
+        <NotesEmptyState message={"Select or create a new note to get started"} />
       </div>
     </div>
   );

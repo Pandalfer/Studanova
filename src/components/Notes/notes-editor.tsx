@@ -1,17 +1,18 @@
-import {Note} from "@/types";
-import {useEffect, useRef, useState} from "react";
-import {Input} from "@/components/ui/input";
-import {Textarea} from "@/components/ui/textarea";
-import {ScrollArea} from "@/components/ui/scroll-area";
+import { Note } from "@/types";
+import { useEffect, useRef, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface NoteEditorProps {
 	note: Note;
-	title: string; // lifted title state
-	setTitle: (title: string) => void; // setter from parent
+	title: string;
+	setTitle: (title: string) => void;
 	onDirtyChange?: (dirty: boolean) => void;
 	editorRef?: React.RefObject<HTMLDivElement | null>;
 	placeholder?: string;
+	loading?: boolean;
 }
 
 export default function NotesEditor({
@@ -21,32 +22,50 @@ export default function NotesEditor({
 	                                    onDirtyChange = () => {},
 	                                    editorRef,
 	                                    placeholder = "Start writing your note here...",
+	                                    loading = false,
                                     }: NoteEditorProps) {
 	const [content, setContent] = useState(note.content);
 	const internalRef = useRef<HTMLDivElement>(null);
-
 	const refToUse = editorRef || internalRef;
 
-	// Sync editable div with state
+	// Only initialize content on mount or when note changes
 	useEffect(() => {
-		if (refToUse.current && refToUse.current.innerHTML !== content) {
-			refToUse.current.innerHTML = content;
+		setContent(note.content);
+		if (refToUse.current) {
+			refToUse.current.innerHTML = note.content;
 		}
-	}, [content, refToUse]);
+	}, [note, refToUse]);
 
+	// Track dirty state
 	useEffect(() => {
 		const dirty = title !== note.title || content !== note.content;
 		onDirtyChange(dirty);
 	}, [title, content, note.title, note.content, onDirtyChange]);
 
-	const isEmptyContent = (html: string) => {
-		const trimmed = html.replace(/<br\s*\/?>/gi, "").trim();
-		return trimmed === "";
+	const isEmptyContent = (text: string) => text.trim().length === 0;
+
+	const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+		setContent(e.currentTarget.innerHTML ?? "");
 	};
+
+	if (loading) {
+		return (
+			<div className="w-190 mx-auto flex flex-col h-full pt-15">
+				<Skeleton className="h-16 w-full mb-3 rounded-md bg-popover" />
+				<ScrollArea className="flex-1 w-full">
+					<div className="flex flex-col gap-2 p-2">
+						{Array.from({ length: 8 }).map((_, i) => (
+							<Skeleton key={i} className="h-6 w-full rounded-md bg-popover" />
+						))}
+					</div>
+				</ScrollArea>
+			</div>
+		);
+	}
 
 	return (
 		<div className="w-190 mx-auto flex flex-col h-full pt-15">
-			<NotesToolbar editorRef={refToUse} setContent={setContent}/>
+			<NotesToolbar editorRef={refToUse} setContent={setContent} />
 			<Input
 				value={title}
 				onChange={(e) => setTitle(e.target.value)}
@@ -64,7 +83,7 @@ export default function NotesEditor({
 						ref={refToUse}
 						contentEditable
 						suppressContentEditableWarning
-						onInput={(e) => setContent(e.currentTarget.innerHTML ?? "")}
+						onInput={handleInput}
 						className="editor-content w-full h-full outline-none break-words whitespace-pre-wrap p-1"
 					/>
 				</div>
