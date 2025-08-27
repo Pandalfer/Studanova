@@ -133,7 +133,7 @@ export function SidebarDesktop({
             </PopoverTrigger>
             <PopoverContent
               className={clsx(
-                "mb-2 w-56 p-3 rounded-[1rem]",
+                "mb-2 w-56 p-3 rounded-[1rem] bg-card",
                 isCollapsed ? "w-40" : "w-56",
               )}
             >

@@ -44,8 +44,8 @@ export default function NoteItem({
 					<div
 						className={`w-full p-3 rounded-md cursor-pointer transition-colors ${
 							activeNoteId === note.id
-								? "bg-primary text-primary-foreground shadow-xs"
-								: "dark:hover:bg-accent/50"
+								? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90"
+								: "dark:hover:bg-accent"
 						}`}
 						onClick={() => onSelectNote(note)}
 					>

@@ -210,7 +210,7 @@ html {
   --muted-foreground: #bdbdbd;
 
   /* Accent */
-  --accent: #64c8ff; /* Add a cyan/blue highlight for variety */
+  --accent: #2c2c2c;
   --accent-foreground: #0e0e0e;
 
   /* Status colors */

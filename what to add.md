@@ -3,6 +3,20 @@
 Google and GitHub login options
 Remember me
 
+Respond to different screen sizes (mobile, tablet, desktop)
+Shared notes between users
+Add a rename option to note items
+A copy link option to note items
+Open in new tab option to note items
+A favourite option to note items
+A search bar for notes
+A last edited timestamp on note items
+Folder organisation for notes
+
+A ... button that opens the context menu
+
+MAKE LIGHT MODE USABLE
+
 # 🧭 Suggested Pages & Features
 
 ---
@@ -61,7 +75,7 @@ Even 3–5 FAQs can help reduce friction.
 - Rich-text note-taking with folders/tags
 - Color-coded notes
 - Optional markdown support
-- Sync to cloud/local storage
+- Sync to cloud/local storage ✅
 
 ---
 
