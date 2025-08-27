@@ -76,27 +76,18 @@ export default function NotesPage({ params }: PageProps) {
   };
 
   const createNewNote = async () => {
-    if (isDirty && activeNote) {
-      await saveNote({
-        ...activeNote,
-        title: title.trim() === "" ? "Untitled Note" : title,
-        content: editorRef.current?.innerHTML ?? activeNote.content,
-      });
-    }
-
     const newNote: Note = {
       id: nanoid(),
       title: "Untitled Note",
       content: "",
       createdAt: Date.now(),
     };
-    setNotes((prev) => [...prev, newNote]);
-    setActiveNote(newNote);
-    setTitle(newNote.title);
-    if (editorRef.current) editorRef.current.innerHTML = "";
-    setIsDirty(false);
 
-    router.push(`/${uuid}/notes/${newNote.id}`); // ✅ redirect on new note
+    // Save to DB first
+    await saveNoteToDb(newNote, uuid);
+
+    // Redirect immediately — no local state needed
+    router.push(`/${uuid}/notes/${newNote.id}`);
   };
 
   const deleteNote = async (id: string) => {

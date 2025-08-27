@@ -116,11 +116,11 @@ export default function NotesPage({ params }: PageProps) {
 			}
 		}
 
-		setActiveNote(note);
-		setTitle(note.title);
-		if (editorRef.current) editorRef.current.innerHTML = note.content;
-		setIsDirty(false);
+		// Temporarily clear activeNote so editor disappears
+		setActiveNote(null);
+		setTitle("");
 
+		// Navigate to new note
 		router.push(`/${uuid}/notes/${note.id}`);
 	};
 
@@ -151,6 +151,8 @@ export default function NotesPage({ params }: PageProps) {
 			setActiveNote(null);
 			setTitle("");
 			if (editorRef.current) editorRef.current.innerHTML = "";
+
+			router.push(`/${uuid}/notes`);
 		}
 	};
 
@@ -168,16 +170,34 @@ export default function NotesPage({ params }: PageProps) {
 			/>
 
 			<div className="flex-1 h-screen">
-				{activeNote && (
-					<NotesEditor
-						note={activeNote}
-						title={title}
-						setTitle={setTitle}
-						editorRef={editorRef}
-						onDirtyChange={setIsDirty}
-						loading={loadingNotes}
-					/>
-				)}
+				<div className="flex-1 h-screen">
+					{loadingNotes ? (
+						<NotesEditor
+							note={{
+								id: "",
+								title: "",
+								content: "",
+								createdAt: Date.now(),
+							}}
+							title=""
+							setTitle={() => {
+							}}
+							editorRef={editorRef}
+							loading={true}
+						/>
+					) : activeNote ? (
+						<NotesEditor
+							note={activeNote}
+							title={title}
+							setTitle={setTitle}
+							editorRef={editorRef}
+							onDirtyChange={setIsDirty}
+							loading={false}
+						/>
+					) : (
+						<div></div>
+					)}
+				</div>
 			</div>
 		</div>
 	);

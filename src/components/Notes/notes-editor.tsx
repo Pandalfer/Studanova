@@ -30,11 +30,15 @@ export default function NotesEditor({
 
 	// Only initialize content on mount or when note changes
 	useEffect(() => {
-		setContent(note.content);
+		// Only reset editor if switching to a different note
 		if (refToUse.current) {
-			refToUse.current.innerHTML = note.content;
+			if (refToUse.current.innerHTML !== note.content) {
+				refToUse.current.innerHTML = note.content;
+				setContent(note.content);
+			}
 		}
-	}, [note, refToUse]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [note.id]); // only depend on note.id, not note.content
 
 	// Track dirty state
 	useEffect(() => {
