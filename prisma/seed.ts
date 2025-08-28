@@ -1,4 +1,5 @@
 import { PrismaClient } from "../src/generated/prisma";
+import {nanoid} from "nanoid";
 
 const client = new PrismaClient();
 
@@ -26,6 +27,7 @@ async function createNotesForStudent(studentId: string) {
       client.note.create({
         data: {
           ...note,
+          id: nanoid(),
           student: {
             connect: { id: studentId },
           },

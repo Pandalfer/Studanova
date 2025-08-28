@@ -30,8 +30,7 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
-  } catch (error) {
-    console.log("Error creating user: " + error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to create user" },
       { status: 500 },

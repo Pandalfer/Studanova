@@ -1,7 +1,7 @@
 "use client";
 
 import { Note } from "@/types";
-import { useEffect, useState, useRef, use } from "react"; // 👈 import use
+import { useEffect, useState, useRef, use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
@@ -10,13 +10,12 @@ import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 
 interface PageProps {
-  params: Promise<{ uuid: string }>; // 👈 now params is a Promise
+  params: Promise<{ uuid: string }>;
 }
 
 export default function NotesPage({ params }: PageProps) {
   const router = useRouter();
-  const { uuid } = use(params); // 👈 unwrap params safely
-
+  const { uuid } = use(params);
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
@@ -72,7 +71,7 @@ export default function NotesPage({ params }: PageProps) {
     if (editorRef.current) editorRef.current.innerHTML = note.content;
     setIsDirty(false);
 
-    router.push(`/${uuid}/notes/${note.id}`); // ✅ redirect works
+    router.push(`/${uuid}/notes/${note.id}`);
   };
 
   const createNewNote = async () => {

@@ -79,6 +79,7 @@ html {
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+  --color-popover-hover: var(--popover-hover);
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
@@ -172,7 +173,7 @@ html {
   --toolbar-grey: #bdbdbd;
   --toolbar-pink: #ff85a2;
   --toolbar-teal: #3ddc97;
-  --toolbar-bg-default: #181818; /* darker white */
+  --toolbar-bg-default: #0e0e0e; /* darker white */
   --toolbar-bg-green: #5a7320; /* darker lime-green */
   --toolbar-bg-cyan: #2c7ba0; /* darker cyan */
   --toolbar-bg-orange: #b3621a; /* darker orange */
@@ -195,6 +196,7 @@ html {
 
   --popover: #252525; /* Distinguishable popovers */
   --popover-foreground: #f5f5f5;
+  --popover-hover: #333333;
 
   /* Primary (Accent) */
   --primary: #a8e34b; /* Brighter lime-green */
@@ -241,7 +243,7 @@ html {
   --toolbar-grey: #bdbdbd;
   --toolbar-pink: #ff85a2;
   --toolbar-teal: #3ddc97;
-  --toolbar-bg-default: #181818;
+  --toolbar-bg-default: #0e0e0e;
   --toolbar-bg-green: #5a7320; /* darker lime-green */
   --toolbar-bg-cyan: #2c7ba0; /* darker cyan */
   --toolbar-bg-orange: #b3621a; /* darker orange */

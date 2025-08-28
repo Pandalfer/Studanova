@@ -17,6 +17,8 @@ A ... button that opens the context menu
 
 MAKE LIGHT MODE USABLE
 
+add a 404 page
+
 # 🧭 Suggested Pages & Features
 
 ---

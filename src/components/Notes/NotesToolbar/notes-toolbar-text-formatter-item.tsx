@@ -1,7 +1,7 @@
 import React from "react";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { applyBlock, blockNameMap, BlockType } from "@/lib/notesToolbar/toolbar-actions";
+import { applyBlock, blockNameMap, BlockType } from "@/lib/notes/notes-toolbar/toolbar-actions";
 import { LucideIcon, Check } from "lucide-react";
 
 export default function NotesToolbarTextFormatterItem({

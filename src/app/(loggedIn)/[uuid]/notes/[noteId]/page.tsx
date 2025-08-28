@@ -27,7 +27,7 @@ export default function NotesPage({ params }: PageProps) {
 	const editorRef = useRef<HTMLDivElement>(null);
 	const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-	// Extract noteId from URL
+
 	const pathSegments = pathname.split("/");
 	const noteIdFromPath = pathSegments[3]; // /uuid/notes/noteId
 
@@ -84,22 +84,39 @@ export default function NotesPage({ params }: PageProps) {
 		(async () => {
 			setLoadingNotes(true);
 			const loadedNotes = await loadNotes(uuid);
-			setNotes(loadedNotes);
 
-			if (noteIdFromPath) {
-				const match = loadedNotes.find((n) => n.id === noteIdFromPath);
-				if (match) {
-					setActiveNote(match);
-					setTitle(match.title);
-					if (editorRef.current) editorRef.current.innerHTML = match.content;
-				}
+			if (!noteIdFromPath) {
+				router.push(`/${uuid}/notes`);
+				return;
 			}
+
+			const match = loadedNotes.find((n) => n.id === noteIdFromPath);
+
+			if (!match) {
+				// invalid noteId → redirect
+				router.push(`/${uuid}/notes`);
+				return;
+			}
+
+			setNotes(loadedNotes);
+			setActiveNote(match);
+
+			// Only show "Untitled Note" if the user actually typed it
+			if (match.title === "Untitled Note") {
+				setTitle("");
+			} else {
+				setTitle(match.title);
+			}
+
+			if (editorRef.current) editorRef.current.innerHTML = match.content;
 			setLoadingNotes(false);
 		})();
 	}, [uuid, noteIdFromPath]);
 
 	const selectNote = async (note: Note) => {
-		// Save current note if dirty
+
+		if(note.id === activeNote?.id) return;
+
 		if (isDirty && activeNote) {
 			const updatedNote: Note = {
 				...activeNote,

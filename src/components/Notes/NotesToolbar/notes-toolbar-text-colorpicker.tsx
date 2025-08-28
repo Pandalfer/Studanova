@@ -1,6 +1,6 @@
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import React from "react";
-import { ColorName } from "@/lib/notesToolbar/toolbar-actions";
+import { ColorName } from "@/lib/notes/notes-toolbar/toolbar-actions";
 import {
   Tooltip,
   TooltipContent,

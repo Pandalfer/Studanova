@@ -14,7 +14,7 @@ import {
   ColorName,
   isColorName,
   isBackgroundName,
-} from "@/lib/notesToolbar/toolbar-actions";
+} from "@/lib/notes/notes-toolbar/toolbar-actions";
 import NotesToolbarBackgroundColourpicker from "@/components/Notes/NotesToolbar/notes-toolbar-background-colourpicker";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 

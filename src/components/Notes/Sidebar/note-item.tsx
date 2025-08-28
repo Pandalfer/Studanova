@@ -11,8 +11,12 @@ import {
 	AlertDialogCancel,
 	AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import {Link, Trash2} from "lucide-react";
 import { useState } from "react";
+import {useParams, usePathname} from "next/navigation";
+import {copyUrlToClipboard} from "@/lib/notes/note-item-actions";
+import {toast} from "sonner";
+
 
 export default function NoteItem({
 	                                 note,
@@ -25,9 +29,10 @@ export default function NoteItem({
 	onSelectNote: (note: Note) => void;
 	onDeleteNote: (id: string) => void;
 }) {
-	const [dialogOpen, setDialogOpen] = useState(false);
+	const { uuid } = useParams() as { uuid: string };
+	const isDemo = usePathname().includes("demo");
 
-	// tiny helper to clear any stuck pointer-events on <body>
+	const [dialogOpen, setDialogOpen] = useState(false);
 	const clearBodyPointerEvents = () => {
 		// defer to end of tick to let Radix finish unmounting
 		setTimeout(() => {
@@ -57,11 +62,25 @@ export default function NoteItem({
 				</ContextMenuTrigger>
 
 				<ContextMenuContent className="w-36 rounded-md shadow-lg">
+					{!isDemo ? (
+						<ContextMenuItem
+							onClick={() => {
+								copyUrlToClipboard(uuid, note.id);
+								toast.success("Url copied to clipboard!");
+							}}
+						>
+							<Link />
+							Copy Link
+						</ContextMenuItem>
+					) : (
+							<></>
+					)}
+
 					<AlertDialog
 						open={dialogOpen}
 						onOpenChange={(open) => {
 							setDialogOpen(open);
-							if (!open) clearBodyPointerEvents(); // ✅ belt & braces
+							if (!open) clearBodyPointerEvents();
 						}}
 					>
 						<AlertDialogTrigger asChild>

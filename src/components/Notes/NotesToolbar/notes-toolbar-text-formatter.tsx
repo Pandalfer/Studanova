@@ -9,7 +9,7 @@ import {
 	blockNameMap,
 	BlockType,
 	isBlock,
-} from "@/lib/notesToolbar/toolbar-actions";
+} from "@/lib/notes/notes-toolbar/toolbar-actions";
 import {
 	Type, Heading1, Heading2, Heading3, List, ListOrdered, LucideIcon, ChevronDown
 } from "lucide-react";

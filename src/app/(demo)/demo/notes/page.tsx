@@ -93,7 +93,9 @@ export default function DemoNotesPage() {
     }
 
     setActiveNote(note);
-    setTitle(note.title.trim() === "" ? "Untitled Note" : note.title);
+    // Show blank if stored title is just "Untitled Note"
+    setTitle(note.title === "Untitled Note" ? "" : note.title);
+
     if (editorRef.current) editorRef.current.innerHTML = note.content;
     setIsDirty(false);
   };
@@ -105,7 +107,7 @@ export default function DemoNotesPage() {
           n.id === activeNote.id
             ? {
               ...n,
-              title,
+              title: title.trim() === "" ? "Untitled Note" : title,
               content: editorRef.current?.innerHTML ?? n.content,
             }
             : n
@@ -115,14 +117,15 @@ export default function DemoNotesPage() {
 
     const newNote: Note = {
       id: uuidv4(),
-      title: "Untitled Note",
+      title: "Untitled Note", // DB / storage fallback
       content: "",
       createdAt: Date.now(),
     };
+
     if (editorRef.current) editorRef.current.innerHTML = "";
     setNotes((prev) => [...prev, newNote]);
     setActiveNote(newNote);
-    setTitle(newNote.title);
+    setTitle("");
     setIsDirty(false);
   };
 

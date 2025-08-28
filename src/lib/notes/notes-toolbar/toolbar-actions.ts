@@ -194,7 +194,7 @@ export function applyBackground({
 }
 
 function resolveVar(name: string): string {
-  if (typeof window === "undefined") return ""; // SSR safe
+  if (typeof window === "undefined") return "";
   return getComputedStyle(document.documentElement)
     .getPropertyValue(name)
     .trim();
@@ -265,7 +265,7 @@ export function isBackground(): string | null {
 export function getBackgroundMap(): Record<string, string> {
   if (typeof window === "undefined") return {};
   return {
-    default: resolveVar("--toolbar-bg-default"), // <-- fixed
+    default: resolveVar("--toolbar-bg-default"),
     green: resolveVar("--toolbar-bg-green"),
     cyan: resolveVar("--toolbar-bg-cyan"),
     orange: resolveVar("--toolbar-bg-orange"),
@@ -297,7 +297,7 @@ export function isColorName(): ColorName | null {
 }
 
 export function isBackgroundName(): BackgroundName | null {
-  const current = isBackground(); // <-- fixed
+  const current = isBackground();
   if (!current) return null;
 
   const bgMap = getBackgroundMap();

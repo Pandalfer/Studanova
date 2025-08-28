@@ -1,4 +1,4 @@
-import { BackgroundName } from "@/lib/notesToolbar/toolbar-actions";
+import { BackgroundName } from "@/lib/notes/notes-toolbar/toolbar-actions";
 import {
   Tooltip,
   TooltipContent,

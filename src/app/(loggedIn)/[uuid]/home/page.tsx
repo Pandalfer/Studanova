@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import React from "react";
+import {toast} from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -51,7 +52,10 @@ export default function LoggedInHome({ params }: PageProps) {
     })();
   }, [uuid]);
 
-  if (error) return <div>{error}</div>;
+  if (error) {
+    toast.error(error);
+    return;
+  }
   if (!username) return <div>Loading...</div>;
 
   return (

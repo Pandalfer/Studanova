@@ -4,8 +4,8 @@
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useMediaQuery } from "usehooks-ts";
-import { useSelectionRect } from "@/lib/notesToolbar/use-selection-rect";
-import { useToolbarPosition } from "@/lib/notesToolbar/use-toolbar-position";
+import { useSelectionRect } from "@/lib/notes/notes-toolbar/use-selection-rect";
+import { useToolbarPosition } from "@/lib/notes/notes-toolbar/use-toolbar-position";
 import {
   applyBold,
   applyItalic,
@@ -15,7 +15,7 @@ import {
   isItalic,
   isStrikethrough,
   isUnderline,
-} from "@/lib/notesToolbar/toolbar-actions";
+} from "@/lib/notes/notes-toolbar/toolbar-actions";
 import { Italic, Strikethrough, Underline } from "lucide-react";
 import NotesToolbarColorPicker from "@/components/Notes/NotesToolbar/notes-toolbar-colorpicker";
 import NotesToolbarTextFormatter from "@/components/Notes/NotesToolbar/notes-toolbar-text-formatter";

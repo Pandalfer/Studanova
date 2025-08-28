@@ -6,7 +6,7 @@ import { ClientLayoutWrapper } from "./client-layout-wrapper";
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: Promise<{ uuid: string }>; // params is a Promise now
+  params: Promise<{ uuid: string }>;
 }
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children, params }: LayoutProps) {
-  const { uuid } = await params; // await params here
+  const { uuid } = await params;
 
   return (
     <html lang="en">
