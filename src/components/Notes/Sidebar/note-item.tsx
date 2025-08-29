@@ -2,7 +2,7 @@ import { Note } from "@/types";
 import {
   ContextMenu,
   ContextMenuContent,
-  ContextMenuItem, ContextMenuLabel,
+  ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import {
@@ -16,7 +16,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import {Copy, ExternalLink, Link, PencilLine, Trash2} from "lucide-react";
+import { Copy, ExternalLink, Link, PencilLine, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -24,18 +24,18 @@ import {
   openNoteInNewTab,
 } from "@/lib/notes/note-item-actions";
 import { toast } from "sonner";
-import {Separator} from "@/components/ui/separator";
-import {formatDate} from "@/lib/note-storage";
-import {Input} from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/lib/note-storage";
+import { Input } from "@/components/ui/input";
 
 export default function NoteItem({
-  note,
-  activeNoteId,
-  onSelectNote,
-  onDeleteNote,
-  onDuplicateNote,
-  onRenameNote,
-}: {
+                                   note,
+                                   activeNoteId,
+                                   onSelectNote,
+                                   onDeleteNote,
+                                   onDuplicateNote,
+                                   onRenameNote,
+                                 }: {
   note: Note;
   activeNoteId?: string;
   onSelectNote: (note: Note) => void;
@@ -51,13 +51,28 @@ export default function NoteItem({
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const clearBodyPointerEvents = () => {
-    // defer to end of tick to let Radix finish unmounting
     setTimeout(() => {
       if (document.body && document.body.style.pointerEvents === "none") {
         document.body.style.pointerEvents = "";
       }
     }, 50);
   };
+
+  const finishRename = () => {
+    const trimmed = newTitle.trim();
+    setIsRenaming(false);
+
+    if (!trimmed) {
+      // revert if empty
+      setNewTitle(note.title);
+      return;
+    }
+
+    if (trimmed !== note.title) {
+      onRenameNote?.(note, trimmed);
+    }
+  };
+
   return (
     <>
       <ContextMenu modal={false}>
@@ -77,8 +92,7 @@ export default function NoteItem({
                 onChange={(e) => setNewTitle(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
-                    onRenameNote?.(note, newTitle.trim() || note.title);
-                    setIsRenaming(false);
+                    finishRename();
                   }
                   if (e.key === "Escape") {
                     setNewTitle(note.title);
@@ -86,8 +100,7 @@ export default function NoteItem({
                   }
                 }}
                 onBlur={() => {
-                  // optional: only close if the input wasn't just opened
-                  setTimeout(() => setIsRenaming(false), 100);
+                  setTimeout(() => finishRename(), 0);
                 }}
                 className="w-full"
               />
@@ -97,14 +110,13 @@ export default function NoteItem({
                 {note.title.length > 25 ? "..." : ""}
               </h3>
             )}
-
-
           </div>
         </ContextMenuTrigger>
 
         <ContextMenuContent className="w-48 rounded-md shadow-lg">
           <ContextMenuItem
             onClick={() => {
+              // delay so Radix finishes closing the menu before focusing input
               setTimeout(() => setIsRenaming(true), 50);
             }}
           >
@@ -112,7 +124,7 @@ export default function NoteItem({
             Rename
           </ContextMenuItem>
 
-          {!isDemo ? (
+          {!isDemo && (
             <div>
               <ContextMenuItem
                 onClick={() => {
@@ -120,7 +132,7 @@ export default function NoteItem({
                   toast.success("Url copied to clipboard!");
                 }}
               >
-                <Link/>
+                <Link />
                 Copy Link
               </ContextMenuItem>
               <ContextMenuItem
@@ -128,20 +140,18 @@ export default function NoteItem({
                   openNoteInNewTab(uuid, note.id);
                 }}
               >
-                <ExternalLink/>
+                <ExternalLink />
                 Open in new tab
               </ContextMenuItem>
             </div>
-          ) : (
-            <></>
           )}
 
           <ContextMenuItem
             onClick={() => {
-              note ? onDuplicateNote?.(note) : null
+              note ? onDuplicateNote?.(note) : null;
             }}
           >
-            <Copy/>
+            <Copy />
             Duplicate Note
           </ContextMenuItem>
 
@@ -156,19 +166,15 @@ export default function NoteItem({
               <ContextMenuItem
                 className="text-destructive dark:hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
                 onSelect={(e) => {
-                  // keep the menu from interfering while the dialog opens
                   e.preventDefault();
                   setDialogOpen(true);
                 }}
               >
-                <Trash2 className="h-4 w-4 mr-2"/> Delete
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
               </ContextMenuItem>
             </AlertDialogTrigger>
 
-            <AlertDialogContent
-              // optional: avoid weird refocus back to the menu anchor
-              onCloseAutoFocus={(e) => e.preventDefault()}
-            >
+            <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -198,9 +204,9 @@ export default function NoteItem({
             </AlertDialogContent>
           </AlertDialog>
 
-          <Separator/>
+          <Separator className={"m-2"} />
 
-          <h3 className="text-muted font-bold p-2 text-center text-xs cursor-default">
+          <h3 className="text-muted font-bold text-center text-xs cursor-default pb-2">
             Created On {formatDate(note.createdAt)}
           </h3>
         </ContextMenuContent>
