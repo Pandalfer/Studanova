@@ -37,12 +37,12 @@ export default function DemoNotesPage() {
         prevNotes.map((note) =>
           note.id === activeNote.id
             ? {
-              ...note,
-              title: title.trim() === "" ? "Untitled Note" : title,
-              content: editorRef.current?.innerHTML ?? note.content,
-            }
-            : note
-        )
+                ...note,
+                title: title.trim() === "" ? "Untitled Note" : title,
+                content: editorRef.current?.innerHTML ?? note.content,
+              }
+            : note,
+        ),
       );
       setIsDirty(false);
     }, 2000);
@@ -59,12 +59,12 @@ export default function DemoNotesPage() {
           prevNotes.map((n) =>
             n.id === activeNote.id
               ? {
-                ...n,
-                title: title.trim() === "" ? "Untitled Note" : title,
-                content: editorRef.current?.innerHTML ?? n.content,
-              }
-              : n
-          )
+                  ...n,
+                  title: title.trim() === "" ? "Untitled Note" : title,
+                  content: editorRef.current?.innerHTML ?? n.content,
+                }
+              : n,
+          ),
         );
         e.preventDefault();
         e.returnValue = "You have unsaved changes!";
@@ -83,12 +83,12 @@ export default function DemoNotesPage() {
         prevNotes.map((n) =>
           n.id === activeNote.id
             ? {
-              ...n,
-              title: title.trim() === "" ? "Untitled Note" : title,
-              content: editorRef.current?.innerHTML ?? n.content,
-            }
-            : n
-        )
+                ...n,
+                title: title.trim() === "" ? "Untitled Note" : title,
+                content: editorRef.current?.innerHTML ?? n.content,
+              }
+            : n,
+        ),
       );
     }
 
@@ -100,18 +100,47 @@ export default function DemoNotesPage() {
     setIsDirty(false);
   };
 
+  const duplicateNote = (note: Note) => {
+    if (isDirty && activeNote) {
+      setNotes((prevNotes) =>
+        prevNotes.map((n) =>
+          n.id === activeNote.id
+            ? {
+                ...n,
+                title: title.trim() === "" ? "Untitled Note" : title,
+                content: editorRef.current?.innerHTML ?? n.content,
+              }
+            : n,
+        ),
+      );
+    }
+
+    const newNote: Note = {
+      id: uuidv4(),
+      title: note.title + " (Copy)",
+      content: note.content,
+      createdAt: Date.now(),
+    };
+
+    setNotes((prev) => [...prev, newNote]);
+    setActiveNote(newNote);
+    setTitle(newNote.title === "Untitled Note" ? "" : newNote.title);
+    if (editorRef.current) editorRef.current.innerHTML = newNote.content;
+    setIsDirty(false);
+  }
+
   const createNewNote = () => {
     if (isDirty && activeNote) {
       setNotes((prevNotes) =>
         prevNotes.map((n) =>
           n.id === activeNote.id
             ? {
-              ...n,
-              title: title.trim() === "" ? "Untitled Note" : title,
-              content: editorRef.current?.innerHTML ?? n.content,
-            }
-            : n
-        )
+                ...n,
+                title: title.trim() === "" ? "Untitled Note" : title,
+                content: editorRef.current?.innerHTML ?? n.content,
+              }
+            : n,
+        ),
       );
     }
 
@@ -129,6 +158,20 @@ export default function DemoNotesPage() {
     setIsDirty(false);
   };
 
+  const renameNote = (note: Note, newTitle: string) => {
+    const updatedNote: Note = {
+      ...note,
+      title: newTitle.trim() || "Untitled Note",
+    };
+    setNotes((prev) =>
+      prev.map((n) => (n.id === updatedNote.id ? updatedNote : n)),
+    );
+    if (activeNote?.id === updatedNote.id) {
+      setActiveNote(updatedNote);
+      setTitle(updatedNote.title === "Untitled Note" ? "" : updatedNote.title);
+    }
+  }
+
   const deleteNote = (id: string) => {
     setNotes(notes.filter((note) => note.id !== id));
     if (activeNote?.id === id) {
@@ -141,7 +184,9 @@ export default function DemoNotesPage() {
   return (
     <div className="flex min-h-screen">
       <NotesSidebar
+        onDuplicateNote={duplicateNote}
         notes={notes}
+        onRenameNote={renameNote}
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDeleteNote={deleteNote}

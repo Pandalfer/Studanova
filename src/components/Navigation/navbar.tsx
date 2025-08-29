@@ -25,8 +25,8 @@ export default function Navbar() {
           {/* Middle */}
           <div className="hidden md:flex absolute left-1/2 transform -translate-x-1/2 gap-20">
             <NavigationTitle title="Notes" destination="notes" />
-            <NavigationTitle title="Tasks" destination={"tasks"} />
-            <NavigationTitle title="Tools" destination={"tools"} />
+            {/*<NavigationTitle title="Tasks" destination={"tasks"} />*/}
+            {/*<NavigationTitle title="Tools" destination={"tools"} />*/}
           </div>
 
           {/* Right */}

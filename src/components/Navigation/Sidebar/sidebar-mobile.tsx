@@ -51,7 +51,9 @@ export function SidebarMobile({ sidebarItems, username }: SidebarMobileProps) {
                 <SidebarButton
                   icon={link.icon}
                   className="w-full"
-                  variant={pathname.startsWith(link.href) ? "secondary" : "ghost"}
+                  variant={
+                    pathname.startsWith(link.href) ? "secondary" : "ghost"
+                  }
                 >
                   {link.label}
                 </SidebarButton>

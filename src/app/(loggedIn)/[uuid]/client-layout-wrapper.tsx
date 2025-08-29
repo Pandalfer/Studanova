@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/Navigation/Sidebar/sidebar";
 import clsx from "clsx";
-import {usePathname} from "next/navigation";
+import { usePathname } from "next/navigation";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
@@ -11,9 +11,9 @@ interface ClientLayoutWrapperProps {
 }
 
 export function ClientLayoutWrapper({
-                                      children,
-                                      uuid,
-                                    }: ClientLayoutWrapperProps) {
+  children,
+  uuid,
+}: ClientLayoutWrapperProps) {
   const pathname = usePathname();
 
   const [isCollapsed, setIsCollapsed] = useState(true);
@@ -28,7 +28,7 @@ export function ClientLayoutWrapper({
         className={clsx(
           "transition-all duration-300 ease-in-out overflow-y-auto",
           isCollapsed ? "sm:ml-[60px]" : "sm:ml-[270px]",
-          pathname.includes("notes") ? "mr-[320px]" : "mr-0"
+          pathname.includes("notes") ? "mr-[320px]" : "mr-0",
         )}
       >
         {children}

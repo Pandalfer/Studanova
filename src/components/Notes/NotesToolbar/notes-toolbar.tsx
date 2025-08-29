@@ -19,16 +19,25 @@ import {
 import { Italic, Strikethrough, Underline } from "lucide-react";
 import NotesToolbarColorPicker from "@/components/Notes/NotesToolbar/notes-toolbar-colorpicker";
 import NotesToolbarTextFormatter from "@/components/Notes/NotesToolbar/notes-toolbar-text-formatter";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
   setContent: (html: string) => void;
 }
 
-export default function NotesToolbar({ editorRef, setContent }: NotesToolbarProps) {
+export default function NotesToolbar({
+  editorRef,
+  setContent,
+}: NotesToolbarProps) {
   const [visible, setVisible] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)", { initializeWithValue: false });
+  const isDesktop = useMediaQuery("(min-width: 640px)", {
+    initializeWithValue: false,
+  });
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const selectionRect = useSelectionRect(editorRef);
@@ -48,7 +57,10 @@ export default function NotesToolbar({ editorRef, setContent }: NotesToolbarProp
       style={{ top: pos.top, left: pos.left, transform: "translateY(-4px)" }}
       id="notes-toolbar"
     >
-      <NotesToolbarTextFormatter editorRef={editorRef} setContent={setContent} />
+      <NotesToolbarTextFormatter
+        editorRef={editorRef}
+        setContent={setContent}
+      />
 
       {/* Bold */}
       <Tooltip>

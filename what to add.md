@@ -6,7 +6,6 @@ Remember me
 Respond to different screen sizes (mobile, tablet, desktop)
 Shared notes between users
 Add a rename option to note items
-A copy link option to note items
 Open in new tab option to note items
 A favourite option to note items
 A search bar for notes

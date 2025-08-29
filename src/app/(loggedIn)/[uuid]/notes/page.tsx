@@ -8,6 +8,7 @@ import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
+import {toast} from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -19,11 +20,9 @@ export default function NotesPage({ params }: PageProps) {
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
-  const [title, setTitle] = useState("");
-  const [isDirty, setIsDirty] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
 
   useEffect(() => {
     setMounted(true);
@@ -36,43 +35,40 @@ export default function NotesPage({ params }: PageProps) {
     })();
   }, [uuid]);
 
-  const saveNote = async (updatedNote: Note) => {
-    try {
-      const noteToSave = {
-        ...updatedNote,
-        title: updatedNote.title.trim() === "" ? "Untitled Note" : updatedNote.title,
-      };
 
-      const savedNote = await saveNoteToDb(noteToSave, uuid);
-      if (!savedNote) return;
+  const duplicateNote = async (note: Note) => {
+    const newNote: Note = {
+      id: nanoid(),
+      title: note.title + " (Copy)",
+      content: note.content,
+      createdAt: Date.now(),
+    };
 
-      setNotes((prev) =>
-        prev.map((note) => (note.id === updatedNote.id ? savedNote : note))
-      );
-
-      setActiveNote(savedNote);
-      setIsDirty(false);
-    } catch (error) {
-      console.error("Error saving note:", error);
-    }
+    setNotes((prev) => [...prev, newNote]);
+    saveNoteToDb(newNote, uuid).catch(console.error);
   };
 
   const selectNote = async (note: Note) => {
-    if (isDirty && activeNote) {
-      await saveNote({
-        ...activeNote,
-        title: title.trim() === "" ? "Untitled Note" : title,
-        content: editorRef.current?.innerHTML ?? activeNote.content,
-      });
-    }
-
     setActiveNote(note);
-    setTitle(note.title);
-    if (editorRef.current) editorRef.current.innerHTML = note.content;
-    setIsDirty(false);
-
     router.push(`/${uuid}/notes/${note.id}`);
   };
+
+  const renameNote = async (note: Note, newTitle: string) => {
+    const updatedNote: Note = {
+      ...note,
+      title: newTitle.trim() || "Untitled Note",
+    };
+    try {
+      const savedNote = await saveNoteToDb(updatedNote, uuid);
+      if (savedNote) {
+        setNotes((prev) =>
+          prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
+        );
+      }
+    } catch (err) {
+      toast.error("Failed to rename note");
+    }
+  }
 
   const createNewNote = async () => {
     const newNote: Note = {
@@ -94,7 +90,6 @@ export default function NotesPage({ params }: PageProps) {
     setNotes((prev) => prev.filter((note) => note.id !== id));
     if (activeNote?.id === id) {
       setActiveNote(null);
-      setTitle("");
       if (editorRef.current) editorRef.current.innerHTML = "";
     }
   };
@@ -108,10 +103,14 @@ export default function NotesPage({ params }: PageProps) {
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDeleteNote={deleteNote}
+        onDuplicateNote={duplicateNote}
+        onRenameNote={renameNote}
         activeNoteId={activeNote?.id}
       />
       <div className="flex-1 h-screen">
-        <NotesEmptyState message={"Select or create a new note to get started"} />
+        <NotesEmptyState
+          message={"Select or create a new note to get started"}
+        />
       </div>
     </div>
   );

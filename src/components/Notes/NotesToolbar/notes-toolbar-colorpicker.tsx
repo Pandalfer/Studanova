@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+  import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -16,7 +16,11 @@ import {
   isBackgroundName,
 } from "@/lib/notes/notes-toolbar/toolbar-actions";
 import NotesToolbarBackgroundColourpicker from "@/components/Notes/NotesToolbar/notes-toolbar-background-colourpicker";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function NotesToolbarColorPicker({
   editorRef,
@@ -112,7 +116,11 @@ export default function NotesToolbarColorPicker({
                 color={c}
                 active={backgroundColor === c}
                 onClick={() => {
-                  applyBackground({ editorRef, setContent, backgroundColour: c });
+                  applyBackground({
+                    editorRef,
+                    setContent,
+                    backgroundColour: c,
+                  });
                   setBackgroundColor(c);
                 }}
               />

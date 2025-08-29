@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import React from "react";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;

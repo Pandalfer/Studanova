@@ -1,5 +1,5 @@
 import { PrismaClient } from "../src/generated/prisma";
-import {nanoid} from "nanoid";
+import { nanoid } from "nanoid";
 
 const client = new PrismaClient();
 

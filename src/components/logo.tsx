@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 export default function Logo({ size }: { size: number }) {
   return (
@@ -9,14 +10,22 @@ export default function Logo({ size }: { size: number }) {
       style={{ width: size, height: size }}
       aria-label="Home"
     >
-      <Image
-        className="cursor-pointer"
-        width={size}
-        height={size}
-        quality={100}
-        src="/Logo.svg"
-        alt="Logo"
-      />
+      <Tooltip>
+        <TooltipTrigger>
+          <Image
+            className="cursor-pointer"
+            width={size}
+            height={size}
+            quality={100}
+            src="/Logo.svg"
+            alt="Logo"
+          />
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Studanova Logo</p>
+        </TooltipContent>
+      </Tooltip>
+
     </Link>
   );
 }

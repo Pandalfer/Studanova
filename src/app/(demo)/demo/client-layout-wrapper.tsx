@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar } from "@/components/Navigation/Sidebar/sidebar";
 import clsx from "clsx";
-import {usePathname} from "next/navigation";
+import { usePathname } from "next/navigation";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
@@ -29,7 +29,7 @@ export function ClientLayoutWrapper({
         className={clsx(
           "transition-all duration-300 ease-in-out overflow-y-auto",
           isCollapsed ? "sm:ml-[60px]" : "sm:ml-[270px]",
-          pathname === "/demo/notes" ? "mr-[320px]" : "mr-0"
+          pathname === "/demo/notes" ? "mr-[320px]" : "mr-0",
         )}
       >
         {children}
