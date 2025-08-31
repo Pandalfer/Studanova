@@ -65,7 +65,8 @@ export default function NotesPage({ params }: PageProps) {
           prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
         );
       }
-    } catch (err) {
+      toast.success("Note renamed successfully");
+    } catch {
       toast.error("Failed to rename note");
     }
   }

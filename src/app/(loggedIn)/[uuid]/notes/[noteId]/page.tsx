@@ -7,6 +7,7 @@ import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { nanoid } from "nanoid";
 import { useRouter, usePathname } from "next/navigation";
+import {toast} from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -126,6 +127,7 @@ export default function NotesPage({ params }: PageProps) {
           setNotes((prev) =>
             prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
           );
+
       } catch (err) {
         console.error("Failed to save before switching note:", err);
       }
@@ -155,8 +157,9 @@ export default function NotesPage({ params }: PageProps) {
           setTitle(savedNote.title);
         }
       }
-    } catch (err) {
-      console.error("Failed to rename note:", err);
+      toast.success("Note renamed successfully");
+    } catch {
+      toast.error("Failed to rename note");
     }
   }
 

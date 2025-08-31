@@ -11,7 +11,6 @@ import {
   AlertDialogContent,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
@@ -46,10 +45,10 @@ export default function NoteItem({
   const { uuid } = useParams() as { uuid: string };
 
   const isDemo = usePathname().includes("demo");
-  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(note.title);
 
-  const [dialogOpen, setDialogOpen] = useState(false);
   const clearBodyPointerEvents = () => {
     setTimeout(() => {
       if (document.body && document.body.style.pointerEvents === "none") {
@@ -60,11 +59,10 @@ export default function NoteItem({
 
   const finishRename = () => {
     const trimmed = newTitle.trim();
-    setIsRenaming(false);
+    setRenameDialogOpen(false);
 
     if (!trimmed) {
-      // revert if empty
-      setNewTitle(note.title);
+      setNewTitle(note.title); // revert if empty
       return;
     }
 
@@ -85,76 +83,89 @@ export default function NoteItem({
             }`}
             onClick={() => onSelectNote(note)}
           >
-            {isRenaming ? (
-              <Input
-                autoFocus
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    finishRename();
-                  }
-                  if (e.key === "Escape") {
-                    setNewTitle(note.title);
-                    setIsRenaming(false);
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => finishRename(), 0);
-                }}
-                className="w-full"
-              />
-            ) : (
-              <h3 className="font-medium truncate block">
-                {note.title.substring(0, 25)}
-                {note.title.length > 25 ? "..." : ""}
-              </h3>
-            )}
+            <h3 className="font-medium truncate block">
+              {note.title.substring(0, 25)}
+              {note.title.length > 25 ? "..." : ""}
+            </h3>
           </div>
         </ContextMenuTrigger>
 
         <ContextMenuContent className="w-48 rounded-md shadow-lg">
-          <ContextMenuItem
-            onClick={() => {
-              // delay so Radix finishes closing the menu before focusing input
-              setTimeout(() => setIsRenaming(true), 50);
-            }}
-          >
-            <PencilLine />
-            Rename
-          </ContextMenuItem>
+          {/* Rename with popup */}
+          <AlertDialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+            <AlertDialogTrigger asChild>
+              <ContextMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  setRenameDialogOpen(true);
+                  setTimeout(() => {
+                    const input = document.querySelector<HTMLInputElement>("#rename-input");
+                    input?.focus();
+                    input?.select();
+                  });
+                }}
+              >
+                <PencilLine /> Rename
+              </ContextMenuItem>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Rename Note</AlertDialogTitle>
+              </AlertDialogHeader>
+              <Input
+                id="rename-input"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") finishRename();
+                  if (e.key === "Escape") {
+                    setRenameDialogOpen(false);
+                    setNewTitle(note.title);
+                  }
+                }}
+                autoFocus
+              />
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  onClick={() => {
+                    setRenameDialogOpen(false);
+                    setNewTitle(note.title);
+                  }}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction onClick={finishRename}>
+                  Save
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {!isDemo && (
-            <div>
+            <>
               <ContextMenuItem
                 onClick={() => {
                   copyUrlToClipboard(uuid, note.id);
                   toast.success("Url copied to clipboard!");
                 }}
               >
-                <Link />
-                Copy Link
+                <Link /> Copy Link
               </ContextMenuItem>
               <ContextMenuItem
                 onClick={() => {
                   openNoteInNewTab(uuid, note.id);
                 }}
               >
-                <ExternalLink />
-                Open in new tab
+                <ExternalLink /> Open in new tab
               </ContextMenuItem>
-            </div>
+            </>
           )}
 
-          <ContextMenuItem
-            onClick={() => {
-              note ? onDuplicateNote?.(note) : null;
-            }}
-          >
-            <Copy />
-            Duplicate Note
+          <ContextMenuItem onClick={() => onDuplicateNote?.(note)}>
+            <Copy /> Duplicate Note
           </ContextMenuItem>
 
+          {/* Delete Dialog */}
           <AlertDialog
             open={dialogOpen}
             onOpenChange={(open) => {
@@ -173,15 +184,14 @@ export default function NoteItem({
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
               </ContextMenuItem>
             </AlertDialogTrigger>
-
             <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your note and remove your data from our servers.
-                </AlertDialogDescription>
               </AlertDialogHeader>
+              <p>
+                This action cannot be undone. This will permanently delete your note and
+                remove your data from our servers.
+              </p>
               <AlertDialogFooter>
                 <AlertDialogCancel
                   onClick={() => {
@@ -204,8 +214,7 @@ export default function NoteItem({
             </AlertDialogContent>
           </AlertDialog>
 
-          <Separator className={"m-2"} />
-
+          <Separator className="m-2" />
           <h3 className="text-muted font-bold text-center text-xs cursor-default pb-2">
             Created On {formatDate(note.createdAt)}
           </h3>
