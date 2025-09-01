@@ -19,19 +19,22 @@ export async function POST(req: NextRequest) {
 
     const notesFromDb = await prisma.note.findMany({
       where: { studentId: uuid },
-      orderBy: { createdAt: "desc" },
+      orderBy: [
+        { order: "asc" },      // 👈 use ordering field first
+        { createdAt: "asc" },  // 👈 fallback
+      ],
     });
 
     const notes = notesFromDb.map((note) => ({
       id: note.id.toString(),
       title: note.title,
       content: note.content,
-      createdAt: Number(note.createdAt),
+      createdAt: note.createdAt.getTime(), // timestamp
     }));
 
     return NextResponse.json({ notes });
   } catch (error) {
-    console.log("Error getting user info: " + error);
+    console.error("Error getting user info:", error);
     return NextResponse.json({ error: "Failed to find user" }, { status: 500 });
   }
 }

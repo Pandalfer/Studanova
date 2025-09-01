@@ -187,6 +187,7 @@ export default function DemoNotesPage() {
     <div className="flex min-h-screen">
       <NotesSidebar
         onDuplicateNote={duplicateNote}
+        setNotes={setNotes}
         notes={notes}
         onRenameNote={renameNote}
         onSelectNote={selectNote}

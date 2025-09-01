@@ -15,6 +15,19 @@ export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
   return data.note as Note;
 }
 
+export async function saveNoteOrderToDb(
+  studentId: string,
+  notes: { id: string; order: number }[]
+): Promise<void> {
+  await fetch("/api/notes/save-order", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ studentId, notes }),
+  });
+}
+
 export async function deleteNoteFromDb(id: string): Promise<void> {
   const res = await fetch("/api/notes/delete-note", {
     method: "POST",

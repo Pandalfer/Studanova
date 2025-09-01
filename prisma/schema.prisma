@@ -34,5 +34,6 @@ model Note {
   studentId String   @db.Uuid
   content   String
   createdAt DateTime @default(now())
+  order     Int      @default(0)
   student   Student  @relation(fields: [studentId], references: [id])
 }

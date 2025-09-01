@@ -214,6 +214,7 @@ export default function NotesPage({ params }: PageProps) {
     <div className="flex min-h-screen">
       <NotesSidebar
         notes={notes}
+        setNotes={setNotes}
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDuplicateNote={duplicateNote}

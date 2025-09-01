@@ -102,6 +102,7 @@ export default function NotesPage({ params }: PageProps) {
       <NotesSidebar
         notes={notes}
         onSelectNote={selectNote}
+        setNotes={setNotes}
         createNewNote={createNewNote}
         onDeleteNote={deleteNote}
         onDuplicateNote={duplicateNote}
