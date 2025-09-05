@@ -1,6 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function Logo({ size }: { size: number }) {
   return (
@@ -25,7 +29,6 @@ export default function Logo({ size }: { size: number }) {
           <p>Studanova Logo</p>
         </TooltipContent>
       </Tooltip>
-
     </Link>
   );
 }

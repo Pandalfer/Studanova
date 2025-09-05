@@ -1,4 +1,4 @@
-import { Note } from "@/types";
+import {Folder, FolderInput, Note} from "@/types";
 
 const STORAGE_KEY = "notes";
 
@@ -15,17 +15,17 @@ export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
   return data.note as Note;
 }
 
-export async function saveNoteOrderToDb(
-  studentId: string,
-  notes: { id: string; order: number }[]
-): Promise<void> {
-  await fetch("/api/notes/save-order", {
+export async function saveFolderToDb(folder: FolderInput, uuid: string): Promise<Folder> {
+  const response = await fetch("/api/folders/save-folder", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ studentId, notes }),
+    body: JSON.stringify({ ...folder, studentId: uuid }),
   });
+
+  const data = await response.json();
+  return data.folder as Folder;
 }
 
 export async function deleteNoteFromDb(id: string): Promise<void> {
@@ -57,6 +57,23 @@ export async function loadNotes(uuid: string): Promise<Note[]> {
 
   const data = await response.json();
   return data.notes as Note[];
+}
+
+export async function loadFolders(uuid: string): Promise<Folder[]> {
+  const response = await fetch("/api/folders/load-folders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ uuid }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to load folders");
+  }
+
+  const data = await response.json();
+  return data.folders as Folder[];
 }
 
 export function saveDemoNotes(notes: Note[]): void {

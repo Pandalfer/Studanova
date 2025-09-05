@@ -15,6 +15,7 @@ model Student {
   password    String
   assignments Assignment[]
   Note        Note[]
+  Folder      Folder[]
 }
 
 model Assignment {
@@ -34,6 +35,20 @@ model Note {
   studentId String   @db.Uuid
   content   String
   createdAt DateTime @default(now())
-  order     Int      @default(0)
   student   Student  @relation(fields: [studentId], references: [id])
+
+  folderId String? @db.Uuid
+  folder   Folder? @relation(fields: [folderId], references: [id])
+}
+
+model Folder {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title    String
+  notes    Note[]
+  parentId String?  @db.Uuid
+  parent   Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  folders  Folder[] @relation("FolderToFolder")
+
+  studentId String  @db.Uuid
+  student   Student @relation(fields: [studentId], references: [id])
 }

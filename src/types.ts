@@ -16,3 +16,16 @@ export interface Note {
   content: string;
   createdAt: number;
 }
+
+export interface Folder {
+  id: string;
+  title: string;
+  studentId: string;
+  notes: Note[];
+  folders: Folder[];
+  parentId?: string;
+}
+
+export interface FolderInput {
+  title: string;
+}

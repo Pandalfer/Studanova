@@ -28,13 +28,13 @@ import { formatDate } from "@/lib/note-storage";
 import { Input } from "@/components/ui/input";
 
 export default function NoteItem({
-                                   note,
-                                   activeNoteId,
-                                   onSelectNote,
-                                   onDeleteNote,
-                                   onDuplicateNote,
-                                   onRenameNote,
-                                 }: {
+  note,
+  activeNoteId,
+  onSelectNote,
+  onDeleteNote,
+  onDuplicateNote,
+  onRenameNote,
+}: {
   note: Note;
   activeNoteId?: string;
   onSelectNote: (note: Note) => void;
@@ -92,14 +92,18 @@ export default function NoteItem({
 
         <ContextMenuContent className="w-48 rounded-md shadow-lg">
           {/* Rename with popup */}
-          <AlertDialog open={renameDialogOpen} onOpenChange={setRenameDialogOpen}>
+          <AlertDialog
+            open={renameDialogOpen}
+            onOpenChange={setRenameDialogOpen}
+          >
             <AlertDialogTrigger asChild>
               <ContextMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
                   setRenameDialogOpen(true);
                   setTimeout(() => {
-                    const input = document.querySelector<HTMLInputElement>("#rename-input");
+                    const input =
+                      document.querySelector<HTMLInputElement>("#rename-input");
                     input?.focus();
                     input?.select();
                   });
@@ -189,8 +193,8 @@ export default function NoteItem({
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               </AlertDialogHeader>
               <p>
-                This action cannot be undone. This will permanently delete your note and
-                remove your data from our servers.
+                This action cannot be undone. This will permanently delete your
+                note and remove your data from our servers.
               </p>
               <AlertDialogFooter>
                 <AlertDialogCancel

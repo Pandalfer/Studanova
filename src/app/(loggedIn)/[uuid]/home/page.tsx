@@ -2,9 +2,22 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { toast } from "sonner";
+import {loadFolders, loadNotes} from "@/lib/note-storage";
+import {Folder, Note} from "@/types";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
+}
+
+function collectAllNotes(folders: Folder[]): Note[] {
+  const result: Note[] = [];
+  for (const folder of folders) {
+    result.push(...folder.notes);
+    if (folder.folders && folder.folders.length > 0) {
+      result.push(...collectAllNotes(folder.folders));
+    }
+  }
+  return result;
 }
 
 export default function LoggedInHome({ params }: PageProps) {
@@ -32,20 +45,16 @@ export default function LoggedInHome({ params }: PageProps) {
         const userData = await userResponse.json();
         setUsername(userData.username);
 
-        // Fetch notes
-        const notesResponse = await fetch("/api/notes/load-notes", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uuid }),
-        });
+        const loadedNotes = await loadNotes(uuid);
+        const loadedFolders = await loadFolders(uuid);
 
-        if (!notesResponse.ok) {
-          console.error("Failed to load notes");
-          return;
-        }
 
-        const notesData = await notesResponse.json();
-        setNumberOfNotes(notesData.notes.length);
+        const allNotes = [
+          ...loadedNotes,
+          ...collectAllNotes(loadedFolders)
+        ];
+
+        setNumberOfNotes(allNotes.length);
       } catch {
         setError("An unexpected error occurred");
       }

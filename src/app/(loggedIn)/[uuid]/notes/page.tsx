@@ -1,14 +1,13 @@
 "use client";
 
-import { Note } from "@/types";
+import {Folder, FolderInput, Note} from "@/types";
 import { useEffect, useState, useRef, use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
-import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
+import {loadNotes, saveNoteToDb, deleteNoteFromDb, loadFolders, saveFolderToDb} from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
-import NotesEditor from "@/components/Notes/notes-editor";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -19,10 +18,11 @@ export default function NotesPage({ params }: PageProps) {
   const { uuid } = use(params);
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
+  const [loadingNotes, setLoadingNotes] = useState(true);
 
   const editorRef = useRef<HTMLDivElement>(null);
-
 
   useEffect(() => {
     setMounted(true);
@@ -30,11 +30,14 @@ export default function NotesPage({ params }: PageProps) {
 
   useEffect(() => {
     (async () => {
+      setLoadingNotes(true)
       const loadedNotes = await loadNotes(uuid);
+      const loadedFolders = await loadFolders(uuid);
       setNotes(loadedNotes);
+      setFolders(loadedFolders);
+      setLoadingNotes(false)
     })();
   }, [uuid]);
-
 
   const duplicateNote = async (note: Note) => {
     const newNote: Note = {
@@ -69,7 +72,7 @@ export default function NotesPage({ params }: PageProps) {
     } catch {
       toast.error("Failed to rename note");
     }
-  }
+  };
 
   const createNewNote = async () => {
     const newNote: Note = {
@@ -84,6 +87,17 @@ export default function NotesPage({ params }: PageProps) {
 
     // Redirect immediately — no local state needed
     router.push(`/${uuid}/notes/${newNote.id}`);
+  };
+
+
+  const createNewFolder = async () => {
+    const folderInput: FolderInput = { title: "Untitled Folder" };
+    try {
+      const savedFolder = await saveFolderToDb(folderInput, uuid);
+      setFolders((prev) => [...prev, savedFolder]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const deleteNote = async (id: string) => {
@@ -101,13 +115,15 @@ export default function NotesPage({ params }: PageProps) {
     <div className="flex min-h-screen">
       <NotesSidebar
         notes={notes}
+        folders={folders}
         onSelectNote={selectNote}
-        setNotes={setNotes}
         createNewNote={createNewNote}
+        createNewFolder={createNewFolder}
         onDeleteNote={deleteNote}
         onDuplicateNote={duplicateNote}
         onRenameNote={renameNote}
         activeNoteId={activeNote?.id}
+        loading={loadingNotes}
       />
       <div className="flex-1 h-screen">
         <NotesEmptyState

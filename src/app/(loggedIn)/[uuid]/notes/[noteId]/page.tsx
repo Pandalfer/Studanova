@@ -1,17 +1,29 @@
 "use client";
 
-import { Note } from "@/types";
+import {Note, Folder, FolderInput} from "@/types";
 import { useEffect, useState, useRef, use } from "react";
-import { loadNotes, saveNoteToDb, deleteNoteFromDb } from "@/lib/note-storage";
+import {loadNotes, saveNoteToDb, deleteNoteFromDb, saveFolderToDb, loadFolders} from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { nanoid } from "nanoid";
 import { useRouter, usePathname } from "next/navigation";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
+
+function collectAllNotes(folders: Folder[]): Note[] {
+  const result: Note[] = [];
+  for (const folder of folders) {
+    result.push(...folder.notes);
+    if (folder.folders && folder.folders.length > 0) {
+      result.push(...collectAllNotes(folder.folders));
+    }
+  }
+  return result;
+}
+
 
 export default function NotesPage({ params }: PageProps) {
   const router = useRouter();
@@ -20,6 +32,7 @@ export default function NotesPage({ params }: PageProps) {
 
   const [mounted, setMounted] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [title, setTitle] = useState("");
   const [isDirty, setIsDirty] = useState(false);
@@ -84,21 +97,23 @@ export default function NotesPage({ params }: PageProps) {
     (async () => {
       setLoadingNotes(true);
       const loadedNotes = await loadNotes(uuid);
+      const loadedFolders = await loadFolders(uuid);
 
-      if (!noteIdFromPath) {
-        router.push(`/${uuid}/notes`);
-        return;
-      }
 
-      const match = loadedNotes.find((n) => n.id === noteIdFromPath);
+      const allNotes = [
+        ...loadedNotes,
+        ...collectAllNotes(loadedFolders)
+      ];
+
+      const match = allNotes.find((n) => n.id === noteIdFromPath);
 
       if (!match) {
-        // invalid noteId → redirect
         router.push(`/${uuid}/notes`);
         return;
       }
 
       setNotes(loadedNotes);
+      setFolders(loadedFolders);
       setActiveNote(match);
 
       if (match.title === "Untitled Note") {
@@ -127,7 +142,6 @@ export default function NotesPage({ params }: PageProps) {
           setNotes((prev) =>
             prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
           );
-
       } catch (err) {
         console.error("Failed to save before switching note:", err);
       }
@@ -161,8 +175,7 @@ export default function NotesPage({ params }: PageProps) {
     } catch {
       toast.error("Failed to rename note");
     }
-  }
-
+  };
 
   const createNewNote = async () => {
     const newNote: Note = {
@@ -195,6 +208,18 @@ export default function NotesPage({ params }: PageProps) {
     saveNoteToDb(newNote, uuid).catch(console.error);
   };
 
+  const createNewFolder = async () => {
+    const folderInput: FolderInput = { title: "Untitled Folder" };
+    try {
+      const savedFolder = await saveFolderToDb(folderInput, uuid);
+      setFolders((prev) => [...prev, savedFolder]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+
   const deleteNote = async (id: string) => {
     await deleteNoteFromDb(id);
     setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -214,7 +239,7 @@ export default function NotesPage({ params }: PageProps) {
     <div className="flex min-h-screen">
       <NotesSidebar
         notes={notes}
-        setNotes={setNotes}
+        createNewFolder={createNewFolder}
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDuplicateNote={duplicateNote}
@@ -222,6 +247,7 @@ export default function NotesPage({ params }: PageProps) {
         onRenameNote={renameNote}
         activeNoteId={activeNote?.id}
         loading={loadingNotes}
+        folders={folders}
       />
 
       <div className="flex-1 h-screen">

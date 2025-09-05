@@ -7,7 +7,7 @@ import { loadDemoNotes, saveDemoNotes } from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
-import {toast} from "sonner";
+import { toast } from "sonner";
 
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
@@ -128,7 +128,7 @@ export default function DemoNotesPage() {
     setTitle(newNote.title === "Untitled Note" ? "" : newNote.title);
     if (editorRef.current) editorRef.current.innerHTML = newNote.content;
     setIsDirty(false);
-  }
+  };
 
   const createNewNote = () => {
     if (isDirty && activeNote) {
@@ -172,7 +172,7 @@ export default function DemoNotesPage() {
       setTitle(updatedNote.title === "Untitled Note" ? "" : updatedNote.title);
     }
     toast.success("Note renamed successfully");
-  }
+  };
 
   const deleteNote = (id: string) => {
     setNotes(notes.filter((note) => note.id !== id));

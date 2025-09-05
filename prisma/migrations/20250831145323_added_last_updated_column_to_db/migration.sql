@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."Note" ADD COLUMN     "lastUpdated" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;

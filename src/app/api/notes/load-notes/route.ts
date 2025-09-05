@@ -18,11 +18,8 @@ export async function POST(req: NextRequest) {
     }
 
     const notesFromDb = await prisma.note.findMany({
-      where: { studentId: uuid },
-      orderBy: [
-        { order: "asc" },      // 👈 use ordering field first
-        { createdAt: "asc" },  // 👈 fallback
-      ],
+      where: { studentId: uuid, folderId: null },
+      orderBy: [{ title: "asc" }],
     });
 
     const notes = notesFromDb.map((note) => ({

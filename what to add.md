@@ -5,12 +5,10 @@ Remember me
 
 Respond to different screen sizes (mobile, tablet, desktop)
 Shared notes between users
-Add a rename option to note items
-Open in new tab option to note items
 A favourite option to note items
 A search bar for notes
 A last edited timestamp on note items
-Folder organisation for notes
+Move notes and folders into other folders
 
 A ... button that opens the context menu
 
