@@ -1,17 +1,20 @@
 "use client";
 
-import { Note } from "@/types";
+import {Folder, Note} from "@/types";
 import { useEffect, useRef, useState } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
-import { loadDemoNotes, saveDemoNotes } from "@/lib/note-storage";
+import {loadDemoFolders, loadDemoNotes, saveDemoFolders, saveDemoNotes} from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { toast } from "sonner";
 
+
+
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
-  const [notes, setNotes] = useState<Note[]>(() => loadDemoNotes());
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [activeNote, setActiveNote] = useState<Note | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [title, setTitle] = useState("");
@@ -20,6 +23,7 @@ export default function DemoNotesPage() {
 
   useEffect(() => {
     setNotes(loadDemoNotes());
+    setFolders(loadDemoFolders());
     setMounted(true);
   }, []);
 
@@ -159,6 +163,17 @@ export default function DemoNotesPage() {
     setIsDirty(false);
   };
 
+  const createNewFolder = () => {
+    const newFolder: Folder = {
+      id: uuidv4(),
+      title: "Untitled Note", // DB / storage fallback
+      studentId: "demo",
+      notes: [],
+      folders: [],
+    };
+    setFolders((prev) => [...prev, newFolder]);
+    saveDemoFolders([...folders, newFolder]);
+  }
   const renameNote = (note: Note, newTitle: string) => {
     const updatedNote: Note = {
       ...note,
@@ -187,7 +202,8 @@ export default function DemoNotesPage() {
     <div className="flex min-h-screen">
       <NotesSidebar
         onDuplicateNote={duplicateNote}
-        setNotes={setNotes}
+        folders={folders}
+        createNewFolder={createNewFolder}
         notes={notes}
         onRenameNote={renameNote}
         onSelectNote={selectNote}

@@ -1,7 +1,7 @@
 import {Folder, FolderInput, Note} from "@/types";
 
 const STORAGE_KEY = "notes";
-
+//region Database
 export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
   const response = await fetch("/api/notes/save-note", {
     method: "POST",
@@ -75,7 +75,8 @@ export async function loadFolders(uuid: string): Promise<Folder[]> {
   const data = await response.json();
   return data.folders as Folder[];
 }
-
+//endregion
+//region Demo (localStorage)
 export function saveDemoNotes(notes: Note[]): void {
   if (typeof window === "undefined") return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
@@ -104,3 +105,24 @@ export function formatDate(timestamp: number): string {
     day: "numeric",
   });
 }
+
+export function saveDemoFolders(folders: Folder[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem("folders", JSON.stringify(folders));
+}
+
+export function loadDemoFolders(): Folder[] {
+  if (typeof window === "undefined") return [];
+  const folders = localStorage.getItem("folders");
+
+  if (folders) {
+    try {
+      return JSON.parse(folders);
+    } catch (error) {
+      console.error("Failed to parse folders from localStorage", error);
+      return [];
+    }
+  }
+  return [];
+}
+//endregion

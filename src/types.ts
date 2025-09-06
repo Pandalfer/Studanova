@@ -20,7 +20,7 @@ export interface Note {
 export interface Folder {
   id: string;
   title: string;
-  studentId: string;
+  studentId?: string;
   notes: Note[];
   folders: Folder[];
   parentId?: string;
