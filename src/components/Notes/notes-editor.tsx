@@ -1,4 +1,4 @@
-import { Note } from "@/types";
+import { Note } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -68,7 +68,7 @@ export default function NotesEditor({
   }
 
   return (
-    <div className="w-190 mx-auto flex flex-col h-full pt-15">
+    <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
       <NotesToolbar editorRef={refToUse} setContent={setContent} />
       <Input
         value={title}
@@ -76,21 +76,20 @@ export default function NotesEditor({
         placeholder="Note Title"
         className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0 bg-none"
       />
-        <div className="relative w-full h-full flex-1 text-toolbar-white">
-          {isEmptyContent(content) && (
-            <div className="absolute top-1 left-1 pointer-events-none text-muted">
-              {placeholder}
-            </div>
-          )}
-          <div
-            ref={refToUse}
-            contentEditable
-            suppressContentEditableWarning
-            onInput={handleInput}
-            className="editor-content w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
-
-          />
-        </div>
+      <div className="relative w-full h-full flex-1 text-toolbar-white">
+        {isEmptyContent(content) && (
+          <div className="absolute top-1 left-1 pointer-events-none text-muted">
+            {placeholder}
+          </div>
+        )}
+        <div
+          ref={refToUse}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          className="editor-content w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import {Folder, Note} from "@/types";
+import {Folder, Note} from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import {loadDemoFolders, loadDemoNotes, saveDemoFolders, saveDemoNotes} from "@/lib/note-storage";
@@ -21,6 +21,38 @@ export default function DemoNotesPage() {
   const editorRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
+  function updateNote(updatedNote: Note) {
+    // Update root notes
+    setNotes((prev) =>
+      prev.map((n) => (n.id === updatedNote.id ? updatedNote : n))
+    );
+
+    // Update folder notes
+    setFolders((prevFolders) =>
+      prevFolders.map((folder) => ({
+        ...folder,
+        notes: folder.notes.map((n) =>
+          n.id === updatedNote.id ? updatedNote : n
+        ),
+      }))
+    );
+
+    // Persist ALL notes (root + folder notes)
+    const allNotes = [
+      ...notes.filter((n) => n.id !== updatedNote.id), // root notes except this one
+      updatedNote,
+      // add all folder notes:
+      ...folders.flatMap((f) =>
+        f.notes.filter((n) => n.id !== updatedNote.id)
+      ),
+    ];
+    saveDemoNotes(allNotes);
+
+    setActiveNote(updatedNote);
+    setIsDirty(false);
+  }
+
+
   useEffect(() => {
     setNotes(loadDemoNotes());
     setFolders(loadDemoFolders());
@@ -38,17 +70,19 @@ export default function DemoNotesPage() {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
     debounceTimer.current = setTimeout(() => {
-      setNotes((prevNotes) =>
-        prevNotes.map((note) =>
-          note.id === activeNote.id
-            ? {
-                ...note,
-                title: title.trim() === "" ? "Untitled Note" : title,
-                content: editorRef.current?.innerHTML ?? note.content,
-              }
-            : note,
-        ),
+      const updatedNote: Note = {
+        ...activeNote,
+        title: title.trim() === "" ? "Untitled Note" : title,
+        content: editorRef.current?.innerHTML ?? activeNote.content,
+      };
+      updateNote(updatedNote);
+
+      // persist all notes
+      saveDemoNotes(
+        [...notes.filter((n) => n.id !== updatedNote.id), updatedNote]
       );
+
+      setActiveNote(updatedNote);
       setIsDirty(false);
     }, 2000);
 
@@ -84,17 +118,12 @@ export default function DemoNotesPage() {
 
   const selectNote = (note: Note) => {
     if (isDirty && activeNote) {
-      setNotes((prevNotes) =>
-        prevNotes.map((n) =>
-          n.id === activeNote.id
-            ? {
-                ...n,
-                title: title.trim() === "" ? "Untitled Note" : title,
-                content: editorRef.current?.innerHTML ?? n.content,
-              }
-            : n,
-        ),
-      );
+      const updatedNote: Note = {
+        ...activeNote,
+        title: title.trim() === "" ? "Untitled Note" : title,
+        content: editorRef.current?.innerHTML ?? activeNote.content,
+      };
+      updateNote(updatedNote);
     }
 
     setActiveNote(note);
@@ -154,6 +183,7 @@ export default function DemoNotesPage() {
       title: "Untitled Note", // DB / storage fallback
       content: "",
       createdAt: Date.now(),
+      folderId: "556095c0-646e-4c96-81a2-ad312c874da2"
     };
 
     if (editorRef.current) editorRef.current.innerHTML = "";
@@ -166,7 +196,7 @@ export default function DemoNotesPage() {
   const createNewFolder = () => {
     const newFolder: Folder = {
       id: uuidv4(),
-      title: "Untitled Note", // DB / storage fallback
+      title: "Untitled Note",
       studentId: "demo",
       notes: [],
       folders: [],
@@ -174,6 +204,7 @@ export default function DemoNotesPage() {
     setFolders((prev) => [...prev, newFolder]);
     saveDemoFolders([...folders, newFolder]);
   }
+
   const renameNote = (note: Note, newTitle: string) => {
     const updatedNote: Note = {
       ...note,
@@ -190,7 +221,25 @@ export default function DemoNotesPage() {
   };
 
   const deleteNote = (id: string) => {
-    setNotes(notes.filter((note) => note.id !== id));
+    // Remove from root notes
+    setNotes((prev) => prev.filter((note) => note.id !== id));
+
+    // Remove from folder notes
+    setFolders((prevFolders) =>
+      prevFolders.map((folder) => ({
+        ...folder,
+        notes: folder.notes.filter((note) => note.id !== id),
+      }))
+    );
+
+    // Persist all notes
+    const allNotes = [
+      ...notes.filter((n) => n.id !== id),
+      ...folders.flatMap((f) => f.notes.filter((n) => n.id !== id)),
+    ];
+    saveDemoNotes(allNotes);
+
+    // Clear active note if it was deleted
     if (activeNote?.id === id) {
       setActiveNote(null);
       setTitle("");
@@ -202,9 +251,9 @@ export default function DemoNotesPage() {
     <div className="flex min-h-screen">
       <NotesSidebar
         onDuplicateNote={duplicateNote}
-        folders={folders}
+        folders={folders.filter(f => !f.parentId)}
         createNewFolder={createNewFolder}
-        notes={notes}
+        notes={notes.filter(n => !n.folderId)}
         onRenameNote={renameNote}
         onSelectNote={selectNote}
         createNewNote={createNewNote}

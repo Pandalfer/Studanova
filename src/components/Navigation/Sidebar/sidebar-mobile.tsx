@@ -1,6 +1,6 @@
 "use client";
 
-import { SidebarItems } from "@/types";
+import { SidebarItems } from "@/lib/types";
 import { Sheet, SheetClose, SheetHeader } from "@/components/ui/sheet";
 import { SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";

@@ -10,7 +10,6 @@
     "format": "prettier --write .",
     "migrate": "npx prisma migrate dev && npx prisma generate",
     "seed": "tsx prisma/seed.ts",
-    "query": "tsx src/prisma.ts",
     "reset": "npx prisma migrate reset --skip-seed"
   },
   "dependencies": {

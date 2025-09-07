@@ -1,4 +1,4 @@
-import { Note } from "@/types";
+import { Note } from "@/lib/types";
 import {
   ContextMenu,
   ContextMenuContent,

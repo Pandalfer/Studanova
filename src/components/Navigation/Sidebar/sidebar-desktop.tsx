@@ -2,7 +2,7 @@
 
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
 import { LogOut, MoreHorizontal, Settings, Library, X } from "lucide-react";
-import { SidebarItems } from "@/types";
+import { SidebarItems } from "@/lib/types";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import {

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import { toast } from "sonner";
 import {loadFolders, loadNotes} from "@/lib/note-storage";
-import {Folder, Note} from "@/types";
+import {Folder, Note} from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;

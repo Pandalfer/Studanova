@@ -1,6 +1,6 @@
 "use client";
 
-import {Folder, FolderInput, Note} from "@/types";
+import {Folder, FolderInput, Note} from "@/lib/types";
 import { useEffect, useState, useRef, use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import {loadNotes, saveNoteToDb, deleteNoteFromDb, loadFolders, saveFolderToDb} from "@/lib/note-storage";

@@ -1,4 +1,4 @@
-import { Folder, Note } from "@/types";
+import { Folder, Note } from "@/lib/types";
 import React from "react";
 import NoteItem from "@/components/Notes/Sidebar/note-item";
 import {

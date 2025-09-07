@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { FolderPen, SquarePen } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Folder, Note } from "@/types";
+import { Folder, Note } from "@/lib/types";
 import NoteItem from "./note-item";
 import FolderItem from "@/components/Notes/Sidebar/folder-item";
 import React from "react";
@@ -53,18 +53,26 @@ export function NotesSidebar({
                                createNewFolder,
                              }: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
-
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
   });
 
-  React.useEffect(() => {
-    if (activeNoteId) {
-      const path = findFolderPath(folders, activeNoteId);
-      setOpenFolders(path);
-    }
-  }, [activeNoteId, folders]);
+  const firstRender = React.useRef(true);
 
+  React.useEffect(() => {
+    if (!activeNoteId) return;
+
+    const path = findFolderPath(folders, activeNoteId);
+
+    if (firstRender.current) {
+      setOpenFolders(path);
+      firstRender.current = false;
+    } else {
+      if (path.join("/") !== openFolders.join("/")) {
+        setOpenFolders(path);
+      }
+    }
+  }, [activeNoteId]);
   return (
     <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
       {/* Toolbar */}

@@ -1,4 +1,4 @@
-import {Folder, FolderInput, Note} from "@/types";
+import {Folder, FolderInput, Note} from "@/lib/types";
 
 const STORAGE_KEY = "notes";
 //region Database
@@ -88,7 +88,7 @@ export function loadDemoNotes(): Note[] {
 
   if (notes) {
     try {
-      return JSON.parse(notes);
+      return JSON.parse(notes).sort((a: Note,b: Note) => a.title.localeCompare(b.title));
     } catch (error) {
       console.error("Failed to parse notes from localStorage", error);
       return [];
@@ -117,7 +117,12 @@ export function loadDemoFolders(): Folder[] {
 
   if (folders) {
     try {
-      return JSON.parse(folders);
+      const parsedFolders = JSON.parse(folders).sort((a: Folder,b: Folder) => a.title.localeCompare(b.title));
+      for (const folder of parsedFolders) {
+        folder.folders = parsedFolders.filter((f: Folder) => f.parentId === folder.id).sort((a: Folder,b: Folder) => a.title.localeCompare(b.title));
+        folder.notes = loadDemoNotes().filter((n: Note) => n.folderId === folder.id).sort((a: Note,b: Note) => a.title.localeCompare(b.title));
+      }
+      return parsedFolders;
     } catch (error) {
       console.error("Failed to parse folders from localStorage", error);
       return [];
