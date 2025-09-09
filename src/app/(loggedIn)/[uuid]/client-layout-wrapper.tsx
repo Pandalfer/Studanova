@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
-  uuid: string;
+  uuid?: string;
 }
 
 export function ClientLayoutWrapper({

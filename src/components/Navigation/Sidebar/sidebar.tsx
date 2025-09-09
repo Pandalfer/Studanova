@@ -9,7 +9,7 @@ import { SidebarMobile } from "@/components/Navigation/Sidebar/sidebar-mobile";
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
 
 interface SidebarProps {
-  uuid: string;
+  uuid?: string;
   isCollapsed: boolean;
   setIsCollapsed: (v: boolean) => void;
   isDemo?: boolean; // new optional prop
@@ -78,7 +78,6 @@ export function Sidebar({
   if (isDemo === false && !username)
     return <div className="p-3">Loading user info...</div>;
 
-  // In demo mode we already have username = "Guest", so render normally
   if (isDesktop) {
     return (
       <SidebarDesktop
