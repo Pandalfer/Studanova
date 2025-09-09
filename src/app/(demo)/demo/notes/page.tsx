@@ -1,15 +1,18 @@
 "use client";
 
-import {Folder, Note} from "@/lib/types";
+import { Folder, Note } from "@/lib/types";
 import { useEffect, useRef, useState } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
-import {loadDemoFolders, loadDemoNotes, saveDemoFolders, saveDemoNotes} from "@/lib/note-storage";
+import {
+  loadDemoFolders,
+  loadDemoNotes,
+  saveDemoFolders,
+  saveDemoNotes,
+} from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { toast } from "sonner";
-
-
 
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
@@ -24,7 +27,7 @@ export default function DemoNotesPage() {
   function updateNote(updatedNote: Note) {
     // Update root notes
     setNotes((prev) =>
-      prev.map((n) => (n.id === updatedNote.id ? updatedNote : n))
+      prev.map((n) => (n.id === updatedNote.id ? updatedNote : n)),
     );
 
     // Update folder notes
@@ -32,9 +35,9 @@ export default function DemoNotesPage() {
       prevFolders.map((folder) => ({
         ...folder,
         notes: folder.notes.map((n) =>
-          n.id === updatedNote.id ? updatedNote : n
+          n.id === updatedNote.id ? updatedNote : n,
         ),
-      }))
+      })),
     );
 
     // Persist ALL notes (root + folder notes)
@@ -42,16 +45,13 @@ export default function DemoNotesPage() {
       ...notes.filter((n) => n.id !== updatedNote.id), // root notes except this one
       updatedNote,
       // add all folder notes:
-      ...folders.flatMap((f) =>
-        f.notes.filter((n) => n.id !== updatedNote.id)
-      ),
+      ...folders.flatMap((f) => f.notes.filter((n) => n.id !== updatedNote.id)),
     ];
     saveDemoNotes(allNotes);
 
     setActiveNote(updatedNote);
     setIsDirty(false);
   }
-
 
   useEffect(() => {
     setNotes(loadDemoNotes());
@@ -78,9 +78,10 @@ export default function DemoNotesPage() {
       updateNote(updatedNote);
 
       // persist all notes
-      saveDemoNotes(
-        [...notes.filter((n) => n.id !== updatedNote.id), updatedNote]
-      );
+      saveDemoNotes([
+        ...notes.filter((n) => n.id !== updatedNote.id),
+        updatedNote,
+      ]);
 
       setActiveNote(updatedNote);
       setIsDirty(false);
@@ -183,7 +184,6 @@ export default function DemoNotesPage() {
       title: "Untitled Note", // DB / storage fallback
       content: "",
       createdAt: Date.now(),
-      folderId: "556095c0-646e-4c96-81a2-ad312c874da2"
     };
 
     if (editorRef.current) editorRef.current.innerHTML = "";
@@ -203,7 +203,7 @@ export default function DemoNotesPage() {
     };
     setFolders((prev) => [...prev, newFolder]);
     saveDemoFolders([...folders, newFolder]);
-  }
+  };
 
   const renameNote = (note: Note, newTitle: string) => {
     const updatedNote: Note = {
@@ -229,7 +229,7 @@ export default function DemoNotesPage() {
       prevFolders.map((folder) => ({
         ...folder,
         notes: folder.notes.filter((note) => note.id !== id),
-      }))
+      })),
     );
 
     // Persist all notes
@@ -251,9 +251,9 @@ export default function DemoNotesPage() {
     <div className="flex min-h-screen">
       <NotesSidebar
         onDuplicateNote={duplicateNote}
-        folders={folders.filter(f => !f.parentId)}
+        folders={folders.filter((f) => !f.parentId)}
         createNewFolder={createNewFolder}
-        notes={notes.filter(n => !n.folderId)}
+        notes={notes.filter((n) => !n.folderId)}
         onRenameNote={renameNote}
         onSelectNote={selectNote}
         createNewNote={createNewNote}

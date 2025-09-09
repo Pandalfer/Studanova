@@ -7,7 +7,8 @@ import { Folder, Note } from "@/lib/types";
 import NoteItem from "./note-item";
 import FolderItem from "@/components/Notes/Sidebar/folder-item";
 import React from "react";
-import {useMediaQuery} from "usehooks-ts";
+import { useMediaQuery } from "usehooks-ts";
+import { DndContext } from "@dnd-kit/core";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -41,17 +42,17 @@ function findFolderPath(folders: Folder[], noteId: string): string[] {
 }
 
 export function NotesSidebar({
-                               notes,
-                               folders,
-                               onSelectNote,
-                               createNewNote,
-                               onDeleteNote,
-                               onDuplicateNote,
-                               onRenameNote,
-                               activeNoteId,
-                               loading = false,
-                               createNewFolder,
-                             }: NotesSidebarProps) {
+  notes,
+  folders,
+  onSelectNote,
+  createNewNote,
+  onDeleteNote,
+  onDuplicateNote,
+  onRenameNote,
+  activeNoteId,
+  loading = false,
+  createNewFolder,
+}: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
@@ -77,11 +78,19 @@ export function NotesSidebar({
     <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
       {/* Toolbar */}
       <div className="justify-center flex p-5">
-        <Button onClick={createNewNote} className="aspect-square" variant="ghost">
-          <SquarePen/>
+        <Button
+          onClick={createNewNote}
+          className="aspect-square"
+          variant="ghost"
+        >
+          <SquarePen />
         </Button>
-        <Button onClick={createNewFolder} className="aspect-square" variant="ghost">
-          <FolderPen/>
+        <Button
+          onClick={createNewFolder}
+          className="aspect-square"
+          variant="ghost"
+        >
+          <FolderPen />
         </Button>
       </div>
 
@@ -89,12 +98,12 @@ export function NotesSidebar({
       {loading ? (
         <ScrollArea className="h-full pr-5 pl-5">
           <div className="flex flex-col gap-2 w-full">
-            {Array.from({length: 8}).map((_, i) => (
+            {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
                 className="w-full p-3 rounded-md bg-popover animate-pulse flex items-center"
               >
-                <Skeleton className="h-6 w-full rounded-md bg-popover"/>
+                <Skeleton className="h-6 w-full rounded-md bg-popover" />
               </div>
             ))}
           </div>
@@ -110,45 +119,46 @@ export function NotesSidebar({
         // Folders + Notes
         <ScrollArea
           className={`pl-5 ${isDesktop ? "pr-5" : ""}`}
-          style={{height: "calc(100% - 5rem)"}}
+          style={{ height: "calc(100% - 5rem)" }}
         >
-          <div className="flex flex-col gap-2 w-full min-w-0">
-            {folders.map((folder) => (
-              <div key={folder.id} className="rounded-md transition-colors min-w-0">
-                <FolderItem
-                  folder={folder}
-                  openFolders={openFolders}
-                  setOpenFolders={setOpenFolders}
-                  onSelectNote={onSelectNote}
-                  onRenameNote={onRenameNote}
-                  onDeleteNote={onDeleteNote}
-                  onDuplicateNote={onDuplicateNote}
-                  activeNoteId={activeNoteId}
-                />
-              </div>
-            ))}
-          </div>
+          <DndContext>
+            <div className="flex flex-col gap-2 w-full min-w-0">
+              {folders.map((folder) => (
+                <div
+                  key={folder.id}
+                  className="rounded-md transition-colors min-w-0"
+                >
+                  <FolderItem
+                    folder={folder}
+                    openFolders={openFolders}
+                    setOpenFolders={setOpenFolders}
+                    onSelectNote={onSelectNote}
+                    onRenameNote={onRenameNote}
+                    onDeleteNote={onDeleteNote}
+                    onDuplicateNote={onDuplicateNote}
+                    activeNoteId={activeNoteId}
+                  />
+                </div>
+              ))}
+            </div>
 
-          <div className="flex flex-col gap-2 w-full mt-2">
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                className="rounded-md transition-colors"
-              >
-                <NoteItem
-                  note={note}
-                  onSelectNote={onSelectNote}
-                  onRenameNote={onRenameNote}
-                  onDeleteNote={onDeleteNote}
-                  onDuplicateNote={onDuplicateNote}
-                  activeNoteId={activeNoteId}
-                />
-              </div>
-            ))}
-          </div>
+            <div className="flex flex-col gap-2 w-full mt-2">
+              {notes.map((note) => (
+                <div key={note.id} className="rounded-md transition-colors">
+                  <NoteItem
+                    note={note}
+                    onSelectNote={onSelectNote}
+                    onRenameNote={onRenameNote}
+                    onDeleteNote={onDeleteNote}
+                    onDuplicateNote={onDuplicateNote}
+                    activeNoteId={activeNoteId}
+                  />
+                </div>
+              ))}
+            </div>
+          </DndContext>
         </ScrollArea>
       )}
     </aside>
-
   );
 }

@@ -46,7 +46,8 @@ export default function NotesEditor({
     onDirtyChange(dirty);
   }, [title, content, note.title, note.content, onDirtyChange]);
 
-  const isEmptyContent = (text: string) => text.replace("<br>", "").length === 0;
+  const isEmptyContent = (text: string) =>
+    text.replace("<br>", "").length === 0;
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     setContent(e.currentTarget.innerHTML ?? "");

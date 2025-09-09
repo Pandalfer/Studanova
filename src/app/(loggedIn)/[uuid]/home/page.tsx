@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import React from "react";
 import { toast } from "sonner";
-import {loadFolders, loadNotes} from "@/lib/note-storage";
-import {Folder, Note} from "@/lib/types";
+import { loadFolders, loadNotes } from "@/lib/note-storage";
+import { Folder, Note } from "@/lib/types";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -48,11 +48,7 @@ export default function LoggedInHome({ params }: PageProps) {
         const loadedNotes = await loadNotes(uuid);
         const loadedFolders = await loadFolders(uuid);
 
-
-        const allNotes = [
-          ...loadedNotes,
-          ...collectAllNotes(loadedFolders)
-        ];
+        const allNotes = [...loadedNotes, ...collectAllNotes(loadedFolders)];
 
         setNumberOfNotes(allNotes.length);
       } catch {

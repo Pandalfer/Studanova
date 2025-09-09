@@ -1,4 +1,4 @@
-import {Folder, FolderInput, Note} from "@/lib/types";
+import { Folder, FolderInput, Note } from "@/lib/types";
 
 const STORAGE_KEY = "notes";
 //region Database
@@ -15,7 +15,10 @@ export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
   return data.note as Note;
 }
 
-export async function saveFolderToDb(folder: FolderInput, uuid: string): Promise<Folder> {
+export async function saveFolderToDb(
+  folder: FolderInput,
+  uuid: string,
+): Promise<Folder> {
   const response = await fetch("/api/folders/save-folder", {
     method: "POST",
     headers: {
@@ -88,7 +91,9 @@ export function loadDemoNotes(): Note[] {
 
   if (notes) {
     try {
-      return JSON.parse(notes).sort((a: Note,b: Note) => a.title.localeCompare(b.title));
+      return JSON.parse(notes).sort((a: Note, b: Note) =>
+        a.title.localeCompare(b.title),
+      );
     } catch (error) {
       console.error("Failed to parse notes from localStorage", error);
       return [];
@@ -117,10 +122,16 @@ export function loadDemoFolders(): Folder[] {
 
   if (folders) {
     try {
-      const parsedFolders = JSON.parse(folders).sort((a: Folder,b: Folder) => a.title.localeCompare(b.title));
+      const parsedFolders = JSON.parse(folders).sort((a: Folder, b: Folder) =>
+        a.title.localeCompare(b.title),
+      );
       for (const folder of parsedFolders) {
-        folder.folders = parsedFolders.filter((f: Folder) => f.parentId === folder.id).sort((a: Folder,b: Folder) => a.title.localeCompare(b.title));
-        folder.notes = loadDemoNotes().filter((n: Note) => n.folderId === folder.id).sort((a: Note,b: Note) => a.title.localeCompare(b.title));
+        folder.folders = parsedFolders
+          .filter((f: Folder) => f.parentId === folder.id)
+          .sort((a: Folder, b: Folder) => a.title.localeCompare(b.title));
+        folder.notes = loadDemoNotes()
+          .filter((n: Note) => n.folderId === folder.id)
+          .sort((a: Note, b: Note) => a.title.localeCompare(b.title));
       }
       return parsedFolders;
     } catch (error) {

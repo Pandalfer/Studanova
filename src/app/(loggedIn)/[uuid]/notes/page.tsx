@@ -1,9 +1,15 @@
 "use client";
 
-import {Folder, FolderInput, Note} from "@/lib/types";
+import { Folder, FolderInput, Note } from "@/lib/types";
 import { useEffect, useState, useRef, use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
-import {loadNotes, saveNoteToDb, deleteNoteFromDb, loadFolders, saveFolderToDb} from "@/lib/note-storage";
+import {
+  loadNotes,
+  saveNoteToDb,
+  deleteNoteFromDb,
+  loadFolders,
+  saveFolderToDb,
+} from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
@@ -30,12 +36,12 @@ export default function NotesPage({ params }: PageProps) {
 
   useEffect(() => {
     (async () => {
-      setLoadingNotes(true)
+      setLoadingNotes(true);
       const loadedNotes = await loadNotes(uuid);
       const loadedFolders = await loadFolders(uuid);
       setNotes(loadedNotes);
       setFolders(loadedFolders);
-      setLoadingNotes(false)
+      setLoadingNotes(false);
     })();
   }, [uuid]);
 
@@ -88,7 +94,6 @@ export default function NotesPage({ params }: PageProps) {
     // Redirect immediately — no local state needed
     router.push(`/${uuid}/notes/${newNote.id}`);
   };
-
 
   const createNewFolder = async () => {
     const folderInput: FolderInput = { title: "Untitled Folder" };

@@ -100,7 +100,9 @@ export function SidebarDesktop({
                   icon={link.icon}
                   collapsed={isCollapsed}
                   className="w-full"
-                  variant={pathname === link.href ? "secondary" : "ghost"}
+                  variant={
+                    pathname.startsWith(link.href) ? "secondary" : "ghost"
+                  }
                 >
                   {link.label}
                 </SidebarButton>

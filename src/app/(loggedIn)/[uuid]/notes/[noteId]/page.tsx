@@ -1,8 +1,14 @@
 "use client";
 
-import {Note, Folder, FolderInput} from "@/lib/types";
+import { Note, Folder, FolderInput } from "@/lib/types";
 import { useEffect, useState, useRef, use } from "react";
-import {loadNotes, saveNoteToDb, deleteNoteFromDb, saveFolderToDb, loadFolders} from "@/lib/note-storage";
+import {
+  loadNotes,
+  saveNoteToDb,
+  deleteNoteFromDb,
+  saveFolderToDb,
+  loadFolders,
+} from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { nanoid } from "nanoid";
@@ -23,7 +29,6 @@ function collectAllNotes(folders: Folder[]): Note[] {
   }
   return result;
 }
-
 
 export default function NotesPage({ params }: PageProps) {
   const router = useRouter();
@@ -99,11 +104,7 @@ export default function NotesPage({ params }: PageProps) {
       const loadedNotes = await loadNotes(uuid);
       const loadedFolders = await loadFolders(uuid);
 
-
-      const allNotes = [
-        ...loadedNotes,
-        ...collectAllNotes(loadedFolders)
-      ];
+      const allNotes = [...loadedNotes, ...collectAllNotes(loadedFolders)];
 
       const match = allNotes.find((n) => n.id === noteIdFromPath);
 
@@ -217,8 +218,6 @@ export default function NotesPage({ params }: PageProps) {
       console.error(err);
     }
   };
-
-
 
   const deleteNote = async (id: string) => {
     await deleteNoteFromDb(id);

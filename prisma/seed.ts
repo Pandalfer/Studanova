@@ -63,7 +63,7 @@ async function createFolderForStudent(studentId: string, folderTitle: string) {
             studentId: studentId,
           },
         ],
-      }
+      },
     },
   });
   console.log("Created folder:", folder);
@@ -78,7 +78,10 @@ async function createFolderForStudent(studentId: string, folderTitle: string) {
 //     await client.$disconnect();
 //   });
 
-createFolderForStudent("40a87edb-8ca8-4e3d-ac93-5857f8ef4939", "Study Materials")
+createFolderForStudent(
+  "40a87edb-8ca8-4e3d-ac93-5857f8ef4939",
+  "Study Materials",
+)
   .catch((e) => {
     console.error("Error creating folder:", e);
   })
