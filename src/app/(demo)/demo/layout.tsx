@@ -14,16 +14,13 @@ export const metadata: Metadata = {
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: Promise<{ uuid: string }>;
 }
 
-export default async function RootLayout({ children, params }: LayoutProps) {
-  const { uuid } = await params;
-
+export default async function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="en" className={roboto.className}>
       <body className="dark overflow-y-hidden">
-        <ClientLayoutWrapper uuid={uuid}>{children}</ClientLayoutWrapper>
+        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
         <Toaster richColors position="top-center" />
       </body>
     </html>

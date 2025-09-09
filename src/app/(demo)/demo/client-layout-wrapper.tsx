@@ -7,12 +7,10 @@ import { usePathname } from "next/navigation";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
-  uuid: string;
 }
 
 export function ClientLayoutWrapper({
   children,
-  uuid,
 }: ClientLayoutWrapperProps) {
   const pathname = usePathname();
 
@@ -20,7 +18,6 @@ export function ClientLayoutWrapper({
   return (
     <>
       <Sidebar
-        uuid={uuid}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
         isDemo
