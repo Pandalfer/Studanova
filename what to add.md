@@ -15,6 +15,11 @@ A ... button that opens the context menu
 MAKE LIGHT MODE USABLE
 
 add a 404 page
+Make the notes folder saving in demo page
+Movable folders
+Root folder support
+Fix the horizontal scrollbar in notes sidebar
+
 
 # 🧭 Suggested Pages & Features
 

@@ -4,7 +4,8 @@ import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, title, content, createdAt, studentId } = await req.json();
+    const { id, title, content, createdAt, studentId, folderId } =
+      await req.json();
 
     if (!studentId) {
       return NextResponse.json({ error: "Missing studentId" }, { status: 400 });
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
         // update if it exists
         note = await prisma.note.update({
           where: { id },
-          data: { title, content },
+          data: { title, content, folderId },
         });
       } else {
         // otherwise, create a fresh one

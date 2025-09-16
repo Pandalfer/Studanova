@@ -81,7 +81,7 @@ export async function loadFolders(uuid: string): Promise<Folder[]> {
 //endregion
 //region Demo (localStorage)
 export function saveDemoNotes(notes: Note[]): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined") { console.log("Test"); return;}
   localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
 }
 

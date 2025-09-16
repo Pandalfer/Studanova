@@ -27,8 +27,37 @@ function collectAllNotes(folders: Folder[]): Note[] {
       result.push(...collectAllNotes(folder.folders));
     }
   }
-  return result;
+  return result.sort((a, b) => a.title.localeCompare(b.title));
 }
+
+function sortFoldersRecursively(folders: Folder[]): Folder[] {
+  return folders.map((folder) => ({
+    ...folder,
+    notes: (folder.notes ?? []).slice().sort((a, b) =>
+      a.title.localeCompare(b.title)
+    ),
+    folders: sortFoldersRecursively(folder.folders ?? []),
+  }));
+}
+
+function deleteNoteFromFolders(folders: Folder[], noteId: string): Folder[] {
+  return folders.map((folder) => ({
+    ...folder,
+    notes: (folder.notes ?? []).filter((n) => n.id !== noteId),
+    folders: deleteNoteFromFolders(folder.folders ?? [], noteId),
+  }));
+}
+
+function renameNoteInFolders(folders: Folder[], updatedNote: Note): Folder[] {
+  return folders.map((folder) => ({
+    ...folder,
+    notes: (folder.notes ?? [])
+      .map((n) => (n.id === updatedNote.id ? updatedNote : n))
+      .sort((a, b) => a.title.localeCompare(b.title)),
+    folders: renameNoteInFolders(folder.folders ?? [], updatedNote),
+  }));
+}
+
 
 export default function NotesPage({ params }: PageProps) {
   const router = useRouter();
@@ -69,9 +98,15 @@ export default function NotesPage({ params }: PageProps) {
       try {
         const savedNote = await saveNoteToDb(updatedNote, uuid);
         if (savedNote) {
-          setNotes((prev) =>
-            prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
-          );
+          if (!savedNote.folderId) {
+            // Root-level note
+            setNotes((prev) =>
+              prev.map((n) => (n.id === savedNote.id ? savedNote : n))
+            );
+          } else {
+            setFolders((prev) => renameNoteInFolders(prev, savedNote));
+          }
+
           setActiveNote(savedNote);
           setIsDirty(false);
         }
@@ -90,12 +125,12 @@ export default function NotesPage({ params }: PageProps) {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
         e.preventDefault();
-        e.returnValue = "";
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty]);
+
 
   // Load notes
   useEffect(() => {
@@ -114,7 +149,7 @@ export default function NotesPage({ params }: PageProps) {
       }
 
       setNotes(loadedNotes);
-      setFolders(loadedFolders);
+      setFolders(sortFoldersRecursively(loadedFolders));
       setActiveNote(match);
 
       if (match.title === "Untitled Note") {
@@ -127,6 +162,61 @@ export default function NotesPage({ params }: PageProps) {
       setLoadingNotes(false);
     })();
   }, [uuid, noteIdFromPath]);
+
+  const moveNoteToFolder = (noteId: string, folderId?: string) => {
+    setNotes((prevNotes) => {
+      // find the note in root
+      let note = prevNotes.find((n) => n.id === noteId);
+
+      // if not in root, look inside folders
+      if (!note) {
+        const all = collectAllNotes(folders);
+        note = all.find((n) => n.id === noteId);
+      }
+
+      if (!note) return prevNotes;
+
+      const updatedNote: Note = { ...note, folderId };
+
+      // save to DB
+      saveNoteToDb(updatedNote, uuid).catch(console.error);
+
+      // if moved to a folder, remove it from root notes
+      const nextNotes = folderId
+        ? prevNotes.filter((n) => n.id !== noteId)
+        : prevNotes.map((n) => (n.id === noteId ? updatedNote : n));
+
+      // update folders tree
+      setFolders((prevFolders) => {
+        const updateFolders = (folders: Folder[]): Folder[] =>
+          folders.map((folder) => {
+            const cleanedNotes = (folder.notes ?? []).filter(
+              (n) => n.id !== noteId,
+            );
+
+            if (folder.id === folderId) {
+              return {
+                ...folder,
+                notes: [...cleanedNotes, updatedNote].sort((a, b) => a.title.localeCompare(b.title)),
+                folders: updateFolders(folder.folders ?? []),
+              };
+            }
+
+            return {
+              ...folder,
+              notes: cleanedNotes.sort((a, b) => a.title.localeCompare(b.title)),
+              folders: updateFolders(folder.folders ?? []),
+            };
+          });
+
+        return updateFolders(prevFolders);
+      });
+
+      return nextNotes.sort((a, b) => a.title.localeCompare(b.title));
+    });
+  };
+
+
 
   const selectNote = async (note: Note) => {
     if (note.id === activeNote?.id) return;
@@ -164,9 +254,16 @@ export default function NotesPage({ params }: PageProps) {
     try {
       const savedNote = await saveNoteToDb(updatedNote, uuid);
       if (savedNote) {
-        setNotes((prev) =>
-          prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
-        );
+        if(!savedNote.folderId) {
+          setNotes((prev) =>
+            prev
+              .map((n) => (n.id === savedNote.id ? savedNote : n))
+              .sort((a, b) => a.title.localeCompare(b.title))
+          );
+        } else {
+          setFolders((prev) => renameNoteInFolders(prev, savedNote));
+        }
+
         if (activeNote?.id === savedNote.id) {
           setActiveNote(savedNote);
           setTitle(savedNote.title);
@@ -186,7 +283,9 @@ export default function NotesPage({ params }: PageProps) {
       createdAt: Date.now(),
     };
 
-    setNotes((prev) => [...prev, newNote]);
+    setNotes((prev) =>
+      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title))
+    );
     setActiveNote(newNote);
     setTitle(newNote.title);
     if (editorRef.current) editorRef.current.innerHTML = "";
@@ -205,7 +304,10 @@ export default function NotesPage({ params }: PageProps) {
       createdAt: Date.now(),
     };
 
-    setNotes((prev) => [...prev, newNote]);
+    setNotes((prev) =>
+      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title))
+    );
+    setFolders((prev) => sortFoldersRecursively(prev));
     saveNoteToDb(newNote, uuid).catch(console.error);
   };
 
@@ -213,23 +315,33 @@ export default function NotesPage({ params }: PageProps) {
     const folderInput: FolderInput = { title: "Untitled Folder" };
     try {
       const savedFolder = await saveFolderToDb(folderInput, uuid);
-      setFolders((prev) => [...prev, savedFolder]);
+      setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
     } catch (err) {
       console.error(err);
     }
   };
 
   const deleteNote = async (id: string) => {
-    await deleteNoteFromDb(id);
-    setNotes((prev) => prev.filter((n) => n.id !== id));
+    try {
+      await deleteNoteFromDb(id);
+    } catch (err) {
+      console.error("Failed to delete note from DB:", err);
+    }
 
     if (activeNote?.id === id) {
       setActiveNote(null);
       setTitle("");
       if (editorRef.current) editorRef.current.innerHTML = "";
-
       router.push(`/${uuid}/notes`);
     }
+
+    const noteToDelete = notes.find((n) => n.id === id);
+    if(noteToDelete) {
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+      return;
+    }
+
+    setFolders((prev) => deleteNoteFromFolders(prev, id));
   };
 
   if (!mounted) return null;
@@ -237,6 +349,7 @@ export default function NotesPage({ params }: PageProps) {
   return (
     <div className="flex min-h-screen">
       <NotesSidebar
+        moveNoteToFolder={moveNoteToFolder}
         notes={notes}
         createNewFolder={createNewFolder}
         onSelectNote={selectNote}

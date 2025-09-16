@@ -9,9 +9,7 @@ interface ClientLayoutWrapperProps {
   children: React.ReactNode;
 }
 
-export function ClientLayoutWrapper({
-  children,
-}: ClientLayoutWrapperProps) {
+export function ClientLayoutWrapper({ children }: ClientLayoutWrapperProps) {
   const pathname = usePathname();
 
   const [isCollapsed, setIsCollapsed] = useState(true);

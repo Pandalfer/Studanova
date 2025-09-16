@@ -20,8 +20,6 @@
     "GRAD" 0;
 }
 
-@custom-variant dark (&:is(.dark *));
-
 @layer base {
   html {
     font-family: "Inter", sans-serif;

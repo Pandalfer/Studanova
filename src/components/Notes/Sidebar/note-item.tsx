@@ -26,7 +26,7 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/note-storage";
 import { Input } from "@/components/ui/input";
-
+import { useDraggable } from "@dnd-kit/core";
 export default function NoteItem({
   note,
   activeNoteId,
@@ -70,9 +70,17 @@ export default function NoteItem({
       onRenameNote?.(note, trimmed);
     }
   };
+  const { attributes, listeners, setNodeRef } = useDraggable({
+    id: note.id,
+  });
 
   return (
-    <>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={{}}
+    >
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
@@ -148,8 +156,8 @@ export default function NoteItem({
           {!isDemo && (
             <>
               <ContextMenuItem
-                onClick={() => {
-                  copyUrlToClipboard(uuid, note.id);
+                onClick={async () => {
+                  await copyUrlToClipboard(uuid, note.id);
                   toast.success("Url copied to clipboard!");
                 }}
               >
@@ -192,7 +200,7 @@ export default function NoteItem({
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               </AlertDialogHeader>
-              <p>
+              <p  className={"text-muted-foreground"}>
                 This action cannot be undone. This will permanently delete your
                 note and remove your data from our servers.
               </p>
@@ -224,6 +232,6 @@ export default function NoteItem({
           </h3>
         </ContextMenuContent>
       </ContextMenu>
-    </>
+    </div>
   );
 }
