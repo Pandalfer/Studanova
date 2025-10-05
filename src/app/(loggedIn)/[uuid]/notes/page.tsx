@@ -14,47 +14,22 @@ import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  collectAllNotes,
+  deleteNoteFromFolders,
+  renameNoteInFolders,
+} from "@/lib/notes/note-actions";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
 
-function collectAllNotes(folders: Folder[]): Note[] {
-  const result: Note[] = [];
-  for (const folder of folders) {
-    result.push(...folder.notes);
-    if (folder.folders && folder.folders.length > 0) {
-      result.push(...collectAllNotes(folder.folders));
-    }
-  }
-  return result;
-}
-
-function deleteNoteFromFolders(folders: Folder[], noteId: string): Folder[] {
-  return folders.map((folder) => ({
-    ...folder,
-    notes: (folder.notes ?? []).filter((n) => n.id !== noteId),
-    folders: deleteNoteFromFolders(folder.folders ?? [], noteId),
-  }));
-}
-
-function renameNoteInFolders(folders: Folder[], updatedNote: Note): Folder[] {
-  return folders.map((folder) => ({
-    ...folder,
-    notes: (folder.notes ?? [])
-      .map((n) => (n.id === updatedNote.id ? updatedNote : n))
-      .sort((a, b) => a.title.localeCompare(b.title)),
-    folders: renameNoteInFolders(folder.folders ?? [], updatedNote),
-  }));
-}
-
-
 function sortFoldersRecursively(folders: Folder[]): Folder[] {
   return folders.map((folder) => ({
     ...folder,
-    notes: (folder.notes ?? []).slice().sort((a, b) =>
-      a.title.localeCompare(b.title)
-    ),
+    notes: (folder.notes ?? [])
+      .slice()
+      .sort((a, b) => a.title.localeCompare(b.title)),
     folders: sortFoldersRecursively(folder.folders ?? []),
   }));
 }
@@ -91,7 +66,7 @@ export default function NotesPage({ params }: PageProps) {
     };
 
     setNotes((prev) =>
-      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title))
+      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
     );
     setFolders((prev) => sortFoldersRecursively(prev));
     saveNoteToDb(newNote, uuid).catch(console.error);
@@ -109,11 +84,11 @@ export default function NotesPage({ params }: PageProps) {
     try {
       const savedNote = await saveNoteToDb(updatedNote, uuid);
       if (savedNote) {
-        if(!savedNote.folderId) {
+        if (!savedNote.folderId) {
           setNotes((prev) =>
             prev
               .map((n) => (n.id === savedNote.id ? savedNote : n))
-              .sort((a, b) => a.title.localeCompare(b.title))
+              .sort((a, b) => a.title.localeCompare(b.title)),
           );
         } else {
           setFolders((prev) => renameNoteInFolders(prev, savedNote));
@@ -156,7 +131,7 @@ export default function NotesPage({ params }: PageProps) {
     }
 
     const noteToDelete = notes.find((n) => n.id === id);
-    if(noteToDelete) {
+    if (noteToDelete) {
       setNotes((prev) => prev.filter((n) => n.id !== id));
       return;
     }
@@ -165,27 +140,29 @@ export default function NotesPage({ params }: PageProps) {
   };
 
   const moveNoteToFolder = (noteId: string, folderId?: string) => {
+    console.log("Moving note", noteId, "to folder", folderId);
+
     setNotes((prevNotes) => {
-      // find the note in root
-      let note = prevNotes.find((n) => n.id === noteId);
-
-      // if not in root, look inside folders
-      if (!note) {
-        const all = collectAllNotes(folders);
-        note = all.find((n) => n.id === noteId);
-      }
-
+      const allNotes = [...prevNotes, ...collectAllNotes(folders)];
+      const note = allNotes.find((n) => n.id === noteId);
       if (!note) return prevNotes;
 
       const updatedNote: Note = { ...note, folderId };
 
-      // save to DB
       saveNoteToDb(updatedNote, uuid).catch(console.error);
 
-      // if moved to a folder, remove it from root notes
-      const nextNotes = folderId
-        ? prevNotes.filter((n) => n.id !== noteId)
-        : prevNotes.map((n) => (n.id === noteId ? updatedNote : n));
+      let nextNotes: Note[];
+
+      if (folderId) {
+        // Moving into a folder → remove from root
+        nextNotes = prevNotes.filter((n) => n.id !== noteId);
+      } else {
+        // Moving to root
+        const isInRoot = prevNotes.some((n) => n.id === noteId);
+        nextNotes = isInRoot
+          ? prevNotes.map((n) => (n.id === noteId ? updatedNote : n))
+          : [...prevNotes, updatedNote];
+      }
 
       // update folders tree
       setFolders((prevFolders) => {
@@ -198,14 +175,18 @@ export default function NotesPage({ params }: PageProps) {
             if (folder.id === folderId) {
               return {
                 ...folder,
-                notes: [...cleanedNotes, updatedNote].sort((a, b) => a.title.localeCompare(b.title)),
+                notes: [...cleanedNotes, updatedNote].sort((a, b) =>
+                  a.title.localeCompare(b.title),
+                ),
                 folders: updateFolders(folder.folders ?? []),
               };
             }
 
             return {
               ...folder,
-              notes: cleanedNotes.sort((a, b) => a.title.localeCompare(b.title)),
+              notes: cleanedNotes.sort((a, b) =>
+                a.title.localeCompare(b.title),
+              ),
               folders: updateFolders(folder.folders ?? []),
             };
           });

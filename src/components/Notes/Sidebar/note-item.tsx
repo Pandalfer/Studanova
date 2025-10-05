@@ -18,10 +18,7 @@ import {
 import { Copy, ExternalLink, Link, PencilLine, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useParams, usePathname } from "next/navigation";
-import {
-  copyUrlToClipboard,
-  openNoteInNewTab,
-} from "@/lib/notes/note-item-actions";
+import { copyUrlToClipboard, openNoteInNewTab } from "@/lib/notes/note-actions";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/note-storage";
@@ -72,15 +69,11 @@ export default function NoteItem({
   };
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: note.id,
+    data: { type: "note", note },
   });
 
   return (
-    <div
-      ref={setNodeRef}
-      {...attributes}
-      {...listeners}
-      style={{}}
-    >
+    <div ref={setNodeRef} {...attributes} {...listeners}>
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
@@ -200,7 +193,7 @@ export default function NoteItem({
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               </AlertDialogHeader>
-              <p  className={"text-muted-foreground"}>
+              <p className={"text-muted-foreground"}>
                 This action cannot be undone. This will permanently delete your
                 note and remove your data from our servers.
               </p>

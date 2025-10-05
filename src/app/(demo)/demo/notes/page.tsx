@@ -7,23 +7,12 @@ import {
   loadDemoFolders,
   loadDemoNotes,
   saveDemoFolders,
-  saveDemoNotes, saveNoteToDb,
+  saveDemoNotes,
 } from "@/lib/note-storage";
 import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { toast } from "sonner";
-
-function collectAllNotes(folders: Folder[]): Note[] {
-  const result: Note[] = [];
-  for (const folder of folders) {
-    result.push(...folder.notes);
-    if (folder.folders && folder.folders.length > 0) {
-      result.push(...collectAllNotes(folder.folders));
-    }
-  }
-  return result.sort((a, b) => a.title.localeCompare(b.title));
-}
 
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
@@ -211,7 +200,7 @@ export default function DemoNotesPage() {
       studentId: "demo",
       notes: [],
       folders: [],
-      parentId: "c40f65e3-8f3b-4026-bc80-8e966671167f"
+      parentId: "c40f65e3-8f3b-4026-bc80-8e966671167f",
     };
     setFolders((prev) => [...prev, newFolder]);
     saveDemoFolders([...folders, newFolder]);

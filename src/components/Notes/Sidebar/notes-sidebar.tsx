@@ -1,14 +1,22 @@
-import NotesEmptyState from "@/components/Notes/empty-state";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { FolderPen, SquarePen } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Folder, Note } from "@/lib/types";
-import NoteItem from "./note-item";
-import FolderItem from "@/components/Notes/Sidebar/folder-item";
-import React from "react";
-import { useMediaQuery } from "usehooks-ts";
-import {DndContext, DragOverlay, PointerSensor, useDroppable, useSensor} from "@dnd-kit/core";
+import NotesEmptyState from '@/components/Notes/empty-state';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { FolderPen, SquarePen } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Folder, Note } from '@/lib/types';
+import NoteItem from './note-item';
+import FolderItem from '@/components/Notes/Sidebar/folder-item';
+import React from 'react';
+import { useMediaQuery } from 'usehooks-ts';
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  UniqueIdentifier,
+  useDndMonitor,
+  useDroppable,
+  useSensor,
+} from '@dnd-kit/core';
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -22,6 +30,7 @@ interface NotesSidebarProps {
   loading?: boolean;
   createNewFolder: () => void;
   moveNoteToFolder: (noteId: string, folderId?: string) => void;
+  activeId?: string | null; // for DragOverlay
 }
 
 function findFolderPath(folders: Folder[], noteId: string): string[] {
@@ -42,7 +51,7 @@ function findFolderPath(folders: Folder[], noteId: string): string[] {
   return [];
 }
 
-export function NotesSidebar({
+function NotesSidebarContent({
   notes,
   folders,
   onSelectNote,
@@ -53,19 +62,31 @@ export function NotesSidebar({
   activeNoteId,
   loading = false,
   createNewFolder,
-  moveNoteToFolder,
 }: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
+  const isDesktop = useMediaQuery('(min-width: 640px)', {
     initializeWithValue: false,
   });
-  const { setNodeRef: setRootRef, isOver: isOverRoot } = useDroppable({ id: "root" });
-  const firstRender = React.useRef(true);
 
-  const [activeId, setActiveId] = React.useState<string | null>(null);
-  const activeNote =
-    notes.find((n) => n.id === activeId) ??
-    findNoteInFolders(folders, activeId ?? "");
+  const { setNodeRef: setRootNodeRef, isOver: isRootOver } = useDroppable({
+    id: 'root',
+    data: { type: 'folder' },
+  });
+  const [overId, setOverId] = React.useState<UniqueIdentifier | null>(null);
+
+  useDndMonitor({
+    onDragOver(event) {
+      setOverId(event.over?.id ?? null);
+    },
+    onDragEnd() {
+      setOverId(null);
+    },
+    onDragCancel() {
+      setOverId(null);
+    },
+  });
+
+  const firstRender = React.useRef(true);
 
   React.useEffect(() => {
     if (!activeNoteId) return;
@@ -76,33 +97,14 @@ export function NotesSidebar({
       setOpenFolders(path);
       firstRender.current = false;
     } else {
-      if (path.join("/") !== openFolders.join("/")) {
+      if (path.join('/') !== openFolders.join('/')) {
         setOpenFolders(path);
       }
     }
   }, [activeNoteId]);
 
-  const pointerSensor = useSensor(PointerSensor, {
-    activationConstraint: {
-      distance: 5,
-    },
-  });
-
-  function findNoteInFolders(folders: Folder[], noteId: string): Note | undefined {
-    for (const folder of folders) {
-      const note = folder.notes?.find((n) => n.id === noteId);
-      if (note) return note;
-
-      if (folder.folders) {
-        const found = findNoteInFolders(folder.folders, noteId);
-        if (found) return found;
-      }
-    }
-    return undefined; // instead of null
-  }
-
   return (
-    <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
+    <>
       {/* Toolbar */}
       <div className="justify-center flex p-5">
         <Button
@@ -145,28 +147,11 @@ export function NotesSidebar({
       ) : (
         // Folders + Notes
         <ScrollArea
-          className={`pl-5 ${isDesktop ? "pr-5" : ""}`}
-          style={{ height: "calc(100% - 5rem)" }}
+          className={`pl-5 ${
+            isDesktop ? 'pr-5' : ''
+          } flex flex-col h-[calc(100%-5rem)]`}
         >
-          <DndContext
-            sensors={[pointerSensor]}
-            onDragStart={({ active }) => setActiveId(active.id as string)}
-            onDragEnd={({ active, over }) => {
-              setActiveId(null);
-              if (!over) return;
-
-              let note = notes.find((n) => n.id === active.id);
-              if (!note) {
-                note = findNoteInFolders(folders, active.id as string);
-              }
-              if (!note) return;
-
-              if (over.data?.current?.type !== "folder" && over.id !== "root") return;
-
-              moveNoteToFolder(note.id, over.id === "root" ? undefined : (over.id as string));
-            }}
-            onDragCancel={() => setActiveId(null)}
-          >
+          <div className="min-h-full flex flex-col">
             <div className="flex flex-col gap-2 w-full min-w-0">
               {folders.map((folder) => (
                 <div
@@ -187,30 +172,94 @@ export function NotesSidebar({
               ))}
             </div>
 
-            <div ref={setRootRef} className={`${isOverRoot ? "bg-primary/30" : ""} flex flex-col gap-2 w-full mt-2`}>
-              {notes.map((note) => (
-                <div key={note.id} className="rounded-md transition-colors">
+            <div
+              ref={setRootNodeRef}
+              className={`rounded-md transition-colors w-full flex-2 flex flex-col mt-2 mb-2 ${
+                isRootOver ? 'bg-primary/30' : ''
+              }`}
+            >
+              <div className="flex flex-col gap-2 flex-1">
+                {notes.map((note) => (
                   <NoteItem
-                    note={note}
-                    onSelectNote={onSelectNote}
-                    onRenameNote={onRenameNote}
-                    onDeleteNote={onDeleteNote}
-                    onDuplicateNote={onDuplicateNote}
-                    activeNoteId={activeNoteId}
+                    key={note.id}
+                    {...{
+                      note,
+                      onSelectNote,
+                      onRenameNote,
+                      onDeleteNote,
+                      onDuplicateNote,
+                      activeNoteId,
+                    }}
                   />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-            <DragOverlay>
-              {activeNote ? (
-                <div className="p-3 rounded-md bg-card shadow-lg">
-                  {activeNote.title}
-                </div>
-              ) : null}
-            </DragOverlay>
-          </DndContext>
+          </div>
         </ScrollArea>
       )}
+    </>
+  );
+}
+
+export function NotesSidebar(props: NotesSidebarProps) {
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: { distance: 5 },
+  });
+
+  const [activeId, setActiveId] = React.useState<string | null>(null);
+
+  function findNoteInFolders(
+    folders: Folder[],
+    noteId: string
+  ): Note | undefined {
+    for (const folder of folders) {
+      const note = folder.notes?.find((n) => n.id === noteId);
+      if (note) return note;
+
+      if (folder.folders) {
+        const found = findNoteInFolders(folder.folders, noteId);
+        if (found) return found;
+      }
+    }
+    return undefined;
+  }
+  const activeNote =
+    props.notes.find((n) => n.id === activeId) ??
+    findNoteInFolders(props.folders, activeId ?? '');
+
+  return (
+    <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
+      <DndContext
+        sensors={[pointerSensor]}
+        onDragStart={({ active }) => setActiveId(active.id as string)}
+        onDragEnd={({ active, over }) => {
+          setActiveId(null);
+          if (!over) return;
+
+          let note = props.notes.find((n) => n.id === active.id);
+          if (!note) {
+            note = findNoteInFolders(props.folders, active.id as string);
+          }
+          if (!note) return;
+
+          if (over.data?.current?.type !== 'folder') return;
+
+          props.moveNoteToFolder(
+            note.id,
+            over.id === 'root' ? undefined : (over.id as string)
+          );
+        }}
+        onDragCancel={() => setActiveId(null)}
+      >
+        <NotesSidebarContent {...props} activeId={activeId} />
+        <DragOverlay>
+          {activeNote ? (
+            <div className="p-3 rounded-md bg-card shadow-lg">
+              {activeNote.title}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </aside>
   );
 }

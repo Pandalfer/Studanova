@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         // update if it exists
         note = await prisma.note.update({
           where: { id },
-          data: { title, content, folderId },
+          data: { title, content, folderId: folderId ?? null },
         });
       } else {
         // otherwise, create a fresh one

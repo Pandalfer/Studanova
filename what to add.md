@@ -20,7 +20,6 @@ Movable folders
 Root folder support
 Fix the horizontal scrollbar in notes sidebar
 
-
 # 🧭 Suggested Pages & Features
 
 ---
