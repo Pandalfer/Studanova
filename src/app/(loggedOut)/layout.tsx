@@ -23,6 +23,7 @@ export default function RootLayout({
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
         />
+        <title>Studanova</title>
       </head>
       <body className="dark">
         <Navbar />

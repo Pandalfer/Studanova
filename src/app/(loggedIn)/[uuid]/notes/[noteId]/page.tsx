@@ -53,7 +53,7 @@ export default function NotesPage({ params }: PageProps) {
   const pathSegments = pathname.split("/");
   const noteIdFromPath = pathSegments[3]; // /uuid/notes/noteId
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => { setMounted(true); document.body.style.cursor='default'; }, []);
 
   // Auto-save effect
   useEffect(() => {
@@ -254,6 +254,7 @@ export default function NotesPage({ params }: PageProps) {
   };
 
   const createNewNote = async () => {
+    document.body.style.cursor='wait';
     const newNote: Note = {
       id: nanoid(),
       title: "Untitled Note",

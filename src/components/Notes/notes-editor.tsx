@@ -1,5 +1,5 @@
 import { Note } from "@/lib/types";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";

@@ -28,7 +28,7 @@
 }
 
 [data-radix-scroll-area-viewport] > div[style*="display: table"] {
-  display: block !important;
+  display: table !important;
   height: 100%;
 }
 

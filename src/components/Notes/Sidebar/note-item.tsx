@@ -69,15 +69,14 @@ export default function NoteItem({
   };
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: note.id,
-    data: { type: "note", note },
   });
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={{}}>
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
-            className={`w-full p-3 rounded-md cursor-pointer transition-colors ${
+            className={`w-full min-w-40 p-3 rounded-md cursor-pointer transition-colors ${
               activeNoteId === note.id
                 ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90"
                 : "dark:hover:bg-accent"

@@ -41,10 +41,7 @@ export default function NotesPage({ params }: PageProps) {
   const [notes, setNotes] = useState<Note[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); document.body.style.cursor='default'; }, []);
 
   useEffect(() => {
     (async () => {
@@ -101,6 +98,7 @@ export default function NotesPage({ params }: PageProps) {
   };
 
   const createNewNote = async () => {
+    document.body.style.cursor='wait';
     const newNote: Note = {
       id: nanoid(),
       title: "Untitled Note",

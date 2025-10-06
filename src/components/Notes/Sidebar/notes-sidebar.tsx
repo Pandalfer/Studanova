@@ -12,8 +12,6 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  UniqueIdentifier,
-  useDndMonitor,
   useDroppable,
   useSensor,
 } from '@dnd-kit/core';
@@ -71,19 +69,6 @@ function NotesSidebarContent({
   const { setNodeRef: setRootNodeRef, isOver: isRootOver } = useDroppable({
     id: 'root',
     data: { type: 'folder' },
-  });
-  const [overId, setOverId] = React.useState<UniqueIdentifier | null>(null);
-
-  useDndMonitor({
-    onDragOver(event) {
-      setOverId(event.over?.id ?? null);
-    },
-    onDragEnd() {
-      setOverId(null);
-    },
-    onDragCancel() {
-      setOverId(null);
-    },
   });
 
   const firstRender = React.useRef(true);
