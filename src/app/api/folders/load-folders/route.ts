@@ -7,6 +7,7 @@ type NoteDTO = {
   title: string;
   content: string;
   createdAt: number; // stored as a timestamp
+  folderId?: string;
 };
 
 // Shape of a folder sent back to the frontend
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
           title: n.title,
           content: n.content,
           createdAt: n.createdAt.getTime(),
+          folderId: n.folderId || undefined,
         })),
         folders: [], // children will be filled later
       });

@@ -53,7 +53,10 @@ export default function NotesPage({ params }: PageProps) {
   const pathSegments = pathname.split("/");
   const noteIdFromPath = pathSegments[3]; // /uuid/notes/noteId
 
-  useEffect(() => { setMounted(true); document.body.style.cursor='default'; }, []);
+  useEffect(() => {
+    setMounted(true);
+    document.body.style.cursor = "default";
+  }, []);
 
   // Auto-save effect
   useEffect(() => {
@@ -138,15 +141,12 @@ export default function NotesPage({ params }: PageProps) {
   }, [uuid, noteIdFromPath]);
 
   const moveNoteToFolder = (noteId: string, folderId?: string) => {
-    console.log("Moving note", noteId, "to folder", folderId);
-
     setNotes((prevNotes) => {
       const allNotes = [...prevNotes, ...collectAllNotes(folders)];
       const note = allNotes.find((n) => n.id === noteId);
       if (!note) return prevNotes;
 
       const updatedNote: Note = { ...note, folderId };
-
       saveNoteToDb(updatedNote, uuid).catch(console.error);
 
       let nextNotes: Note[];
@@ -254,7 +254,7 @@ export default function NotesPage({ params }: PageProps) {
   };
 
   const createNewNote = async () => {
-    document.body.style.cursor='wait';
+    document.body.style.cursor = "wait";
     const newNote: Note = {
       id: nanoid(),
       title: "Untitled Note",
