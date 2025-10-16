@@ -15,8 +15,6 @@ MAKE LIGHT MODE USABLE
 
 add a 404 page ( Oops! we could find this page in the textbook )
 Make the notes folder saving in demo page
-Movable folders
-Make the renaming notes not put them in root folder and update dynamically
 
 # 🧭 Suggested Pages & Features
 

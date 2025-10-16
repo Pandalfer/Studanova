@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, title, studentId } = await req.json();
+    const { id, title, studentId, parentId } = await req.json();
 
     if (!studentId) {
       return NextResponse.json({ error: "Missing studentId" }, { status: 400 });
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
       if (existing) {
         folder = await prisma.folder.update({
           where: { id },
-          data: { title },
+          data: { title, parentId: parentId ?? null },
         });
       } else {
         folder = await prisma.folder.create({

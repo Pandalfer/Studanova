@@ -1,3 +1,5 @@
+"use client";
+
 import { Note } from "@/lib/types";
 import {
   ContextMenu,
@@ -16,15 +18,18 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Copy, ExternalLink, Link, PencilLine, Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
-import { copyUrlToClipboard, openNoteInNewTab } from "@/lib/notes/note-actions";
+import {
+  copyUrlToClipboard,
+  openNoteInNewTab,
+} from "@/lib/notes/note-and-folder-actions";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
-export default function NoteItem({
+function NoteItem({
   note,
   activeNoteId,
   onSelectNote,
@@ -69,19 +74,24 @@ export default function NoteItem({
   };
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: note.id,
+    data: { type: "note" },
   });
+  const handleSelect = useCallback(
+    () => onSelectNote(note),
+    [note, onSelectNote],
+  );
 
   return (
     <div ref={setNodeRef} {...attributes} {...listeners} style={{}}>
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
-            className={`w-full min-w-40 p-3 rounded-md cursor-pointer transition-colors ${
+            className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors ${
               activeNoteId === note.id
                 ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90"
                 : "dark:hover:bg-accent"
             }`}
-            onClick={() => onSelectNote(note)}
+            onClick={handleSelect}
           >
             <h3 className="font-medium truncate block">
               {note.title.substring(0, 25)}
@@ -227,3 +237,5 @@ export default function NoteItem({
     </div>
   );
 }
+
+export default React.memo(NoteItem);

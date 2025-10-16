@@ -256,6 +256,7 @@ export default function DemoNotesPage() {
     <div className="flex min-h-screen">
       <NotesSidebar
         moveNoteToFolder={moveNoteToFolder}
+        moveFolderToFolder={() => {}}
         onDuplicateNote={duplicateNote}
         folders={folders.filter((f) => !f.parentId)}
         createNewFolder={createNewFolder}
