@@ -30,6 +30,7 @@ function FolderItem({
   onRenameNote,
   onDeleteNote,
   onDuplicateNote,
+  onDuplicateFolder,
   activeNoteId,
 }: {
   folder: Folder;
@@ -39,6 +40,7 @@ function FolderItem({
   onRenameNote: (note: Note, newTitle: string) => void;
   onDeleteNote: (id: string) => void;
   onDuplicateNote: (note: Note) => void;
+  onDuplicateFolder: (folder: Folder) => void;
   activeNoteId?: string;
 }) {
   const isClosestFolder = useMemo(
@@ -99,7 +101,7 @@ function FolderItem({
             <ContextMenu modal={false}>
               <ContextMenuTrigger>
                 <AccordionTrigger
-                  className={`h-12 min-w-60 w-full flex items-center text-left font-bold ${isOver ? " " : "dark:hover:bg-accent"} truncate`}
+                  className={`h-12 min-w-60 w-full flex items-center text-left font-bold ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
                   arrow="left"
                 >
                   {folder.title.substring(0, 25)}
@@ -107,8 +109,8 @@ function FolderItem({
                 </AccordionTrigger>
               </ContextMenuTrigger>
               <ContextMenuContent className={"w-48 rounded-md shadow-lg"}>
-                <ContextMenuItem onClick={() => {}}>
-                  <Copy /> Duplicate Note
+                <ContextMenuItem onClick={() => {onDuplicateFolder(folder)}}>
+                  <Copy /> Duplicate Folder
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>
@@ -131,6 +133,7 @@ function FolderItem({
                       onRenameNote={onRenameNote}
                       onDeleteNote={onDeleteNote}
                       onDuplicateNote={onDuplicateNote}
+                      onDuplicateFolder={onDuplicateFolder}
                       activeNoteId={activeNoteId}
                     />
                   </div>
@@ -138,7 +141,7 @@ function FolderItem({
 
                 {/* Notes */}
                 <SortableContext
-                  items={folder.notes}
+                  items={folder.notes ?? []}
                   strategy={verticalListSortingStrategy}
                 >
                   {folder.notes?.map((note) => (

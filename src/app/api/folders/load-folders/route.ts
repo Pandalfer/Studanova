@@ -17,6 +17,7 @@ type FolderDTO = {
   title: string;
   notes: NoteDTO[];
   folders: FolderDTO[];
+  parentId?: string;
 };
 
 // API route handler for POST requests
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
           folderId: n.folderId || undefined,
         })),
         folders: [], // children will be filled later
+        parentId: f.parentId || undefined,
       });
     }
 

@@ -1,7 +1,8 @@
-import { Folder, Note } from "@/lib/types";
+import {Folder, FolderInput, Note} from "@/lib/types";
 import { saveFolderToDb, saveNoteToDb } from "@/lib/note-storage";
 import React from "react";
 import { nanoid } from "nanoid";
+import {toast} from "sonner";
 
 //region URL Actions
 
@@ -29,7 +30,7 @@ export const openNoteInNewTab = (userId: string, noteId: string) => {
 export function collectAllNotes(folders: Folder[]): Note[] {
   const result: Note[] = [];
   for (const folder of folders) {
-    result.push(...folder.notes);
+    result.push(...folder.notes ?? []);
     if (folder.folders && folder.folders.length > 0) {
       result.push(...collectAllNotes(folder.folders));
     }
@@ -162,6 +163,53 @@ export async function duplicateNote(
         [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
       );
 }
+
+export async function duplicateFolder(
+  folder: Folder,
+  uuid: string,
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+): Promise<void> {
+  console.log(folder);
+  const folderInput: Omit<Folder, "id"> = {
+    title: folder.title + " (Copy)",
+    notes: folder.notes ?? [],
+    folders: folder.folders ?? [],
+    parentId: folder.parentId ?? undefined,
+    studentId: folder.studentId,
+  };
+
+  try {
+    const newFolder = await saveFolderToDb(folderInput, uuid);
+    if (newFolder.parentId) {
+      setFolders((prevFolders) => {
+        const updateFolders = (folders: Folder[]): Folder[] =>
+          folders.map((f) => {
+            if (f.id === newFolder.parentId) {
+              return {
+                ...f,
+                folders: [...(f.folders ?? []), newFolder].sort((a, b) =>
+                  a.title.localeCompare(b.title)
+                ),
+              };
+            }
+            return {
+              ...f,
+              folders: updateFolders(f.folders ?? []),
+            };
+          });
+
+        return updateFolders(prevFolders);
+      });
+    } else {
+      setFolders((prev) =>
+        [...prev, newFolder].sort((a, b) => a.title.localeCompare(b.title))
+      );
+    }
+  } catch (e) {
+    toast.error("Failed to duplicate folder");
+  }
+}
+
 
 //endregion
 //region Folder Actions

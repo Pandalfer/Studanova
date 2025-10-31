@@ -8,9 +8,10 @@ Shared notes between users
 A favourite option to note items
 A search bar for notes
 A last edited timestamp on note items
+The notes editor scrollbar to be the shadcn one
 
 A ... button that opens the context menu
-
+  
 MAKE LIGHT MODE USABLE
 
 add a 404 page ( Oops! we could find this page in the textbook )

@@ -15,7 +15,6 @@ import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  collectAllNotes,
   deleteNoteFromFolders,
   duplicateNote,
   moveFolder,

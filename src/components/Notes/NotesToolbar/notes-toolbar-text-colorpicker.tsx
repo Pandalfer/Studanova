@@ -38,6 +38,7 @@ export default function NotesToolbarTextColorpicker({
         text-[var(--toolbar-color)]
         border-[var(--toolbar-color)]/50
         dark:hover:bg-popover
+        hover:bg-popover
         ring-offset-0
         ${
           active

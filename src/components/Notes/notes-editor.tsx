@@ -75,7 +75,7 @@ export default function NotesEditor({
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Note Title"
-        className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0 bg-none"
+        className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
       />
       <div className="relative w-full h-full flex-1 text-toolbar-white">
         {isEmptyContent(content) && (
@@ -88,7 +88,7 @@ export default function NotesEditor({
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          className="editor-content w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
+          className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
         />
       </div>
     </div>

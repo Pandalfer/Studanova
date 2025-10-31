@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
           data: {
             title,
             studentId,
+            parentId: parentId ?? null,
           },
         });
       }
@@ -32,6 +33,7 @@ export async function POST(req: NextRequest) {
         data: {
           title,
           studentId,
+          parentId: parentId ?? null,
         },
       });
     }

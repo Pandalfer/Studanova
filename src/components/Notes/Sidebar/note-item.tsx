@@ -88,8 +88,8 @@ function NoteItem({
           <div
             className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors ${
               activeNoteId === note.id
-                ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90"
-                : "dark:hover:bg-accent"
+                ? "bg-primary text-primary-foreground shadow-xs  dark:hover:bg-primary/90 hover:bg-primary/90"
+                : "dark:hover:bg-accent hover:bg-accent"
             }`}
             onClick={handleSelect}
           >
@@ -189,7 +189,7 @@ function NoteItem({
           >
             <AlertDialogTrigger asChild>
               <ContextMenuItem
-                className="text-destructive dark:hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
+                className="text-destructive dark:hover:bg-destructive-bg hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
                 onSelect={(e) => {
                   e.preventDefault();
                   setDialogOpen(true);

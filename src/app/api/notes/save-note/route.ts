@@ -23,9 +23,6 @@ export async function POST(req: NextRequest) {
           where: { id },
           data: { title, content, folderId: folderId ?? null },
         });
-        console.log(
-          `${note.folderId} asdsad22313713723917822379817892318793278931289791382792138792381`,
-        );
       } else {
         // otherwise, create a fresh one
         note = await prisma.note.create({

@@ -16,7 +16,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 import {
   collectAllNotes,
-  deleteNoteFromFolders,
+  deleteNoteFromFolders, duplicateFolder,
   duplicateNote,
   moveFolder,
   moveNote,
@@ -258,6 +258,10 @@ export default function NotesPage({ params }: PageProps) {
     moveFolder(folderId, setFolders, folders, uuid, parentId);
   };
 
+  const onDuplicateFolder = async (folder: Folder): Promise<void> => {
+    await duplicateFolder(folder, uuid, setFolders);
+  }
+
   if (!mounted) return null;
 
   return (
@@ -265,6 +269,7 @@ export default function NotesPage({ params }: PageProps) {
       <NotesSidebar
         moveNoteToFolder={moveNoteToFolder}
         moveFolderToFolder={moveFolderToFolder}
+        onDuplicateFolder={onDuplicateFolder}
         notes={notes}
         createNewFolder={createNewFolder}
         onSelectNote={selectNote}
