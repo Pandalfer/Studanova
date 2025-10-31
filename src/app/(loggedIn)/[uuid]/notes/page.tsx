@@ -15,7 +15,7 @@ import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  deleteNoteFromFolders,
+  deleteNoteFromFolders, duplicateFolder,
   duplicateNote,
   moveFolder,
   moveNote,
@@ -53,6 +53,10 @@ export default function NotesPage({ params }: PageProps) {
   const onDuplicateNote = async (note: Note) => {
     await duplicateNote(note, uuid, setFolders, setNotes);
   };
+
+  const onDuplicateFolder = async (folder: Folder): Promise<void> => {
+    await duplicateFolder(folder, uuid, setFolders);
+  }
 
   const selectNote = async (note: Note) => {
     router.push(`/${uuid}/notes/${note.id}`);
@@ -144,6 +148,7 @@ export default function NotesPage({ params }: PageProps) {
         createNewFolder={createNewFolder}
         onDeleteNote={deleteNote}
         onDuplicateNote={onDuplicateNote}
+        onDuplicateFolder={onDuplicateFolder}
         onRenameNote={renameNote}
         loading={loadingNotes}
       />

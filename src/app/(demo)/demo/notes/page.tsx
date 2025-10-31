@@ -252,12 +252,17 @@ export default function DemoNotesPage() {
     return;
   };
 
+  const onDuplicateFolder = async (folder: Folder): Promise<void> => {
+    return;
+  }
+
   return (
     <div className="flex min-h-screen">
       <NotesSidebar
         moveNoteToFolder={moveNoteToFolder}
         moveFolderToFolder={() => {}}
         onDuplicateNote={duplicateNote}
+        onDuplicateFolder={onDuplicateFolder}
         folders={folders.filter((f) => !f.parentId)}
         createNewFolder={createNewFolder}
         notes={notes.filter((n) => !n.folderId)}
