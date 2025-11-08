@@ -1,27 +1,24 @@
 "use client";
 
-import { Note, Folder, FolderInput } from "@/lib/types";
+import { Note, Folder } from "@/lib/types";
 import { useEffect, useState, useRef, use } from "react";
-import {
-  loadNotes,
-  saveNoteToDb,
-  deleteNoteFromDb,
-  saveFolderToDb,
-  loadFolders,
-} from "@/lib/note-storage";
+import { loadNotes, saveNoteToDb, loadFolders } from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
-import { nanoid } from "nanoid";
 import { useRouter, usePathname } from "next/navigation";
-import { toast } from "sonner";
 import {
   collectAllNotes,
-  deleteNoteFromFolders, duplicateFolder,
+  createNewFolder,
+  createNewNote,
+  deleteNote,
+  duplicateFolder,
   duplicateNote,
   moveFolder,
   moveNote,
+  renameFolder,
+  renameNote,
   renameNoteInFolders,
-  sortFoldersRecursively,
+  selectNote,
 } from "@/lib/notes/note-and-folder-actions";
 
 interface PageProps {
@@ -138,120 +135,72 @@ export default function NotesPage({ params }: PageProps) {
     moveNote(setNotes, setFolders, folders, noteId, uuid, folderId);
   };
 
-  const selectNote = async (note: Note) => {
-    if (note.id === activeNote?.id) return;
-
-    if (isDirty && activeNote) {
-      const updatedNote: Note = {
-        ...activeNote,
-        title: title.trim() || "Untitled Note",
-        content: editorRef.current?.innerHTML ?? activeNote.content,
-      };
-      try {
-        const savedNote = await saveNoteToDb(updatedNote, uuid);
-        if (savedNote)
-          setNotes((prev) =>
-            prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
-          );
-      } catch (err) {
-        console.error("Failed to save before switching note:", err);
-      }
-    }
-
-    // Temporarily clear activeNote so editor disappears
-    setActiveNote(null);
-    setTitle("");
-
-    // Navigate to new note
-    router.push(`/${uuid}/notes/${note.id}`);
-  };
-
-  const renameNote = async (note: Note, newTitle: string) => {
-    const updatedNote: Note = {
-      ...note,
-      title: newTitle.trim() || "Untitled Note",
-    };
-    try {
-      const savedNote = await saveNoteToDb(updatedNote, uuid);
-      if (savedNote) {
-        if (!savedNote.folderId) {
-          setNotes((prev) =>
-            prev
-              .map((n) => (n.id === savedNote.id ? savedNote : n))
-              .sort((a, b) => a.title.localeCompare(b.title)),
-          );
-        } else {
-          setFolders((prev) => renameNoteInFolders(prev, savedNote));
-        }
-
-        if (activeNote?.id === savedNote.id) {
-          setActiveNote(savedNote);
-          setTitle(savedNote.title);
-        }
-      }
-      toast.success("Note renamed successfully");
-    } catch {
-      toast.error("Failed to rename note");
-    }
-  };
-
-  const createNewNote = async () => {
-    document.body.style.cursor = "wait";
-    const newNote: Note = {
-      id: nanoid(),
-      title: "Untitled Note",
-      content: "",
-      createdAt: Date.now(),
-    };
-
-    setNotes((prev) =>
-      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+  const onSelectNote = async (note: Note) => {
+    await selectNote(
+      note,
+      uuid,
+      router,
+      activeNote,
+      isDirty,
+      title,
+      editorRef,
+      setActiveNote,
+      setTitle,
+      setNotes,
     );
-    setActiveNote(newNote);
-    setTitle(newNote.title);
-    if (editorRef.current) editorRef.current.innerHTML = "";
+  };
 
-    setIsDirty(false);
-    router.push(`/${uuid}/notes/${newNote.id}`);
+  const onRenameNote = async (note: Note, newTitle: string) => {
+    await renameNote(
+      note,
+      newTitle,
+      uuid,
+      setNotes,
+      setFolders,
+      activeNote,
+      setActiveNote,
+      setTitle,
+    );
+  };
 
-    saveNoteToDb(newNote, uuid).catch(console.error);
+  const onRenameFolder = async (folder: Folder, newTitle: string) => {
+    await renameFolder(folder, newTitle, uuid, setFolders);
+  };
+
+  const onCreateNewNote = async () => {
+    await createNewNote(
+      uuid,
+      router,
+      notes,
+      setNotes,
+      setActiveNote,
+      setTitle,
+      editorRef,
+      setIsDirty,
+    );
   };
 
   const onDuplicateNote = async (note: Note) => {
     await duplicateNote(note, uuid, setFolders, setNotes);
   };
 
-  const createNewFolder = async () => {
-    const folderInput: FolderInput = { title: "Untitled Folder" };
-    try {
-      const savedFolder = await saveFolderToDb(folderInput, uuid);
-      setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
-    } catch (err) {
-      console.error(err);
-    }
+  const onCreateNewFolder = async () => {
+    await createNewFolder(uuid, setFolders);
   };
 
-  const deleteNote = async (id: string) => {
-    try {
-      await deleteNoteFromDb(id);
-    } catch (err) {
-      console.error("Failed to delete note from DB:", err);
-    }
-
-    if (activeNote?.id === id) {
-      setActiveNote(null);
-      setTitle("");
-      if (editorRef.current) editorRef.current.innerHTML = "";
-      router.push(`/${uuid}/notes`);
-    }
-
-    const noteToDelete = notes.find((n) => n.id === id);
-    if (noteToDelete) {
-      setNotes((prev) => prev.filter((n) => n.id !== id));
-      return;
-    }
-
-    setFolders((prev) => deleteNoteFromFolders(prev, id));
+  const onDeleteNote = async (id: string) => {
+    await deleteNote(
+      id,
+      notes,
+      setNotes,
+      setFolders,
+      editorRef,
+      setTitle,
+      router,
+      setActiveNote,
+      activeNote,
+      uuid,
+    );
   };
 
   const moveFolderToFolder = (folderId: string, parentId?: string) => {
@@ -260,7 +209,7 @@ export default function NotesPage({ params }: PageProps) {
 
   const onDuplicateFolder = async (folder: Folder): Promise<void> => {
     await duplicateFolder(folder, uuid, setFolders);
-  }
+  };
 
   if (!mounted) return null;
 
@@ -271,12 +220,13 @@ export default function NotesPage({ params }: PageProps) {
         moveFolderToFolder={moveFolderToFolder}
         onDuplicateFolder={onDuplicateFolder}
         notes={notes}
-        createNewFolder={createNewFolder}
-        onSelectNote={selectNote}
-        createNewNote={createNewNote}
+        createNewFolder={onCreateNewFolder}
+        onSelectNote={onSelectNote}
+        createNewNote={onCreateNewNote}
         onDuplicateNote={onDuplicateNote}
-        onDeleteNote={deleteNote}
-        onRenameNote={renameNote}
+        onDeleteNote={onDeleteNote}
+        onRenameNote={onRenameNote}
+        onRenameFolder={onRenameFolder}
         activeNoteId={activeNote?.id}
         loading={loadingNotes}
         folders={folders}

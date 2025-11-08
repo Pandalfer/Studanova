@@ -1,8 +1,13 @@
-import {Folder, FolderInput, Note} from "@/lib/types";
-import { saveFolderToDb, saveNoteToDb } from "@/lib/note-storage";
+import { Folder, FolderInput, Note } from "@/lib/types";
+import {
+  deleteNoteFromDb,
+  saveFolderToDb,
+  saveNoteToDb,
+} from "@/lib/note-storage";
 import React from "react";
 import { nanoid } from "nanoid";
-import {toast} from "sonner";
+import { toast } from "sonner";
+import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 //region URL Actions
 
@@ -30,7 +35,7 @@ export const openNoteInNewTab = (userId: string, noteId: string) => {
 export function collectAllNotes(folders: Folder[]): Note[] {
   const result: Note[] = [];
   for (const folder of folders) {
-    result.push(...folder.notes ?? []);
+    result.push(...(folder.notes ?? []));
     if (folder.folders && folder.folders.length > 0) {
       result.push(...collectAllNotes(folder.folders));
     }
@@ -138,30 +143,186 @@ export async function duplicateNote(
   };
 
   saveNoteToDb(newNote, uuid).catch(console.error);
-  newNote.folderId
-    ? setFolders((prevFolders) => {
-        const updateFolders = (folders: Folder[]): Folder[] =>
-          folders.map((folder) => {
-            if (folder.id === newNote.folderId) {
-              return {
-                ...folder,
-                notes: [...folder.notes, newNote].sort((a, b) =>
-                  a.title.localeCompare(b.title),
-                ),
-                folders: updateFolders(folder.folders ?? []),
-              };
-            }
-
+  if (newNote.folderId) {
+    setFolders((prevFolders) => {
+      const updateFolders = (folders: Folder[]): Folder[] =>
+        folders.map((folder) => {
+          if (folder.id === newNote.folderId) {
             return {
               ...folder,
+              notes: [...folder.notes, newNote].sort((a, b) =>
+                a.title.localeCompare(b.title),
+              ),
               folders: updateFolders(folder.folders ?? []),
             };
-          });
-        return updateFolders(prevFolders);
-      })
-    : setNotes((prev) =>
-        [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+          }
+
+          return {
+            ...folder,
+            folders: updateFolders(folder.folders ?? []),
+          };
+        });
+      return updateFolders(prevFolders);
+    });
+  } else {
+    setNotes((prev) =>
+      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+    );
+  }
+}
+
+export async function deleteNote(
+  id: string,
+  notes: Note[],
+  setNotes: React.Dispatch<React.SetStateAction<Note[]>>,
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+  editorRef?: React.RefObject<HTMLDivElement | null>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+  router?: AppRouterInstance,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  activeNote?: Note | null,
+  uuid?: string,
+): Promise<void> {
+  try {
+    await deleteNoteFromDb(id);
+  } catch (err) {
+    console.error("Failed to delete note from DB:", err);
+  }
+
+  // Active note logic
+  if (activeNote?.id === id) {
+    setActiveNote?.(null);
+    setTitle?.("");
+    if (editorRef?.current) editorRef.current.innerHTML = "";
+    router?.push(`/${uuid}/notes`);
+  }
+
+  // Remove note from state
+  const noteToDelete = notes.find((n) => n.id === id);
+  if (noteToDelete) {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+  } else {
+    setFolders((prev) => deleteNoteFromFolders(prev, id));
+  }
+}
+
+export async function renameNote(
+  note: Note,
+  newTitle: string,
+  uuid: string,
+  setNotes: React.Dispatch<React.SetStateAction<Note[]>>,
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+  activeNote?: Note | null,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+) {
+  const updatedNote: Note = {
+    ...note,
+    title: newTitle.trim() || "Untitled Note",
+  };
+  try {
+    const savedNote = await saveNoteToDb(updatedNote, uuid);
+    if (!savedNote) return;
+    if (!savedNote.folderId) {
+      setNotes((prev) =>
+        prev
+          .map((n) => (n.id === savedNote.id ? savedNote : n))
+          .sort((a, b) => a.title.localeCompare(b.title)),
       );
+    } else {
+      setFolders((prev) => renameNoteInFolders(prev, savedNote));
+    }
+
+    if (activeNote?.id === savedNote.id) {
+      setActiveNote?.(savedNote);
+      setTitle?.(savedNote.title);
+    }
+  } catch {
+    toast.error("Failed to rename note");
+  }
+}
+
+export async function createNewNote(
+  uuid: string,
+  router: AppRouterInstance,
+  notes?: Note[],
+  setNotes?: React.Dispatch<React.SetStateAction<Note[]>>,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+  editorRef?: React.RefObject<HTMLDivElement | null>,
+  setIsDirty?: React.Dispatch<React.SetStateAction<boolean>>,
+) {
+  document.body.style.cursor = "wait";
+
+  const newNote: Note = {
+    id: nanoid(),
+    title: "Untitled Note",
+    content: "",
+    createdAt: Date.now(),
+  };
+
+  if (notes && setNotes) {
+    setNotes((prev) =>
+      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+    );
+  }
+
+  setActiveNote?.(newNote);
+  setTitle?.(newNote.title);
+  if (editorRef?.current) editorRef.current.innerHTML = "";
+  setIsDirty?.(false);
+  router?.push(`/${uuid}/notes/${newNote.id}`);
+  saveNoteToDb(newNote, uuid).catch(console.error);
+}
+
+export async function selectNote(
+  note: Note,
+  uuid: string,
+  router: AppRouterInstance,
+  activeNote?: Note | null,
+  isDirty?: boolean,
+  title?: string,
+  editorRef?: React.RefObject<HTMLDivElement | null>,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+  setNotes?: React.Dispatch<React.SetStateAction<Note[]>>,
+) {
+  if (note.id === activeNote?.id) return;
+
+  if (isDirty && activeNote) {
+    const updatedNote: Note = {
+      ...activeNote,
+      title: title?.trim() || "Untitled Note",
+      content: editorRef?.current?.innerHTML ?? activeNote.content,
+    };
+    try {
+      const savedNote = await saveNoteToDb(updatedNote, uuid);
+      if (savedNote)
+        setNotes?.((prev) =>
+          prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
+        );
+    } catch (err) {
+      console.error("Failed to save before switching note:", err);
+    }
+  }
+
+  // Temporarily clear activeNote so editor disappears
+  setActiveNote?.(null);
+  setTitle?.("");
+
+  router.push(`/${uuid}/notes/${note.id}`);
+}
+
+//endregion
+//region Folder Actions
+export function sortFoldersRecursively(folders: Folder[]): Folder[] {
+  return folders.map((folder) => ({
+    ...folder,
+    notes: (folder.notes ?? [])
+      .slice()
+      .sort((a, b) => a.title.localeCompare(b.title)),
+    folders: sortFoldersRecursively(folder.folders ?? []),
+  }));
 }
 
 export async function duplicateFolder(
@@ -188,7 +349,7 @@ export async function duplicateFolder(
               return {
                 ...f,
                 folders: [...(f.folders ?? []), newFolder].sort((a, b) =>
-                  a.title.localeCompare(b.title)
+                  a.title.localeCompare(b.title),
                 ),
               };
             }
@@ -202,25 +363,12 @@ export async function duplicateFolder(
       });
     } else {
       setFolders((prev) =>
-        [...prev, newFolder].sort((a, b) => a.title.localeCompare(b.title))
+        [...prev, newFolder].sort((a, b) => a.title.localeCompare(b.title)),
       );
     }
-  } catch (e) {
+  } catch {
     toast.error("Failed to duplicate folder");
   }
-}
-
-
-//endregion
-//region Folder Actions
-export function sortFoldersRecursively(folders: Folder[]): Folder[] {
-  return folders.map((folder) => ({
-    ...folder,
-    notes: (folder.notes ?? [])
-      .slice()
-      .sort((a, b) => a.title.localeCompare(b.title)),
-    folders: sortFoldersRecursively(folder.folders ?? []),
-  }));
 }
 
 export function collectAllFolders(folders: Folder[]): Folder[] {
@@ -289,6 +437,56 @@ export function moveFolder(
 
     return addToParent(cleaned);
   });
+}
+
+export async function renameFolder(
+  folder: Folder,
+  newTitle: string,
+  uuid: string,
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+) {
+  const updatedFolder: Folder = {
+    ...folder,
+    title: newTitle.trim() || "Untitled Folder",
+  };
+  try {
+    const savedFolder = await saveFolderToDb(updatedFolder, uuid);
+    const folderWithContent = {
+      ...savedFolder,
+      folders: folder.folders,
+      notes: folder.notes,
+    };
+    if (folderWithContent) {
+      setFolders((prev) => {
+        const updateFolders = (folders: Folder[]): Folder[] =>
+          folders.map((f) => {
+            if (f.id === folderWithContent.id) {
+              return folderWithContent;
+            }
+            return {
+              ...f,
+              folders: updateFolders(f.folders ?? []),
+            };
+          });
+        return updateFolders(prev);
+      });
+    }
+  } catch {
+    toast.error("Failed to rename folder");
+  }
+}
+
+export async function createNewFolder(
+  uuid: string,
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+) {
+  const folderInput: FolderInput = { title: "Untitled Folder" };
+  try {
+    const savedFolder = await saveFolderToDb(folderInput, uuid);
+    setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 //endregion

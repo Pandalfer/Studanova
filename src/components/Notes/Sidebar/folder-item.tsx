@@ -1,7 +1,7 @@
 "use client";
 
 import { Folder, Note } from "@/lib/types";
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import NoteItem from "@/components/Notes/Sidebar/note-item";
 import {
   Accordion,
@@ -20,7 +20,18 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy } from "lucide-react";
+import { Copy, PencilLine } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 function FolderItem({
   folder,
@@ -29,6 +40,7 @@ function FolderItem({
   onSelectNote,
   onRenameNote,
   onDeleteNote,
+  onRenameFolder,
   onDuplicateNote,
   onDuplicateFolder,
   activeNoteId,
@@ -38,11 +50,16 @@ function FolderItem({
   setOpenFolders: React.Dispatch<React.SetStateAction<string[]>>;
   onSelectNote: (note: Note) => void;
   onRenameNote: (note: Note, newTitle: string) => void;
+  onRenameFolder: (folder: Folder, newTitle: string) => void;
   onDeleteNote: (id: string) => void;
   onDuplicateNote: (note: Note) => void;
   onDuplicateFolder: (folder: Folder) => void;
   activeNoteId?: string;
 }) {
+  const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState(folder.title);
+
   const isClosestFolder = useMemo(
     () => folder.notes?.some((n) => n.id === activeNoteId) ?? false,
     [folder.notes, activeNoteId],
@@ -72,6 +89,20 @@ function FolderItem({
     id: folder.id,
     data: { type: "folder" },
   });
+
+  const finishRename = () => {
+    const trimmed = newTitle.trim();
+    setRenameDialogOpen(false);
+
+    if (!trimmed) {
+      setNewTitle(folder.title); // revert if empty
+      return;
+    }
+
+    if (trimmed !== folder.title) {
+      onRenameFolder?.(folder, trimmed);
+    }
+  };
 
   return (
     <div
@@ -109,9 +140,67 @@ function FolderItem({
                 </AccordionTrigger>
               </ContextMenuTrigger>
               <ContextMenuContent className={"w-48 rounded-md shadow-lg"}>
-                <ContextMenuItem onClick={() => {onDuplicateFolder(folder)}}>
+                <ContextMenuItem
+                  onClick={() => {
+                    onDuplicateFolder(folder);
+                  }}
+                >
                   <Copy /> Duplicate Folder
                 </ContextMenuItem>
+                <AlertDialog
+                  open={renameDialogOpen}
+                  onOpenChange={setRenameDialogOpen}
+                >
+                  <AlertDialogTrigger asChild>
+                    <ContextMenuItem
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setRenameDialogOpen(true);
+                        setTimeout(() => {
+                          const input =
+                            document.querySelector<HTMLInputElement>(
+                              "#rename-input",
+                            );
+                          input?.focus();
+                          input?.select();
+                        });
+                      }}
+                    >
+                      <PencilLine /> Rename
+                    </ContextMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Rename Note</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <Input
+                      id="rename-input"
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") finishRename();
+                        if (e.key === "Escape") {
+                          setRenameDialogOpen(false);
+                          setNewTitle(folder.title);
+                        }
+                      }}
+                      autoFocus
+                    />
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => {
+                          setRenameDialogOpen(false);
+                          setNewTitle(folder.title);
+                        }}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={finishRename}>
+                        Save
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </ContextMenuContent>
             </ContextMenu>
 
@@ -131,6 +220,7 @@ function FolderItem({
                       setOpenFolders={setOpenFolders}
                       onSelectNote={onSelectNote}
                       onRenameNote={onRenameNote}
+                      onRenameFolder={onRenameFolder}
                       onDeleteNote={onDeleteNote}
                       onDuplicateNote={onDuplicateNote}
                       onDuplicateFolder={onDuplicateFolder}

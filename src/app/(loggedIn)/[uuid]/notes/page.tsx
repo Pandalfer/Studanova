@@ -1,26 +1,24 @@
 "use client";
 
-import { Folder, FolderInput, Note } from "@/lib/types";
+import { Folder, Note } from "@/lib/types";
 import { useEffect, useState, use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
-import {
-  loadNotes,
-  saveNoteToDb,
-  deleteNoteFromDb,
-  loadFolders,
-  saveFolderToDb,
-} from "@/lib/note-storage";
+import { loadNotes, saveNoteToDb, loadFolders } from "@/lib/note-storage";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
-import { nanoid } from "nanoid";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  deleteNoteFromFolders, duplicateFolder,
+  createNewFolder,
+  createNewNote,
+  deleteNote,
+  duplicateFolder,
   duplicateNote,
   moveFolder,
   moveNote,
+  renameFolder,
+  renameNote,
   renameNoteInFolders,
-  sortFoldersRecursively,
+  selectNote,
 } from "@/lib/notes/note-and-folder-actions";
 
 interface PageProps {
@@ -56,74 +54,26 @@ export default function NotesPage({ params }: PageProps) {
 
   const onDuplicateFolder = async (folder: Folder): Promise<void> => {
     await duplicateFolder(folder, uuid, setFolders);
-  }
-
-  const selectNote = async (note: Note) => {
-    router.push(`/${uuid}/notes/${note.id}`);
   };
 
-  const renameNote = async (note: Note, newTitle: string) => {
-    const updatedNote: Note = {
-      ...note,
-      title: newTitle.trim() || "Untitled Note",
-    };
-    try {
-      const savedNote = await saveNoteToDb(updatedNote, uuid);
-      if (savedNote) {
-        if (!savedNote.folderId) {
-          setNotes((prev) =>
-            prev
-              .map((n) => (n.id === savedNote.id ? savedNote : n))
-              .sort((a, b) => a.title.localeCompare(b.title)),
-          );
-        } else {
-          setFolders((prev) => renameNoteInFolders(prev, savedNote));
-        }
-      }
-      toast.success("Note renamed successfully");
-    } catch {
-      toast.error("Failed to rename note");
-    }
+  const onSelectNote = async (note: Note) => {
+    await selectNote(note, uuid, router);
   };
 
-  const createNewNote = async () => {
-    document.body.style.cursor = "wait";
-    const newNote: Note = {
-      id: nanoid(),
-      title: "Untitled Note",
-      content: "",
-      createdAt: Date.now(),
-    };
-
-    // Save to DB first
-    await saveNoteToDb(newNote, uuid);
-    router.push(`/${uuid}/notes/${newNote.id}`);
+  const onRenameNote = async (note: Note, newTitle: string) => {
+    await renameNote(note, newTitle, uuid, setNotes, setFolders);
   };
 
-  const createNewFolder = async () => {
-    const folderInput: FolderInput = { title: "Untitled Folder" };
-    try {
-      const savedFolder = await saveFolderToDb(folderInput, uuid);
-      setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
-    } catch (err) {
-      console.error(err);
-    }
+  const onCreateNewNote = async () => {
+    await createNewNote(uuid, router);
   };
 
-  const deleteNote = async (id: string) => {
-    try {
-      await deleteNoteFromDb(id);
-    } catch (err) {
-      console.error("Failed to delete note from DB:", err);
-    }
+  const onCreateNewFolder = async () => {
+    await createNewFolder(uuid, setFolders);
+  };
 
-    const noteToDelete = notes.find((n) => n.id === id);
-    if (noteToDelete) {
-      setNotes((prev) => prev.filter((n) => n.id !== id));
-      return;
-    }
-
-    setFolders((prev) => deleteNoteFromFolders(prev, id));
+  const onDeleteNote = async (id: string) => {
+    await deleteNote(id, notes, setNotes, setFolders);
   };
 
   const moveNoteToFolder = (noteId: string, folderId?: string) => {
@@ -132,6 +82,10 @@ export default function NotesPage({ params }: PageProps) {
 
   const moveFolderToFolder = (folderId: string, parentId?: string) => {
     moveFolder(folderId, setFolders, folders, uuid, parentId);
+  };
+
+  const onRenameFolder = async (folder: Folder, newTitle: string) => {
+    await renameFolder(folder, newTitle, uuid, setFolders);
   };
 
   if (!mounted) return null;
@@ -143,13 +97,14 @@ export default function NotesPage({ params }: PageProps) {
         moveFolderToFolder={moveFolderToFolder}
         notes={notes}
         folders={folders}
-        onSelectNote={selectNote}
-        createNewNote={createNewNote}
-        createNewFolder={createNewFolder}
-        onDeleteNote={deleteNote}
+        onSelectNote={onSelectNote}
+        createNewNote={onCreateNewNote}
+        createNewFolder={onCreateNewFolder}
+        onDeleteNote={onDeleteNote}
         onDuplicateNote={onDuplicateNote}
         onDuplicateFolder={onDuplicateFolder}
-        onRenameNote={renameNote}
+        onRenameNote={onRenameNote}
+        onRenameFolder={onRenameFolder}
         loading={loadingNotes}
       />
       <div className="flex-1 h-screen">

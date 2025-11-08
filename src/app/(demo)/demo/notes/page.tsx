@@ -254,7 +254,11 @@ export default function DemoNotesPage() {
 
   const onDuplicateFolder = async (folder: Folder): Promise<void> => {
     return;
-  }
+  };
+
+  const onRenameFolder = async (folder: Folder, newTitle: string) => {
+    return;
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -267,6 +271,7 @@ export default function DemoNotesPage() {
         createNewFolder={createNewFolder}
         notes={notes.filter((n) => !n.folderId)}
         onRenameNote={renameNote}
+        onRenameFolder={onRenameFolder}
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDeleteNote={deleteNote}
