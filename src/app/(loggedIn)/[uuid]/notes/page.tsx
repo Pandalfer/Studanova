@@ -1,6 +1,6 @@
 "use client";
 
-import { useNotes} from "@/hooks/use-notes";
+import { useNotes } from "@/hooks/use-notes";
 import { use } from "react";
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";

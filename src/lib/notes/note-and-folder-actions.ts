@@ -252,8 +252,6 @@ export async function createNewNote(
   editorRef?: React.RefObject<HTMLDivElement | null>,
   setIsDirty?: React.Dispatch<React.SetStateAction<boolean>>,
 ) {
-  document.body.style.cursor = "wait";
-
   const newNote: Note = {
     id: nanoid(),
     title: "Untitled Note",
@@ -338,9 +336,15 @@ export async function duplicateFolder(
     parentId: folder.parentId ?? undefined,
     studentId: folder.studentId,
   };
+  console.log(folderInput.notes);
 
   try {
-    const newFolder = await saveFolderToDb(folderInput, uuid);
+    const newFolder = {
+      ...(await saveFolderToDb(folderInput, uuid)),
+      notes: folderInput.notes,
+      folders: folderInput.folders,
+    };
+    console.log(newFolder.notes);
     if (newFolder.parentId) {
       setFolders((prevFolders) => {
         const updateFolders = (folders: Folder[]): Folder[] =>

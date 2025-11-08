@@ -30,13 +30,13 @@ import { formatDate } from "@/lib/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
 function NoteItem({
-  note,
-  activeNoteId,
-  onSelectNote,
-  onDeleteNote,
-  onDuplicateNote,
-  onRenameNote,
-}: {
+                    note,
+                    activeNoteId,
+                    onSelectNote,
+                    onDeleteNote,
+                    onDuplicateNote,
+                    onRenameNote,
+                  }: {
   note: Note;
   activeNoteId?: string;
   onSelectNote: (note: Note) => void;
@@ -86,16 +86,17 @@ function NoteItem({
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
-            className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors ${
+            className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors flex items-center h-12
+            ${
               activeNoteId === note.id
-                ? "bg-primary text-primary-foreground shadow-xs  dark:hover:bg-primary/90 hover:bg-primary/90"
+                ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90 hover:bg-primary/90"
                 : "dark:hover:bg-accent hover:bg-accent"
             }`}
             onClick={handleSelect}
           >
-            <h3 className="font-medium truncate block">
-              {note.title.substring(0, 25)}
-              {note.title.length > 25 ? "..." : ""}
+            <h3 className="text-sm font-medium leading-tight truncate w-full">
+              {note.title.substring(0, 40)}
+              {note.title.length > 40 ? "..." : ""}
             </h3>
           </div>
         </ContextMenuTrigger>

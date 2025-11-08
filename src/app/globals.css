@@ -27,11 +27,6 @@
   }
 }
 
-[data-radix-scroll-area-viewport] > div[style*="display: table"] {
-  display: table !important;
-  height: 100%;
-}
-
 html {
   scroll-behavior: smooth;
 }

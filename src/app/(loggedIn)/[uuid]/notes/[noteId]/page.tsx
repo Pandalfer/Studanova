@@ -54,7 +54,6 @@ export default function NotesPage({ params }: PageProps) {
     editorRef,
   } = useNotes(uuid, router, noteIdFromPath);
 
-
   return (
     <div className="flex min-h-screen">
       <NotesSidebar

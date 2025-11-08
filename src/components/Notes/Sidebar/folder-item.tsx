@@ -107,7 +107,7 @@ function FolderItem({
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-md ${isOver ? "bg-primary/30" : ""}`}
+      className={`rounded-md transition-colors ${isOver ? "bg-primary/30" : ""}`}
     >
       <div {...attributes} {...listeners} style={{}} ref={setDraggableNodeRef}>
         <Accordion
@@ -132,11 +132,13 @@ function FolderItem({
             <ContextMenu modal={false}>
               <ContextMenuTrigger>
                 <AccordionTrigger
-                  className={`h-12 min-w-60 w-full flex items-center text-left font-bold ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
+                  className={`h-12 min-w-60 w-full flex items-center ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
                   arrow="left"
                 >
-                  {folder.title.substring(0, 25)}
-                  {folder.title.length > 25 ? "..." : ""}
+                  <h3 className="text-sm font-medium leading-tight truncate w-full font-bold">
+                    {folder.title.substring(0, 25)}
+                    {folder.title.length > 25 ? "..." : ""}
+                  </h3>
                 </AccordionTrigger>
               </ContextMenuTrigger>
               <ContextMenuContent className={"w-48 rounded-md shadow-lg"}>
@@ -206,7 +208,7 @@ function FolderItem({
 
             <AccordionContent className="mt-2">
               <div
-                className={`flex flex-col gap-2 pl-4 border-l ${isClosestFolder ? "border-muted" : "border-border"}`}
+                className={`flex flex-col pl-4 border-l ${isClosestFolder ? "border-muted" : "border-border"}`}
               >
                 {/* Nested Folders */}
                 {folder.folders?.map((subfolder) => (

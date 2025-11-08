@@ -10,6 +10,8 @@ A search bar for notes
 A last edited timestamp on note items
 The notes editor scrollbar to be the shadcn one
 
+duplicating a folder doesnt duplicate the notes inside it
+
 A ... button that opens the context menu
 
 MAKE LIGHT MODE USABLE
