@@ -22,6 +22,7 @@ export default function NotesPage({ params }: PageProps) {
     onDuplicateNote,
     onDuplicateFolder,
     onDeleteNote,
+    onDeleteFolder,
     onRenameNote,
     onRenameFolder,
     moveNoteToFolder,
@@ -40,6 +41,7 @@ export default function NotesPage({ params }: PageProps) {
         createNewNote={onCreateNewNote}
         createNewFolder={onCreateNewFolder}
         onDeleteNote={onDeleteNote}
+        onDeleteFolder={onDeleteFolder}
         onDuplicateNote={onDuplicateNote}
         onDuplicateFolder={onDuplicateFolder}
         onRenameNote={onRenameNote}

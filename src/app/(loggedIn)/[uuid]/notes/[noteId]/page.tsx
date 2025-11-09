@@ -1,26 +1,12 @@
 "use client";
 
 import { useNotes } from "@/hooks/use-notes";
-import { Note, Folder } from "@/lib/types";
-import { useEffect, useState, useRef, use } from "react";
-import { loadNotes, saveNoteToDb, loadFolders } from "@/lib/note-storage";
+import {use, useEffect} from "react";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useRouter, usePathname } from "next/navigation";
-import {
-  collectAllNotes,
-  createNewFolder,
-  createNewNote,
-  deleteNote,
-  duplicateFolder,
-  duplicateNote,
-  moveFolder,
-  moveNote,
-  renameFolder,
-  renameNote,
-  renameNoteInFolders,
-  selectNote,
-} from "@/lib/notes/note-and-folder-actions";
+import {loadFolders, loadNotes} from "@/lib/note-storage";
+import {collectAllNotes} from "@/lib/notes/note-and-folder-actions";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -42,6 +28,7 @@ export default function NotesPage({ params }: PageProps) {
     onDuplicateNote,
     onDuplicateFolder,
     onDeleteNote,
+    onDeleteFolder,
     onRenameNote,
     onRenameFolder,
     moveNoteToFolder,
@@ -66,6 +53,7 @@ export default function NotesPage({ params }: PageProps) {
         createNewNote={onCreateNewNote}
         onDuplicateNote={onDuplicateNote}
         onDeleteNote={onDeleteNote}
+        onDeleteFolder={onDeleteFolder}
         onRenameNote={onRenameNote}
         onRenameFolder={onRenameFolder}
         activeNoteId={activeNote?.id}

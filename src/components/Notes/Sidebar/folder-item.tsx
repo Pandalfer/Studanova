@@ -20,7 +20,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy, PencilLine } from "lucide-react";
+import {Copy, PencilLine, Trash2} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +40,7 @@ function FolderItem({
   onSelectNote,
   onRenameNote,
   onDeleteNote,
+  onDeleteFolder,
   onRenameFolder,
   onDuplicateNote,
   onDuplicateFolder,
@@ -52,12 +53,14 @@ function FolderItem({
   onRenameNote: (note: Note, newTitle: string) => void;
   onRenameFolder: (folder: Folder, newTitle: string) => void;
   onDeleteNote: (id: string) => void;
+  onDeleteFolder: (id: string) => void;
   onDuplicateNote: (note: Note) => void;
   onDuplicateFolder: (folder: Folder) => void;
   activeNoteId?: string;
 }) {
+
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(folder.title);
 
   const isClosestFolder = useMemo(
@@ -102,6 +105,14 @@ function FolderItem({
     if (trimmed !== folder.title) {
       onRenameFolder?.(folder, trimmed);
     }
+  };
+
+  const clearBodyPointerEvents = () => {
+    setTimeout(() => {
+      if (document.body && document.body.style.pointerEvents === "none") {
+        document.body.style.pointerEvents = "";
+      }
+    }, 50);
   };
 
   return (
@@ -203,6 +214,49 @@ function FolderItem({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
+                <AlertDialog
+                  open={deleteDialogOpen}
+                >
+                  <AlertDialogTrigger asChild>
+                    <ContextMenuItem
+                      className="text-destructive dark:hover:bg-destructive-bg hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete
+                    </ContextMenuItem>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <p className={"text-muted-foreground"}>
+                      This action cannot be undone. This will permanently delete your
+                      folder and its contents and remove your data from our servers.
+                    </p>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel
+                        onClick={() => {
+                          setDeleteDialogOpen(false);
+                          clearBodyPointerEvents();
+                        }}
+                      >
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          onDeleteFolder(folder.id);
+                          setDeleteDialogOpen(false);
+                          clearBodyPointerEvents();
+                        }}
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </ContextMenuContent>
             </ContextMenu>
 
@@ -224,6 +278,7 @@ function FolderItem({
                       onRenameNote={onRenameNote}
                       onRenameFolder={onRenameFolder}
                       onDeleteNote={onDeleteNote}
+                      onDeleteFolder={onDeleteFolder}
                       onDuplicateNote={onDuplicateNote}
                       onDuplicateFolder={onDuplicateFolder}
                       activeNoteId={activeNoteId}

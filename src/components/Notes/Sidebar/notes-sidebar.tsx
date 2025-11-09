@@ -31,6 +31,7 @@ interface NotesSidebarProps {
   onSelectNote: (note: Note) => void;
   createNewNote?: () => void;
   onDeleteNote: (id: string) => void;
+  onDeleteFolder: (folderId: string) => void;
   onDuplicateNote: (note: Note) => void;
   onDuplicateFolder: (folder: Folder) => void;
   onRenameNote: (note: Note, newTitle: string) => void;
@@ -67,6 +68,7 @@ function NotesSidebarContent({
   onSelectNote,
   createNewNote,
   onDeleteNote,
+  onDeleteFolder,
   onDuplicateNote,
   onDuplicateFolder,
   onRenameNote,
@@ -165,6 +167,7 @@ function NotesSidebarContent({
                     onRenameNote={onRenameNote}
                     onRenameFolder={onRenameFolder}
                     onDeleteNote={onDeleteNote}
+                    onDeleteFolder={onDeleteFolder}
                     onDuplicateNote={onDuplicateNote}
                     onDuplicateFolder={onDuplicateFolder}
                     activeNoteId={activeNoteId}

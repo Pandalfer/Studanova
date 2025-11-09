@@ -1,50 +1,8 @@
 import { Folder, FolderInput, Note } from "@/lib/types";
 
 const STORAGE_KEY = "notes";
-//region Database
-export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
-  const response = await fetch("/api/notes/save-note", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ ...note, studentId: uuid }),
-  });
-
-  const data = await response.json();
-  return data.note as Note;
-}
-
-export async function saveFolderToDb(
-  folder: FolderInput,
-  uuid: string,
-): Promise<Folder> {
-  const response = await fetch("/api/folders/save-folder", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ ...folder, studentId: uuid }),
-  });
-
-  const data = await response.json();
-  return data.folder as Folder;
-}
-
-export async function deleteNoteFromDb(id: string): Promise<void> {
-  const res = await fetch("/api/notes/delete-note", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id }),
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to delete note");
-  }
-}
-
+//region Database ( Logged-In users )
+//region loading
 export async function loadNotes(uuid: string): Promise<Note[]> {
   const response = await fetch("/api/notes/load-notes", {
     method: "POST",
@@ -78,6 +36,67 @@ export async function loadFolders(uuid: string): Promise<Folder[]> {
   const data = await response.json();
   return data.folders as Folder[];
 }
+
+//endregion
+//region saving
+
+export async function saveNoteToDb(note: Note, uuid: string): Promise<Note> {
+  const response = await fetch("/api/notes/save-note", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...note, studentId: uuid }),
+  });
+
+  const data = await response.json();
+  return data.note as Note;
+}
+
+export async function saveFolderToDb(
+  folder: FolderInput,
+  uuid: string,
+): Promise<Folder> {
+  const response = await fetch("/api/folders/save-folder", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...folder, studentId: uuid }),
+  });
+
+  const data = await response.json();
+  return data.folder as Folder;
+}
+//endregion
+//region deleting
+export async function deleteNoteFromDb(id: string): Promise<void> {
+  const res = await fetch("/api/notes/delete-note", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete note");
+  }
+}
+
+export async function deleteFolderFromDb(id: string): Promise<void> {
+  const res = await fetch("/api/folders/delete-folder", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id }),
+  })
+  if(!res.ok){
+    throw new Error("Failed to delete folder");
+  }
+}
+
 //endregion
 //region Demo (localStorage)
 export function saveDemoNotes(notes: Note[]): void {

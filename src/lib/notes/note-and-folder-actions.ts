@@ -1,5 +1,6 @@
 import { Folder, FolderInput, Note } from "@/lib/types";
 import {
+  deleteFolderFromDb,
   deleteNoteFromDb,
   saveFolderToDb,
   saveNoteToDb,
@@ -81,7 +82,13 @@ export function moveNote(
     if (!note) return prevNotes;
 
     const updatedNote: Note = { ...note, folderId };
-    saveNoteToDb(updatedNote, uuid).catch(console.error);
+    try {
+      saveNoteToDb(updatedNote, uuid);
+    } catch (err) {
+      toast.error("Failed to move note");
+      console.error("Failed to move note in DB:", err);
+      return prevNotes;
+    }
 
     let nextNotes: Note[];
 
@@ -142,7 +149,14 @@ export async function duplicateNote(
     folderId: note.folderId ?? undefined,
   };
 
-  saveNoteToDb(newNote, uuid).catch(console.error);
+  try {
+    await saveNoteToDb(newNote, uuid);
+  } catch (err) {
+    toast.error("Failed to duplicate note");
+    console.error("Failed to duplicate note in DB:", err);
+    return;
+  }
+
   if (newNote.folderId) {
     setFolders((prevFolders) => {
       const updateFolders = (folders: Folder[]): Folder[] =>
@@ -186,6 +200,7 @@ export async function deleteNote(
   try {
     await deleteNoteFromDb(id);
   } catch (err) {
+    toast.error("Failed to delete note");
     console.error("Failed to delete note from DB:", err);
   }
 
@@ -270,7 +285,12 @@ export async function createNewNote(
   if (editorRef?.current) editorRef.current.innerHTML = "";
   setIsDirty?.(false);
   router?.push(`/${uuid}/notes/${newNote.id}`);
-  saveNoteToDb(newNote, uuid).catch(console.error);
+  try {
+    await saveNoteToDb(newNote, uuid);
+  } catch (err) {
+    toast.error("Failed to create note");
+    console.error("Failed to create note in DB:", err);
+  }
 }
 
 export async function selectNote(
@@ -300,7 +320,7 @@ export async function selectNote(
           prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
         );
     } catch (err) {
-      console.error("Failed to save before switching note:", err);
+      toast.error("Failed to save before switching note:");
     }
   }
 
@@ -328,7 +348,6 @@ export async function duplicateFolder(
   uuid: string,
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
 ): Promise<void> {
-  console.log(folder);
   const folderInput: Omit<Folder, "id"> = {
     title: folder.title + " (Copy)",
     notes: folder.notes ?? [],
@@ -336,7 +355,6 @@ export async function duplicateFolder(
     parentId: folder.parentId ?? undefined,
     studentId: folder.studentId,
   };
-  console.log(folderInput.notes);
 
   try {
     const newFolder = {
@@ -344,7 +362,6 @@ export async function duplicateFolder(
       notes: folderInput.notes,
       folders: folderInput.folders,
     };
-    console.log(newFolder.notes);
     if (newFolder.parentId) {
       setFolders((prevFolders) => {
         const updateFolders = (folders: Folder[]): Folder[] =>
@@ -405,7 +422,13 @@ export function moveFolder(
   }
 
   const updatedFolder: Folder = { ...oldFolder, parentId };
-  saveFolderToDb(updatedFolder, uuid).catch(console.error);
+  try {
+    saveFolderToDb(updatedFolder, uuid);
+  } catch (err) {
+    toast.error("Failed to move folder");
+    console.error("Failed to move folder in DB:", err);
+    return;
+  }
 
   setFolders((prevFolders) => {
     // Remove the folder from all levels
@@ -489,7 +512,73 @@ export async function createNewFolder(
     const savedFolder = await saveFolderToDb(folderInput, uuid);
     setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
   } catch (err) {
-    console.error(err);
+    toast.error("Failed to create folder");
+    console.error("Failed to create folder:", err);
+  }
+}
+
+export function deleteFolderFromFolders(
+  folderId: string,
+  folders: Folder[],
+  activeNote?: Note | null,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+  editorRef?: React.RefObject<HTMLDivElement | null>,
+  router?: AppRouterInstance,
+  uuid?: string,
+): Folder[] {
+
+
+  return folders
+    .filter((f) => f.id !== folderId)
+    .map(f => ({
+    ...f,
+    folders: deleteFolderFromFolders(folderId, f.folders ?? [], activeNote, setActiveNote, setTitle, editorRef, router, uuid)
+  }));
+}
+
+function isNoteInFolderTree(noteId: string, folder: Folder): boolean {
+  // Check notes in the current folder
+  if ((folder.notes ?? []).some(n => n.id === noteId)) {
+    return true;
+  }
+
+  // Check notes in child folders recursively
+  for (const childFolder of folder.folders ?? []) {
+    if (isNoteInFolderTree(noteId, childFolder)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function deleteFolder(
+  folderId: string,
+  folders: Folder[],
+  setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
+  activeNote?: Note | null,
+  setActiveNote?: React.Dispatch<React.SetStateAction<Note | null>>,
+  setTitle?: React.Dispatch<React.SetStateAction<string>>,
+  editorRef?: React.RefObject<HTMLDivElement | null>,
+  router?: AppRouterInstance,
+  uuid?: string,
+) {
+  try {
+    await deleteFolderFromDb(folderId);
+  } catch (err) {
+    toast.error("Failed to delete folder");
+    console.error("Failed to delete folder from DB:", err);
+    return;
+  }
+  const folderToDelete = collectAllFolders(folders).find(f => f.id === folderId);
+
+  setFolders(prev => deleteFolderFromFolders(folderId, prev));
+  if (activeNote && folderToDelete && isNoteInFolderTree(activeNote.id, folderToDelete)) {
+    setActiveNote?.(null);
+    setTitle?.("");
+    if (editorRef?.current) editorRef.current.innerHTML = "";
+    router?.push(`/${uuid}/notes`);
   }
 }
 

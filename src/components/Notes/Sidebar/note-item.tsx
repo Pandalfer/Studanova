@@ -30,13 +30,13 @@ import { formatDate } from "@/lib/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
 function NoteItem({
-                    note,
-                    activeNoteId,
-                    onSelectNote,
-                    onDeleteNote,
-                    onDuplicateNote,
-                    onRenameNote,
-                  }: {
+  note,
+  activeNoteId,
+  onSelectNote,
+  onDeleteNote,
+  onDuplicateNote,
+  onRenameNote,
+}: {
   note: Note;
   activeNoteId?: string;
   onSelectNote: (note: Note) => void;

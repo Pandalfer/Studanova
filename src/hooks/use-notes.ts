@@ -7,7 +7,7 @@ import { loadFolders, loadNotes, saveNoteToDb } from "@/lib/note-storage";
 import {
   collectAllNotes,
   createNewFolder,
-  createNewNote,
+  createNewNote, deleteFolder,
   deleteNote,
   duplicateFolder,
   duplicateNote,
@@ -50,6 +50,8 @@ export function useNotes(
             setActiveNote(found);
             setTitle(found.title === "Untitled Note" ? "" : found.title);
             if (editorRef.current) editorRef.current.innerHTML = found.content;
+          } else {
+            router.push(`/${uuid}/notes`);
           }
         }
       } finally {
@@ -149,6 +151,18 @@ export function useNotes(
         router,
         setActiveNote,
         activeNote,
+        uuid,
+      ),
+    onDeleteFolder: (folderId: string) =>
+      deleteFolder(
+        folderId,
+        folders,
+        setFolders,
+        activeNote,
+        setActiveNote,
+        setTitle,
+        editorRef,
+        router,
         uuid,
       ),
     onRenameNote: (note: Note, newTitle: string) =>
