@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { toast } from "sonner";
+import {deleteFolder} from "@/lib/notes/note-and-folder-actions";
 
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
@@ -260,6 +261,12 @@ export default function DemoNotesPage() {
     return;
   };
 
+  const deleteFolder = async (folderId: string): Promise<void> => {
+    return;
+  }
+
+
+
   return (
     <div className="flex min-h-screen">
       <NotesSidebar
@@ -275,6 +282,7 @@ export default function DemoNotesPage() {
         onSelectNote={selectNote}
         createNewNote={createNewNote}
         onDeleteNote={deleteNote}
+        onDeleteFolder={deleteFolder}
         activeNoteId={activeNote?.id}
       />
       <div className="flex-1 h-screen">
