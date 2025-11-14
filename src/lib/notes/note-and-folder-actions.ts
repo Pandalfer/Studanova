@@ -348,28 +348,59 @@ export async function duplicateFolder(
   uuid: string,
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
 ): Promise<void> {
-  const folderInput: Omit<Folder, "id"> = {
-    title: folder.title + " (Copy)",
-    notes: folder.notes ?? [],
-    folders: folder.folders ?? [],
-    parentId: folder.parentId ?? undefined,
-    studentId: folder.studentId,
-  };
+  async function duplicateFolderRecursively(
+    f: Folder,
+    parentId?: string,
+  ): Promise<Folder> {
+    const newFolder: Omit<Folder, "id"> = {
+      title: f.title,
+      studentId: f.studentId,
+      notes: [],
+      folders: [],
+      parentId,
+    };
+    const savedFolder = await saveFolderToDb(newFolder, uuid);
+    const savedNotes: Note[] = [];
+    for (const note of f.notes ?? []) {
+      const newNote: Note = {
+        ...note,
+        id: nanoid(),
+        createdAt: Date.now(),
+        folderId: savedFolder.id,
+      };
+      try {
+        const savedNote = await saveNoteToDb(newNote, uuid);
+        savedNotes.push(savedNote);
+      } catch (error) {
+        console.error("Failed to duplicate note in folder: ", error);
+      }
+    }
+    const savedFolders: Folder[] = [];
+    for (const folder of f.folders ?? []) {
+      const newSubFolder = await duplicateFolderRecursively(
+        folder,
+        savedFolder.id,
+      );
+      savedFolders.push(newSubFolder);
+    }
+
+    return { ...savedFolder, notes: savedNotes, folders: savedFolders };
+  }
 
   try {
-    const newFolder = {
-      ...(await saveFolderToDb(folderInput, uuid)),
-      notes: folderInput.notes,
-      folders: folderInput.folders,
-    };
-    if (newFolder.parentId) {
+    const duplicated = await duplicateFolderRecursively(
+      folder,
+      folder.parentId ?? undefined,
+    );
+
+    if (duplicated.parentId) {
       setFolders((prevFolders) => {
         const updateFolders = (folders: Folder[]): Folder[] =>
           folders.map((f) => {
-            if (f.id === newFolder.parentId) {
+            if (f.id === duplicated.parentId) {
               return {
                 ...f,
-                folders: [...(f.folders ?? []), newFolder].sort((a, b) =>
+                folders: [...(f.folders ?? []), duplicated].sort((a, b) =>
                   a.title.localeCompare(b.title),
                 ),
               };
@@ -384,7 +415,7 @@ export async function duplicateFolder(
       });
     } else {
       setFolders((prev) =>
-        [...prev, newFolder].sort((a, b) => a.title.localeCompare(b.title)),
+        [...prev, duplicated].sort((a, b) => a.title.localeCompare(b.title)),
       );
     }
   } catch {
@@ -527,19 +558,26 @@ export function deleteFolderFromFolders(
   router?: AppRouterInstance,
   uuid?: string,
 ): Folder[] {
-
-
   return folders
     .filter((f) => f.id !== folderId)
-    .map(f => ({
-    ...f,
-    folders: deleteFolderFromFolders(folderId, f.folders ?? [], activeNote, setActiveNote, setTitle, editorRef, router, uuid)
-  }));
+    .map((f) => ({
+      ...f,
+      folders: deleteFolderFromFolders(
+        folderId,
+        f.folders ?? [],
+        activeNote,
+        setActiveNote,
+        setTitle,
+        editorRef,
+        router,
+        uuid,
+      ),
+    }));
 }
 
 function isNoteInFolderTree(noteId: string, folder: Folder): boolean {
   // Check notes in the current folder
-  if ((folder.notes ?? []).some(n => n.id === noteId)) {
+  if ((folder.notes ?? []).some((n) => n.id === noteId)) {
     return true;
   }
 
@@ -571,10 +609,16 @@ export async function deleteFolder(
     console.error("Failed to delete folder from DB:", err);
     return;
   }
-  const folderToDelete = collectAllFolders(folders).find(f => f.id === folderId);
+  const folderToDelete = collectAllFolders(folders).find(
+    (f) => f.id === folderId,
+  );
 
-  setFolders(prev => deleteFolderFromFolders(folderId, prev));
-  if (activeNote && folderToDelete && isNoteInFolderTree(activeNote.id, folderToDelete)) {
+  setFolders((prev) => deleteFolderFromFolders(folderId, prev));
+  if (
+    activeNote &&
+    folderToDelete &&
+    isNoteInFolderTree(activeNote.id, folderToDelete)
+  ) {
     setActiveNote?.(null);
     setTitle?.("");
     if (editorRef?.current) editorRef.current.innerHTML = "";

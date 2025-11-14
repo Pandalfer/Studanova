@@ -91,8 +91,8 @@ export async function deleteFolderFromDb(id: string): Promise<void> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ id }),
-  })
-  if(!res.ok){
+  });
+  if (!res.ok) {
     throw new Error("Failed to delete folder");
   }
 }

@@ -20,7 +20,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {Copy, PencilLine, Trash2} from "lucide-react";
+import { Copy, PencilLine, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,7 +58,6 @@ function FolderItem({
   onDuplicateFolder: (folder: Folder) => void;
   activeNoteId?: string;
 }) {
-
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(folder.title);
@@ -214,9 +213,7 @@ function FolderItem({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-                <AlertDialog
-                  open={deleteDialogOpen}
-                >
+                <AlertDialog open={deleteDialogOpen}>
                   <AlertDialogTrigger asChild>
                     <ContextMenuItem
                       className="text-destructive dark:hover:bg-destructive-bg hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
@@ -228,13 +225,18 @@ function FolderItem({
                       <Trash2 className="h-4 w-4 mr-2" /> Delete
                     </ContextMenuItem>
                   </AlertDialogTrigger>
-                  <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
+                  <AlertDialogContent
+                    onCloseAutoFocus={(e) => e.preventDefault()}
+                  >
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        Are you absolutely sure?
+                      </AlertDialogTitle>
                     </AlertDialogHeader>
                     <p className={"text-muted-foreground"}>
-                      This action cannot be undone. This will permanently delete your
-                      folder and its contents and remove your data from our servers.
+                      This action cannot be undone. This will permanently delete
+                      your folder and its contents and remove your data from our
+                      servers.
                     </p>
                     <AlertDialogFooter>
                       <AlertDialogCancel

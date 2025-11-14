@@ -7,7 +7,8 @@ import { loadFolders, loadNotes, saveNoteToDb } from "@/lib/note-storage";
 import {
   collectAllNotes,
   createNewFolder,
-  createNewNote, deleteFolder,
+  createNewNote,
+  deleteFolder,
   deleteNote,
   duplicateFolder,
   duplicateNote,

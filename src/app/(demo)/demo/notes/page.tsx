@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { toast } from "sonner";
-import {deleteFolder} from "@/lib/notes/note-and-folder-actions";
+import { deleteFolder } from "@/lib/notes/note-and-folder-actions";
 
 export default function DemoNotesPage() {
   const [mounted, setMounted] = useState(false);
@@ -263,9 +263,7 @@ export default function DemoNotesPage() {
 
   const deleteFolder = async (folderId: string): Promise<void> => {
     return;
-  }
-
-
+  };
 
   return (
     <div className="flex min-h-screen">
