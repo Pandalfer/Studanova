@@ -1,6 +1,7 @@
 import { Folder, FolderInput, Note } from "@/lib/types";
 
-const STORAGE_KEY = "notes";
+const NOTES_KEY = "demo_notes"
+const FOLDERS_KEY = "demo_folders"
 //region Database ( Logged-In users )
 //region loading
 export async function loadNotes(uuid: string): Promise<Note[]> {
@@ -98,29 +99,16 @@ export async function deleteFolderFromDb(id: string): Promise<void> {
 }
 
 //endregion
+//endregion
 //region Demo (localStorage)
-export function saveDemoNotes(notes: Note[]): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+export function saveDemoNotes(notes: Note[]) {
+  if (typeof window === "undefined") return
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes))
 }
 
 export function loadDemoNotes(): Note[] {
-  if (typeof window === "undefined") return [];
-  const notes = localStorage.getItem(STORAGE_KEY);
-
-  if (notes) {
-    try {
-      return JSON.parse(notes).sort((a: Note, b: Note) =>
-        a.title.localeCompare(b.title),
-      );
-    } catch (error) {
-      console.error("Failed to parse notes from localStorage", error);
-      return [];
-    }
-  }
-  return [];
+  if (typeof window === "undefined") return []
+  return JSON.parse(localStorage.getItem(NOTES_KEY) ?? "[]")
 }
 
 export function formatDate(timestamp: number): string {
@@ -132,34 +120,13 @@ export function formatDate(timestamp: number): string {
   });
 }
 
-export function saveDemoFolders(folders: Folder[]): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("folders", JSON.stringify(folders));
+export function saveDemoFolders(folders: Folder[]) {
+  if (typeof window === "undefined") return
+  localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders))
 }
 
 export function loadDemoFolders(): Folder[] {
-  if (typeof window === "undefined") return [];
-  const folders = localStorage.getItem("folders");
-
-  if (folders) {
-    try {
-      const parsedFolders = JSON.parse(folders).sort((a: Folder, b: Folder) =>
-        a.title.localeCompare(b.title),
-      );
-      for (const folder of parsedFolders) {
-        folder.folders = parsedFolders
-          .filter((f: Folder) => f.parentId === folder.id)
-          .sort((a: Folder, b: Folder) => a.title.localeCompare(b.title));
-        folder.notes = loadDemoNotes()
-          .filter((n: Note) => n.folderId === folder.id)
-          .sort((a: Note, b: Note) => a.title.localeCompare(b.title));
-      }
-      return parsedFolders;
-    } catch (error) {
-      console.error("Failed to parse folders from localStorage", error);
-      return [];
-    }
-  }
-  return [];
+  if (typeof window === "undefined") return []
+  return JSON.parse(localStorage.getItem(FOLDERS_KEY) ?? "[]")
 }
 //endregion

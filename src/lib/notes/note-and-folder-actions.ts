@@ -32,6 +32,7 @@ export const openNoteInNewTab = (userId: string, noteId: string) => {
 };
 
 //endregion
+//region Logged In Actions
 //region Note Actions
 export function collectAllNotes(folders: Folder[]): Note[] {
   const result: Note[] = [];
@@ -167,7 +168,6 @@ export async function duplicateNote(
               notes: [...folder.notes, newNote].sort((a, b) =>
                 a.title.localeCompare(b.title),
               ),
-              folders: updateFolders(folder.folders ?? []),
             };
           }
 
@@ -319,7 +319,7 @@ export async function selectNote(
         setNotes?.((prev) =>
           prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
         );
-    } catch (err) {
+    } catch {
       toast.error("Failed to save before switching note:");
     }
   }
@@ -625,5 +625,9 @@ export async function deleteFolder(
     router?.push(`/${uuid}/notes`);
   }
 }
+
+//endregion
+//endregion
+//region Demo Actions
 
 //endregion
