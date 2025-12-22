@@ -199,7 +199,6 @@ export function useDemoNotes() {
 			setTitle("");
 			if (editorRef.current) editorRef.current.innerHTML = "";
 		}
-		toast.success("Note deleted");
 	};
 
 	const renameNote = (note: Note, newTitle: string) => {
@@ -313,7 +312,6 @@ export function useDemoNotes() {
 
 		const newFolders = recursiveRename(folders);
 		persistChanges(rootNotes, newFolders);
-		toast.success("Folder renamed");
 	};
 
 	const deleteFolder = (folderId: string) => {
@@ -352,7 +350,6 @@ export function useDemoNotes() {
 			setTitle("");
 			if (editorRef.current) editorRef.current.innerHTML = "";
 		}
-		toast.success("Folder deleted");
 	};
 
 	const moveFolderToFolder = (folderId: string, targetParentId?: string) => {
@@ -405,7 +402,6 @@ export function useDemoNotes() {
 		}
 
 		persistChanges(rootNotes, finalFolders);
-		toast.success("Folder moved");
 	};
 
 	const duplicateFolder = (folder: Folder) => {
@@ -422,7 +418,6 @@ export function useDemoNotes() {
 		const newFolder = deepCopyFolder(folder);
 		if (folders.some((f) => f.id === folder.id)) {
 			persistChanges(rootNotes, [...folders, newFolder]);
-			toast.success("Folder duplicated");
 			return;
 		}
 
@@ -440,7 +435,6 @@ export function useDemoNotes() {
 
 		const newFolders = recursiveInsert(folders);
 		persistChanges(rootNotes, newFolders);
-		toast.success("Folder duplicated");
 	};
 
 	return {
