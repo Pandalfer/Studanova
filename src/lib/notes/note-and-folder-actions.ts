@@ -4,7 +4,7 @@ import {
   deleteNoteFromDb,
   saveFolderToDb,
   saveNoteToDb,
-} from "@/lib/note-storage";
+} from "@/lib/notes/note-storage";
 import React from "react";
 import { nanoid } from "nanoid";
 import { toast } from "sonner";
@@ -631,3 +631,88 @@ export async function deleteFolder(
 //region Demo Actions
 
 //endregion
+export function findFolderPath(folders: Folder[], noteId: string): string[] {
+  for (const folder of folders) {
+    // Check direct children safely
+    if ((folder.notes ?? []).some((n) => n.id === noteId)) {
+      return [folder.id];
+    }
+
+    // Check nested folders safely
+    if (folder.folders && folder.folders.length > 0) {
+      const path = findFolderPath(folder.folders, noteId);
+      if (path.length > 0) {
+        return [folder.id, ...path];
+      }
+    }
+  }
+  return [];
+}
+
+export function findFolderPathByFolderId(
+  folders: Folder[],
+  folderId: string,
+): string[] {
+  for (const folder of folders) {
+    if (folder.id === folderId) {
+      return [folder.id];
+    }
+
+    if (folder.folders && folder.folders.length > 0) {
+      const path = findFolderPathByFolderId(folder.folders, folderId);
+      if (path.length > 0) {
+        return [folder.id, ...path];
+      }
+    }
+  }
+  return [];
+}
+
+export function flattenFolders(folders: Folder[]): Folder[] {
+  const result: Folder[] = [];
+
+  function walk(folders: Folder[]) {
+    for (const folder of folders) {
+      result.push(folder);
+
+      if (folder.folders && folder.folders.length > 0) {
+        walk(folder.folders);
+      }
+    }
+  }
+
+  walk(folders);
+  return result;
+}
+
+export function findNoteInFolders(
+  folders: Folder[],
+  noteId: string,
+): Note | undefined {
+  for (const folder of folders) {
+    const note = folder.notes?.find((n) => n.id === noteId);
+    if (note) return note;
+
+    if (folder.folders) {
+      const found = findNoteInFolders(folder.folders, noteId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
+export function findFolderInFolders(
+  folders: Folder[],
+  folderId: string,
+): Folder | undefined {
+  for (const Folder of folders) {
+    const folder = Folder.folders?.find((n) => n.id === folderId);
+    if (folder) return folder;
+
+    if (Folder.folders) {
+      const found = findFolderInFolders(Folder.folders, folderId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}

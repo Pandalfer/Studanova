@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
         n.notes.sort((a, b) => a.title.localeCompare(b.title));
         sortNotes(n.folders);
       }
-    }
+    };
     sortTree(roots);
     sortNotes(roots);
 

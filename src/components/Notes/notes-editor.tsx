@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
-import DOMPurify from 'dompurify';
+import DOMPurify from "dompurify";
 
 interface NoteEditorProps {
   note: Note;
@@ -53,13 +53,23 @@ export default function NotesEditor({
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     const rawHTML = e.currentTarget.innerHTML ?? "";
     const cleanHTML = DOMPurify.sanitize(rawHTML, {
-      ALLOWED_TAGS: ["b", "i", "u", "span", "div", "br", "h1", "h2", "h3", "p", "font"],
+      ALLOWED_TAGS: [
+        "b",
+        "i",
+        "u",
+        "span",
+        "div",
+        "br",
+        "h1",
+        "h2",
+        "h3",
+        "p",
+        "font",
+      ],
       ALLOWED_ATTR: ["style", "class", "color"],
     });
     setContent(cleanHTML);
   };
-
-
 
   if (loading) {
     return (
@@ -77,30 +87,28 @@ export default function NotesEditor({
   }
 
   return (
-
-      <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
-        <NotesToolbar editorRef={refToUse} setContent={setContent}/>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Note Title"
-          className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
+    <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
+      <NotesToolbar editorRef={refToUse} setContent={setContent} />
+      <Input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Note Title"
+        className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
+      />
+      <div className="relative w-full h-full flex-1 text-toolbar-white">
+        {isEmptyContent(content) && (
+          <div className="absolute top-1 left-1 pointer-events-none text-muted">
+            {placeholder}
+          </div>
+        )}
+        <div
+          ref={refToUse}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
         />
-        <div className="relative w-full h-full flex-1 text-toolbar-white">
-          {isEmptyContent(content) && (
-            <div className="absolute top-1 left-1 pointer-events-none text-muted">
-              {placeholder}
-            </div>
-          )}
-          <div
-            ref={refToUse}
-            contentEditable
-            suppressContentEditableWarning
-            onInput={handleInput}
-            className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
-          />
-        </div>
       </div>
-
+    </div>
   );
 }

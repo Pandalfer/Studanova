@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Folder, Note } from "@/lib/types";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { loadFolders, loadNotes, saveNoteToDb } from "@/lib/note-storage";
+import { loadFolders, loadNotes, saveNoteToDb } from "@/lib/notes/note-storage";
 import {
   collectAllNotes,
   createNewFolder,

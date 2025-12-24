@@ -5,7 +5,7 @@ import { use, useEffect } from "react";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useRouter, usePathname } from "next/navigation";
-import { loadFolders, loadNotes } from "@/lib/note-storage";
+import { loadFolders, loadNotes } from "@/lib/notes/note-storage";
 import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
 
 interface PageProps {

@@ -30,7 +30,15 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
+import {
+  collectAllNotes,
+  findFolderPath,
+  flattenFolders,
+  findFolderPathByFolderId,
+  findFolderInFolders,
+  findNoteInFolders,
+} from "@/lib/notes/note-and-folder-actions";
+import { calculateLevenshteinDistance } from "@/lib/notes/levenshtein-distance";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -51,95 +59,103 @@ interface NotesSidebarProps {
   activeId?: string | null; // for DragOverlay
 }
 
-function findFolderPath(folders: Folder[], noteId: string): string[] {
-  for (const folder of folders) {
-    // Check direct children safely
-    if ((folder.notes ?? []).some((n) => n.id === noteId)) {
-      return [folder.id];
-    }
-
-    // Check nested folders safely
-    if (folder.folders && folder.folders.length > 0) {
-      const path = findFolderPath(folder.folders, noteId);
-      if (path.length > 0) {
-        return [folder.id, ...path];
-      }
-    }
-  }
-  return [];
-}
-
-function findFolderPathByFolderId(
-  folders: Folder[],
-  folderId: string,
-): string[] {
-  for (const folder of folders) {
-    if (folder.id === folderId) {
-      return [folder.id];
-    }
-
-    if (folder.folders && folder.folders.length > 0) {
-      const path = findFolderPathByFolderId(folder.folders, folderId);
-      if (path.length > 0) {
-        return [folder.id, ...path];
-      }
-    }
-  }
-  return [];
-}
-
-function flattenFolders(folders: Folder[]): Folder[] {
-  const result: Folder[] = [];
-
-  function walk(folders: Folder[]) {
-    for (const folder of folders) {
-      result.push(folder);
-
-      if (folder.folders && folder.folders.length > 0) {
-        walk(folder.folders);
-      }
-    }
-  }
-
-  walk(folders);
-  return result;
-}
-
 function NotesSidebarContent({
-                               notes,
-                               folders,
-                               onSelectNote,
-                               createNewNote,
-                               onDeleteNote,
-                               onDeleteFolder,
-                               onDuplicateNote,
-                               onDuplicateFolder,
-                               onRenameNote,
-                               onRenameFolder,
-                               activeNoteId,
-                               loading = false,
-                               createNewFolder,
-                             }: NotesSidebarProps) {
+  notes,
+  folders,
+  onSelectNote,
+  createNewNote,
+  onDeleteNote,
+  onDeleteFolder,
+  onDuplicateNote,
+  onDuplicateFolder,
+  onRenameNote,
+  onRenameFolder,
+  activeNoteId,
+  loading = false,
+  createNewFolder,
+}: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const isSearching = searchQuery.trim().length > 0;
-
   const allFolders = React.useMemo(() => flattenFolders(folders), [folders]);
 
+  const getDynamicThreshold = (queryLength: number): number => {
+    if (queryLength <= 2) return 0; // Must be exact for very short strings
+    if (queryLength <= 5) return 1; // Allow 1 typo
+    if (queryLength <= 8) return 2; // Allow 2 typos
+    return 3; // Max 3 typos for long strings
+  };
+
   const matchingFolders = React.useMemo(() => {
-    if (!isSearching) return [];
+    if (!isSearching || !searchQuery.trim()) return [];
+
     const q = searchQuery.toLowerCase();
-    return allFolders.filter((f) => f.title.toLowerCase().includes(q));
+    const threshold = getDynamicThreshold(q.length);
+
+    return allFolders
+      .map((folder) => {
+        const title = folder.title.toLowerCase();
+        if (title.includes(q)) {
+          return { ...folder, distance: 0 };
+        }
+        const distance = calculateLevenshteinDistance(q, title);
+        return { ...folder, distance };
+      })
+      .filter((f) => f.distance <= threshold)
+      .sort((a, b) => {
+        if (a.distance !== b.distance) {
+          return a.distance - b.distance;
+        }
+        return a.title.localeCompare(b.title);
+      });
   }, [isSearching, searchQuery, allFolders]);
 
   const matchingNotes = React.useMemo(() => {
-    if (!isSearching) return [];
+    if (!isSearching || !searchQuery.trim()) return [];
+
     const q = searchQuery.toLowerCase();
+    const threshold = getDynamicThreshold(q.length);
     const allNotes = [...collectAllNotes(folders), ...notes];
-    const nameRelatedNotes = allNotes.filter((n) => n.title.toLowerCase().includes(q));
-    const contentRelatedNotes = allNotes.filter((n) => n.content.toLowerCase().includes(q) && !nameRelatedNotes.includes(n));
-    return [...nameRelatedNotes, ...contentRelatedNotes];
-  }, [isSearching, searchQuery, notes]);
+    return allNotes
+      .map((note) => {
+        const noteTitle = note.title.toLowerCase();
+        // We strip HTML tags from content before searching so we don't match on <div> or <span>
+        const noteContent = note.content.toLowerCase().replace(/<[^>]*>/g, " ");
+
+        let distance = Infinity;
+        let matchSource: "title" | "content" | "none" = "none";
+
+        // 1. Priority: Title Contains
+        if (noteTitle.includes(q)) {
+          distance = 0;
+          matchSource = "title";
+        }
+        // 2. Secondary: Title Levenshtein (Typos)
+        else {
+          const titleDistance = calculateLevenshteinDistance(q, noteTitle);
+          if (titleDistance <= threshold) {
+            distance = titleDistance;
+            matchSource = "title";
+          }
+          // 3. Final: Content Contains (Simple check for body text)
+          else if (noteContent.includes(q)) {
+            distance = 1; // Give content matches a slight "penalty" so title matches show first
+            matchSource = "content";
+          }
+        }
+
+        return { ...note, distance, matchSource };
+      })
+      .filter((n) => n.matchSource !== "none")
+      .sort((a, b) => {
+        // Sort by closeness (distance) first
+        if (a.distance !== b.distance) {
+          return a.distance - b.distance;
+        }
+        // Then alphabetical
+        return a.title.localeCompare(b.title);
+      });
+  }, [isSearching, searchQuery]);
 
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
@@ -246,9 +262,10 @@ function NotesSidebarContent({
         />
       ) : (
         // Folders + Notes
-        // CHANGE: removed h-[calc...] and added flex-1
         <ScrollArea
-          className={`flex-1 pl-5 ${isDesktop ? "pr-5" : ""}`}
+          className={`pl-5 ${
+            isDesktop ? "pr-5" : ""
+          } flex flex-col h-[calc(100%-8.5rem)]`}
         >
           <div className="min-h-full flex flex-col">
             {isSearching ? (
@@ -288,7 +305,7 @@ function NotesSidebarContent({
               </>
             ) : (
               <>
-                <div className="flex flex-col gap-2 w-full min-w-0">
+                <div className="flex flex-col w-full min-w-0">
                   {folders.map((folder) => (
                     <div
                       key={folder.id}
@@ -312,14 +329,13 @@ function NotesSidebarContent({
                   ))}
                 </div>
 
-                {/* CHANGE: Changed flex-2 to flex-1 (grow) */}
                 <div
                   ref={setRootNodeRef}
-                  className={`rounded-md transition-colors w-full flex-1 flex flex-col mt-2 mb-2 ${
+                  className={`rounded-md transition-colors w-full flex-1 flex flex-col mb-2 ${
                     isRootOver ? "bg-primary/30" : ""
                   }`}
                 >
-                  <div className="flex flex-col gap-2 flex-1">
+                  <div className="flex flex-col flex-1">
                     {notes.map((note) => (
                       <NoteItem
                         key={note.id}
@@ -343,6 +359,7 @@ function NotesSidebarContent({
     </div>
   );
 }
+
 export function NotesSidebar(props: NotesSidebarProps) {
   class LeftClickMouseSensor extends MouseSensor {
     static activators = [
@@ -373,38 +390,6 @@ export function NotesSidebar(props: NotesSidebarProps) {
   const sensors = useSensors(mouseSensor, touchSensor);
 
   const [activeId, setActiveId] = React.useState<string | null>(null);
-
-  function findNoteInFolders(
-    folders: Folder[],
-    noteId: string,
-  ): Note | undefined {
-    for (const folder of folders) {
-      const note = folder.notes?.find((n) => n.id === noteId);
-      if (note) return note;
-
-      if (folder.folders) {
-        const found = findNoteInFolders(folder.folders, noteId);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  }
-
-  function findFolderInFolders(
-    folders: Folder[],
-    folderId: string,
-  ): Folder | undefined {
-    for (const Folder of folders) {
-      const folder = Folder.folders?.find((n) => n.id === folderId);
-      if (folder) return folder;
-
-      if (Folder.folders) {
-        const found = findFolderInFolders(Folder.folders, folderId);
-        if (found) return found;
-      }
-    }
-    return undefined;
-  }
 
   const activeNote =
     props.notes.find((n) => n.id === activeId) ??

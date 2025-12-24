@@ -26,7 +26,7 @@ import {
 } from "@/lib/notes/note-and-folder-actions";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { formatDate } from "@/lib/note-storage";
+import { formatDate } from "@/lib/notes/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
 function NoteItem({
