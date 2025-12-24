@@ -90,7 +90,14 @@ export async function POST(req: NextRequest) {
       nodes.sort((a, b) => a.title.localeCompare(b.title));
       for (const n of nodes) sortTree(n.folders);
     };
+    const sortNotes = (nodes: FolderDTO[]) => {
+      for (const n of nodes) {
+        n.notes.sort((a, b) => a.title.localeCompare(b.title));
+        sortNotes(n.folders);
+      }
+    }
     sortTree(roots);
+    sortNotes(roots);
 
     // Return the full folder tree as JSON
     return NextResponse.json({ folders: roots });

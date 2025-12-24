@@ -53,6 +53,8 @@ export default function NotesEditor({
     setContent(e.currentTarget.innerHTML ?? "");
   };
 
+
+
   if (loading) {
     return (
       <div className="w-190 mx-auto flex flex-col h-full pt-15">
@@ -69,28 +71,30 @@ export default function NotesEditor({
   }
 
   return (
-    <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
-      <NotesToolbar editorRef={refToUse} setContent={setContent} />
-      <Input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Note Title"
-        className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
-      />
-      <div className="relative w-full h-full flex-1 text-toolbar-white">
-        {isEmptyContent(content) && (
-          <div className="absolute top-1 left-1 pointer-events-none text-muted">
-            {placeholder}
-          </div>
-        )}
-        <div
-          ref={refToUse}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={handleInput}
-          className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
+
+      <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
+        <NotesToolbar editorRef={refToUse} setContent={setContent}/>
+        <Input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Note Title"
+          className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
         />
+        <div className="relative w-full h-full flex-1 text-toolbar-white">
+          {isEmptyContent(content) && (
+            <div className="absolute top-1 left-1 pointer-events-none text-muted">
+              {placeholder}
+            </div>
+          )}
+          <div
+            ref={refToUse}
+            contentEditable
+            suppressContentEditableWarning
+            onInput={handleInput}
+            className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
+          />
+        </div>
       </div>
-    </div>
+
   );
 }

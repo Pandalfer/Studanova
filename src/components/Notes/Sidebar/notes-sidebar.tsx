@@ -136,7 +136,9 @@ function NotesSidebarContent({
     if (!isSearching) return [];
     const q = searchQuery.toLowerCase();
     const allNotes = [...collectAllNotes(folders), ...notes];
-    return allNotes.filter((n) => n.title.toLowerCase().includes(q));
+    const nameRelatedNotes = allNotes.filter((n) => n.title.toLowerCase().includes(q));
+    const contentRelatedNotes = allNotes.filter((n) => n.content.toLowerCase().includes(q) && !nameRelatedNotes.includes(n));
+    return [...nameRelatedNotes, ...contentRelatedNotes];
   }, [isSearching, searchQuery, notes]);
 
   const isDesktop = useMediaQuery("(min-width: 640px)", {
