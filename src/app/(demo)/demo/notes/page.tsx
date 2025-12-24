@@ -3,7 +3,7 @@
 import NotesEmptyState from "@/components/Notes/empty-state";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
-import {useDemoNotes} from "@/hooks/use-demo-notes";
+import { useDemoNotes } from "@/hooks/use-demo-notes";
 
 export default function DemoNotesPage() {
   const {

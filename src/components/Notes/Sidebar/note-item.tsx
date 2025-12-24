@@ -36,6 +36,7 @@ function NoteItem({
   onDeleteNote,
   onDuplicateNote,
   onRenameNote,
+  handleNoteSelect,
 }: {
   note: Note;
   activeNoteId?: string;
@@ -43,6 +44,7 @@ function NoteItem({
   onDeleteNote: (id: string) => void;
   onDuplicateNote: (note: Note) => void;
   onRenameNote: (note: Note, newTitle: string) => void;
+  handleNoteSelect?: (note: Note) => void;
 }) {
   const { uuid } = useParams() as { uuid: string };
 
@@ -92,7 +94,10 @@ function NoteItem({
                 ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90 hover:bg-primary/90"
                 : "dark:hover:bg-accent hover:bg-accent"
             }`}
-            onClick={handleSelect}
+            onClick={() => {
+              handleSelect();
+              handleNoteSelect?.(note);
+            }}
           >
             <h3 className="text-sm font-medium leading-tight truncate w-full">
               {note.title.substring(0, 40)}

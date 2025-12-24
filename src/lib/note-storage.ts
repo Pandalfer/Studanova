@@ -1,7 +1,7 @@
 import { Folder, FolderInput, Note } from "@/lib/types";
 
-const NOTES_KEY = "demo_notes"
-const FOLDERS_KEY = "demo_folders"
+const NOTES_KEY = "demo_notes";
+const FOLDERS_KEY = "demo_folders";
 //region Database ( Logged-In users )
 //region loading
 export async function loadNotes(uuid: string): Promise<Note[]> {
@@ -102,13 +102,13 @@ export async function deleteFolderFromDb(id: string): Promise<void> {
 //endregion
 //region Demo (localStorage)
 export function saveDemoNotes(notes: Note[]) {
-  if (typeof window === "undefined") return
-  localStorage.setItem(NOTES_KEY, JSON.stringify(notes))
+  if (typeof window === "undefined") return;
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
 }
 
 export function loadDemoNotes(): Note[] {
-  if (typeof window === "undefined") return []
-  return JSON.parse(localStorage.getItem(NOTES_KEY) ?? "[]")
+  if (typeof window === "undefined") return [];
+  return JSON.parse(localStorage.getItem(NOTES_KEY) ?? "[]");
 }
 
 export function formatDate(timestamp: number): string {
@@ -121,12 +121,12 @@ export function formatDate(timestamp: number): string {
 }
 
 export function saveDemoFolders(folders: Folder[]) {
-  if (typeof window === "undefined") return
-  localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders))
+  if (typeof window === "undefined") return;
+  localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders));
 }
 
 export function loadDemoFolders(): Folder[] {
-  if (typeof window === "undefined") return []
-  return JSON.parse(localStorage.getItem(FOLDERS_KEY) ?? "[]")
+  if (typeof window === "undefined") return [];
+  return JSON.parse(localStorage.getItem(FOLDERS_KEY) ?? "[]");
 }
 //endregion

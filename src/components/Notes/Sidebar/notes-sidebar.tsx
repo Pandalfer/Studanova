@@ -7,6 +7,7 @@ import {
   Folder as FolderIcon,
   FolderPen,
   NotepadText,
+  Search,
   SquarePen,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +25,12 @@ import {
   type MouseSensorOptions,
 } from "@dnd-kit/core";
 import type { MouseEvent as ReactMouseEvent } from "react";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -62,6 +69,42 @@ function findFolderPath(folders: Folder[], noteId: string): string[] {
   return [];
 }
 
+function findFolderPathByFolderId(
+  folders: Folder[],
+  folderId: string,
+): string[] {
+  for (const folder of folders) {
+    if (folder.id === folderId) {
+      return [folder.id];
+    }
+
+    if (folder.folders && folder.folders.length > 0) {
+      const path = findFolderPathByFolderId(folder.folders, folderId);
+      if (path.length > 0) {
+        return [folder.id, ...path];
+      }
+    }
+  }
+  return [];
+}
+
+function flattenFolders(folders: Folder[]): Folder[] {
+  const result: Folder[] = [];
+
+  function walk(folders: Folder[]) {
+    for (const folder of folders) {
+      result.push(folder);
+
+      if (folder.folders && folder.folders.length > 0) {
+        walk(folder.folders);
+      }
+    }
+  }
+
+  walk(folders);
+  return result;
+}
+
 function NotesSidebarContent({
   notes,
   folders,
@@ -78,6 +121,24 @@ function NotesSidebarContent({
   createNewFolder,
 }: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const isSearching = searchQuery.trim().length > 0;
+
+  const allFolders = React.useMemo(() => flattenFolders(folders), [folders]);
+
+  const matchingFolders = React.useMemo(() => {
+    if (!isSearching) return [];
+    const q = searchQuery.toLowerCase();
+    return allFolders.filter((f) => f.title.toLowerCase().includes(q));
+  }, [isSearching, searchQuery, allFolders]);
+
+  const matchingNotes = React.useMemo(() => {
+    if (!isSearching) return [];
+    const q = searchQuery.toLowerCase();
+    const allNotes = [...collectAllNotes(folders), ...notes];
+    return allNotes.filter((n) => n.title.toLowerCase().includes(q));
+  }, [isSearching, searchQuery, notes]);
+
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
   });
@@ -104,10 +165,22 @@ function NotesSidebarContent({
     }
   }, [activeNoteId]);
 
+  const handleSelectFolder = (folder: Folder) => {
+    const path = findFolderPathByFolderId(folders, folder.id);
+    setOpenFolders(path);
+    setSearchQuery("");
+  };
+
+  const handleSelectNote = (note: Note) => {
+    const path = findFolderPath(folders, note.id);
+    setOpenFolders(path);
+    setSearchQuery("");
+  };
+
   return (
     <>
       {/* Toolbar */}
-      <div className="justify-center flex p-5">
+      <div className="justify-center flex p-5 pb-0">
         <Button
           onClick={createNewNote}
           className="aspect-square"
@@ -122,6 +195,30 @@ function NotesSidebarContent({
         >
           <FolderPen />
         </Button>
+      </div>
+
+      <div className={"justify-center flex p-5"}>
+        <InputGroup className="!bg-card">
+          <InputGroupInput
+            placeholder="Search..."
+            className="placeholder:text-muted"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setSearchQuery("");
+            }}
+          />
+          <InputGroupAddon>
+            <Search className="!text-muted" />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end" className={"text-muted"}>
+            {isSearching
+              ? `${matchingNotes.length + matchingFolders.length} results`
+              : null}
+          </InputGroupAddon>
+        </InputGroup>
       </div>
 
       {/* Loading Skeleton */}
@@ -153,16 +250,15 @@ function NotesSidebarContent({
           } flex flex-col h-[calc(100%-5rem)]`}
         >
           <div className="min-h-full flex flex-col">
-            <div className="flex flex-col gap-2 w-full min-w-0">
-              {folders.map((folder) => (
-                <div
-                  key={folder.id}
-                  className="rounded-md transition-colors min-w-0"
-                >
+            {isSearching ? (
+              <>
+                {matchingFolders.map((folder) => (
                   <FolderItem
+                    key={folder.id}
                     folder={folder}
                     openFolders={openFolders}
                     setOpenFolders={setOpenFolders}
+                    onSelectFolder={() => handleSelectFolder(folder)}
                     onSelectNote={onSelectNote}
                     onRenameNote={onRenameNote}
                     onRenameFolder={onRenameFolder}
@@ -171,21 +267,13 @@ function NotesSidebarContent({
                     onDuplicateNote={onDuplicateNote}
                     onDuplicateFolder={onDuplicateFolder}
                     activeNoteId={activeNoteId}
+                    renderChildren={false}
                   />
-                </div>
-              ))}
-            </div>
-
-            <div
-              ref={setRootNodeRef}
-              className={`rounded-md transition-colors w-full flex-2 flex flex-col mt-2 mb-2 ${
-                isRootOver ? "bg-primary/30" : ""
-              }`}
-            >
-              <div className="flex flex-col gap-2 flex-1">
-                {notes.map((note) => (
+                ))}
+                {matchingNotes.map((note) => (
                   <NoteItem
                     key={note.id}
+                    handleNoteSelect={handleSelectNote}
                     {...{
                       note,
                       onSelectNote,
@@ -196,8 +284,57 @@ function NotesSidebarContent({
                     }}
                   />
                 ))}
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col gap-2 w-full min-w-0">
+                  {folders.map((folder) => (
+                    <div
+                      key={folder.id}
+                      className="rounded-md transition-colors min-w-0"
+                    >
+                      <FolderItem
+                        folder={folder}
+                        openFolders={openFolders}
+                        setOpenFolders={setOpenFolders}
+                        onSelectNote={onSelectNote}
+                        onRenameNote={onRenameNote}
+                        onRenameFolder={onRenameFolder}
+                        onDeleteNote={onDeleteNote}
+                        onDeleteFolder={onDeleteFolder}
+                        onDuplicateNote={onDuplicateNote}
+                        onDuplicateFolder={onDuplicateFolder}
+                        activeNoteId={activeNoteId}
+                        onSelectFolder={handleSelectFolder}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  ref={setRootNodeRef}
+                  className={`rounded-md transition-colors w-full flex-2 flex flex-col mt-2 mb-2 ${
+                    isRootOver ? "bg-primary/30" : ""
+                  }`}
+                >
+                  <div className="flex flex-col gap-2 flex-1">
+                    {notes.map((note) => (
+                      <NoteItem
+                        key={note.id}
+                        {...{
+                          note,
+                          onSelectNote,
+                          onRenameNote,
+                          onDeleteNote,
+                          onDuplicateNote,
+                          activeNoteId,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </ScrollArea>
       )}

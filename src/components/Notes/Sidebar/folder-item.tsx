@@ -45,6 +45,8 @@ function FolderItem({
   onDuplicateNote,
   onDuplicateFolder,
   activeNoteId,
+  onSelectFolder,
+  renderChildren = true,
 }: {
   folder: Folder;
   openFolders: string[];
@@ -57,6 +59,8 @@ function FolderItem({
   onDuplicateNote: (note: Note) => void;
   onDuplicateFolder: (folder: Folder) => void;
   activeNoteId?: string;
+  onSelectFolder?: (folder: Folder) => void;
+  renderChildren?: boolean;
 }) {
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -122,13 +126,13 @@ function FolderItem({
       <div {...attributes} {...listeners} style={{}} ref={setDraggableNodeRef}>
         <Accordion
           type="multiple"
-          value={openFolders}
+          value={renderChildren ? openFolders : []}
           onValueChange={(newValue) => {
+            if (!renderChildren) return;
             if (
               openFolders.includes(folder.id) &&
               !newValue.includes(folder.id)
             ) {
-              // folder is being closed
               const descendantIds = collectDescendantFolderIds(folder);
               setOpenFolders(
                 newValue.filter((id) => !descendantIds.includes(id)),
@@ -144,6 +148,10 @@ function FolderItem({
                 <AccordionTrigger
                   className={`h-12 min-w-60 w-full flex items-center ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
                   arrow="left"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectFolder?.(folder);
+                  }}
                 >
                   <h3 className="text-sm font-medium leading-tight truncate w-full font-bold">
                     {folder.title.substring(0, 25)}
@@ -263,50 +271,57 @@ function FolderItem({
             </ContextMenu>
 
             <AccordionContent className="mt-2">
-              <div
-                className={`flex flex-col pl-4 border-l ${isClosestFolder ? "border-muted" : "border-border"}`}
-              >
-                {/* Nested Folders */}
-                {folder.folders?.map((subfolder) => (
-                  <div
-                    key={subfolder.id}
-                    className="rounded-md transition-colors"
-                  >
-                    <FolderItem
-                      folder={subfolder}
-                      openFolders={openFolders}
-                      setOpenFolders={setOpenFolders}
-                      onSelectNote={onSelectNote}
-                      onRenameNote={onRenameNote}
-                      onRenameFolder={onRenameFolder}
-                      onDeleteNote={onDeleteNote}
-                      onDeleteFolder={onDeleteFolder}
-                      onDuplicateNote={onDuplicateNote}
-                      onDuplicateFolder={onDuplicateFolder}
-                      activeNoteId={activeNoteId}
-                    />
-                  </div>
-                ))}
-
-                {/* Notes */}
-                <SortableContext
-                  items={folder.notes ?? []}
-                  strategy={verticalListSortingStrategy}
+              {renderChildren && (
+                <div
+                  className={`flex flex-col pl-4 border-l ${isClosestFolder ? "border-muted" : "border-border"}`}
                 >
-                  {folder.notes?.map((note) => (
-                    <div key={note.id} className="rounded-md transition-colors">
-                      <NoteItem
-                        note={note}
+                  {/* Nested Folders */}
+                  {folder.folders?.map((subfolder) => (
+                    <div
+                      key={subfolder.id}
+                      className="rounded-md transition-colors"
+                    >
+                      <FolderItem
+                        folder={subfolder}
+                        openFolders={openFolders}
+                        setOpenFolders={setOpenFolders}
                         onSelectNote={onSelectNote}
                         onRenameNote={onRenameNote}
+                        onRenameFolder={onRenameFolder}
                         onDeleteNote={onDeleteNote}
+                        onDeleteFolder={onDeleteFolder}
                         onDuplicateNote={onDuplicateNote}
+                        onDuplicateFolder={onDuplicateFolder}
                         activeNoteId={activeNoteId}
+                        onSelectFolder={onSelectFolder}
+                        renderChildren={renderChildren} // propagate the flag
                       />
                     </div>
                   ))}
-                </SortableContext>
-              </div>
+
+                  {/* Notes */}
+                  <SortableContext
+                    items={folder.notes ?? []}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {folder.notes?.map((note) => (
+                      <div
+                        key={note.id}
+                        className="rounded-md transition-colors"
+                      >
+                        <NoteItem
+                          note={note}
+                          onSelectNote={onSelectNote}
+                          onRenameNote={onRenameNote}
+                          onDeleteNote={onDeleteNote}
+                          onDuplicateNote={onDuplicateNote}
+                          activeNoteId={activeNoteId}
+                        />
+                      </div>
+                    ))}
+                  </SortableContext>
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         </Accordion>
