@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
+import DOMPurify from 'dompurify';
 
 interface NoteEditorProps {
   note: Note;
@@ -50,7 +51,12 @@ export default function NotesEditor({
     text.replace("<br>", "").length === 0;
 
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    setContent(e.currentTarget.innerHTML ?? "");
+    const rawHTML = e.currentTarget.innerHTML ?? "";
+    const cleanHTML = DOMPurify.sanitize(rawHTML, {
+      ALLOWED_TAGS: ["b", "i", "u", "span", "div", "br", "h1", "h2", "h3", "p", "font"],
+      ALLOWED_ATTR: ["style", "class", "color"],
+    });
+    setContent(cleanHTML);
   };
 
 
