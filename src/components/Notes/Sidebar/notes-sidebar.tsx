@@ -106,20 +106,20 @@ function flattenFolders(folders: Folder[]): Folder[] {
 }
 
 function NotesSidebarContent({
-  notes,
-  folders,
-  onSelectNote,
-  createNewNote,
-  onDeleteNote,
-  onDeleteFolder,
-  onDuplicateNote,
-  onDuplicateFolder,
-  onRenameNote,
-  onRenameFolder,
-  activeNoteId,
-  loading = false,
-  createNewFolder,
-}: NotesSidebarProps) {
+                               notes,
+                               folders,
+                               onSelectNote,
+                               createNewNote,
+                               onDeleteNote,
+                               onDeleteFolder,
+                               onDuplicateNote,
+                               onDuplicateFolder,
+                               onRenameNote,
+                               onRenameFolder,
+                               activeNoteId,
+                               loading = false,
+                               createNewFolder,
+                             }: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const isSearching = searchQuery.trim().length > 0;
@@ -178,9 +178,8 @@ function NotesSidebarContent({
   };
 
   return (
-    <>
-      {/* Toolbar */}
-      <div className="justify-center flex p-5 pb-0">
+    <div className="flex flex-col h-full">
+      <div className="justify-center flex p-5 pb-0 shrink-0">
         <Button
           onClick={createNewNote}
           className="aspect-square"
@@ -197,7 +196,8 @@ function NotesSidebarContent({
         </Button>
       </div>
 
-      <div className={"justify-center flex p-5"}>
+      {/* Search Bar */}
+      <div className="justify-center flex p-5 shrink-0">
         <InputGroup className="!bg-card">
           <InputGroupInput
             placeholder="Search..."
@@ -223,7 +223,7 @@ function NotesSidebarContent({
 
       {/* Loading Skeleton */}
       {loading ? (
-        <ScrollArea className="h-full pr-5 pl-5">
+        <ScrollArea className="flex-1 pr-5 pl-5">
           <div className="flex flex-col gap-2 w-full">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
@@ -244,10 +244,9 @@ function NotesSidebarContent({
         />
       ) : (
         // Folders + Notes
+        // CHANGE: removed h-[calc...] and added flex-1
         <ScrollArea
-          className={`pl-5 ${
-            isDesktop ? "pr-5" : ""
-          } flex flex-col h-[calc(100%-5rem)]`}
+          className={`flex-1 pl-5 ${isDesktop ? "pr-5" : ""}`}
         >
           <div className="min-h-full flex flex-col">
             {isSearching ? (
@@ -311,9 +310,10 @@ function NotesSidebarContent({
                   ))}
                 </div>
 
+                {/* CHANGE: Changed flex-2 to flex-1 (grow) */}
                 <div
                   ref={setRootNodeRef}
-                  className={`rounded-md transition-colors w-full flex-2 flex flex-col mt-2 mb-2 ${
+                  className={`rounded-md transition-colors w-full flex-1 flex flex-col mt-2 mb-2 ${
                     isRootOver ? "bg-primary/30" : ""
                   }`}
                 >
@@ -338,10 +338,9 @@ function NotesSidebarContent({
           </div>
         </ScrollArea>
       )}
-    </>
+    </div>
   );
 }
-
 export function NotesSidebar(props: NotesSidebarProps) {
   class LeftClickMouseSensor extends MouseSensor {
     static activators = [
