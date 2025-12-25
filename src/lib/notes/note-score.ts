@@ -49,6 +49,7 @@ export function tokenizeText(text: string): string[] {
 }
 
 export function removeStopWords(tokens: string[]): string[] {
+  if (tokens.length <= 1) return tokens;
   const stopWords = new Set([
     "a",
     "also",

@@ -98,6 +98,7 @@ function NoteItem({
               handleSelect();
               handleNoteSelect?.(note);
             }}
+            data-active-note={activeNoteId === note.id}
           >
             <h3 className="text-sm font-medium leading-tight truncate w-full">
               {note.title.substring(0, 40)}

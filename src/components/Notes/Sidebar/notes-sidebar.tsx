@@ -135,6 +135,22 @@ function NotesSidebarContent({
     }
   }, [activeNoteId]);
 
+  React.useEffect(() => {
+    if (!activeNoteId) return;
+    const timeoutId = setTimeout(() => {
+      const activeElement = document.querySelector('[data-active-note="true"]');
+
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }, 150);
+
+    return () => clearTimeout(timeoutId);
+  }, [activeNoteId]);
+
   const handleSelectFolder = (folder: Folder) => {
     const path = findFolderPathByFolderId(folders, folder.id);
     setOpenFolders(path);
