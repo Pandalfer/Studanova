@@ -191,7 +191,7 @@ function FolderItem({
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Rename Note</AlertDialogTitle>
+                      <AlertDialogTitle>Rename Folder</AlertDialogTitle>
                     </AlertDialogHeader>
                     <Input
                       id="rename-input"

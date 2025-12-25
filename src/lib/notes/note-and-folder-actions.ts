@@ -35,24 +35,20 @@ export const openNoteInNewTab = (userId: string, noteId: string) => {
 //region Logged In Actions
 //region Note Actions
 export function collectAllNotes(folders: Folder[]): Note[] {
-  const result: Note[] = [];
-  for (const folder of folders) {
-    result.push(...(folder.notes ?? []));
-    if (folder.folders && folder.folders.length > 0) {
-      result.push(...collectAllNotes(folder.folders));
-    }
-  }
-  return result.sort((a, b) => a.title.localeCompare(b.title));
+  const notes: Note[] = [];
+  traverseFolders(folders, (folder) => {
+    notes.push(...(folder.notes ?? []));
+  });
+  return sortByTitle(notes);
 }
 
 export function deleteNoteFromFolders(
   folders: Folder[],
   noteId: string,
 ): Folder[] {
-  return folders.map((folder) => ({
+  return mapFolders(folders, (folder) => ({
     ...folder,
     notes: (folder.notes ?? []).filter((n) => n.id !== noteId),
-    folders: deleteNoteFromFolders(folder.folders ?? [], noteId),
   }));
 }
 
@@ -60,13 +56,11 @@ export function renameNoteInFolders(
   folders: Folder[],
   updatedNote: Note,
 ): Folder[] {
-  return folders.map((folder) => ({
+  return mapFolders(folders, (folder) => ({
     ...folder,
-    notes: (folder.notes ?? [])
-      .map((n) => (n.id === updatedNote.id ? updatedNote : n))
-      .sort((a, b) => a.title.localeCompare(b.title)),
-    folders: renameNoteInFolders(folder.folders ?? [], updatedNote),
-  }));
+    notes: sortByTitle((folder.notes ?? [])
+      .map((n) => (n.id === updatedNote.id ? updatedNote : n))),
+  }))
 }
 
 export function moveNote(
@@ -115,16 +109,14 @@ export function moveNote(
           if (folder.id === folderId) {
             return {
               ...folder,
-              notes: [...cleanedNotes, updatedNote].sort((a, b) =>
-                a.title.localeCompare(b.title),
-              ),
+              notes: sortByTitle([...cleanedNotes, updatedNote]),
               folders: updateFolders(folder.folders ?? []),
             };
           }
 
           return {
             ...folder,
-            notes: cleanedNotes.sort((a, b) => a.title.localeCompare(b.title)),
+            notes: sortByTitle(cleanedNotes),
             folders: updateFolders(folder.folders ?? []),
           };
         });
@@ -132,7 +124,7 @@ export function moveNote(
       return updateFolders(prevFolders);
     });
 
-    return nextNotes.sort((a, b) => a.title.localeCompare(b.title));
+    return sortByTitle(nextNotes);
   });
 }
 
@@ -165,9 +157,7 @@ export async function duplicateNote(
           if (folder.id === newNote.folderId) {
             return {
               ...folder,
-              notes: [...folder.notes, newNote].sort((a, b) =>
-                a.title.localeCompare(b.title),
-              ),
+              notes: sortByTitle([...(folder.notes ?? []), newNote]),
             };
           }
 
@@ -180,7 +170,7 @@ export async function duplicateNote(
     });
   } else {
     setNotes((prev) =>
-      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+      sortByTitle([...prev, newNote]),
     );
   }
 }
@@ -240,9 +230,8 @@ export async function renameNote(
     if (!savedNote) return;
     if (!savedNote.folderId) {
       setNotes((prev) =>
-        prev
-          .map((n) => (n.id === savedNote.id ? savedNote : n))
-          .sort((a, b) => a.title.localeCompare(b.title)),
+        sortByTitle(prev
+          .map((n) => (n.id === savedNote.id ? savedNote : n))),
       );
     } else {
       setFolders((prev) => renameNoteInFolders(prev, savedNote));
@@ -276,7 +265,7 @@ export async function createNewNote(
 
   if (notes && setNotes) {
     setNotes((prev) =>
-      [...prev, newNote].sort((a, b) => a.title.localeCompare(b.title)),
+      sortByTitle([...prev, newNote]),
     );
   }
 
@@ -336,9 +325,8 @@ export async function selectNote(
 export function sortFoldersRecursively(folders: Folder[]): Folder[] {
   return folders.map((folder) => ({
     ...folder,
-    notes: (folder.notes ?? [])
-      .slice()
-      .sort((a, b) => a.title.localeCompare(b.title)),
+    notes: sortByTitle((folder.notes ?? [])
+      .slice()),
     folders: sortFoldersRecursively(folder.folders ?? []),
   }));
 }
@@ -353,7 +341,7 @@ export async function duplicateFolder(
     parentId?: string,
   ): Promise<Folder> {
     const newFolder: Omit<Folder, "id"> = {
-      title: f.title,
+      title: f.title + " (Copy)",
       studentId: f.studentId,
       notes: [],
       folders: [],
@@ -400,9 +388,7 @@ export async function duplicateFolder(
             if (f.id === duplicated.parentId) {
               return {
                 ...f,
-                folders: [...(f.folders ?? []), duplicated].sort((a, b) =>
-                  a.title.localeCompare(b.title),
-                ),
+                folders: sortByTitle([...(f.folders ?? []), duplicated])
               };
             }
             return {
@@ -415,7 +401,7 @@ export async function duplicateFolder(
       });
     } else {
       setFolders((prev) =>
-        [...prev, duplicated].sort((a, b) => a.title.localeCompare(b.title)),
+        sortByTitle([...prev, duplicated]),
       );
     }
   } catch {
@@ -425,13 +411,11 @@ export async function duplicateFolder(
 
 export function collectAllFolders(folders: Folder[]): Folder[] {
   const result: Folder[] = [];
-  for (const folder of folders) {
+  traverseFolders(folders, (folder) => {
     result.push(folder);
-    if (folder.folders && folder.folders.length > 0) {
-      result.push(...collectAllFolders(folder.folders));
-    }
-  }
-  return result.sort((a, b) => a.title.localeCompare(b.title));
+  });
+
+  return sortByTitle(result);
 }
 
 export function moveFolder(
@@ -462,7 +446,6 @@ export function moveFolder(
   }
 
   setFolders((prevFolders) => {
-    // Remove the folder from all levels
     const removeFolder = (folders: Folder[]): Folder[] =>
       folders
         .filter((f) => f.id !== folderId)
@@ -475,9 +458,7 @@ export function moveFolder(
 
     if (!parentId) {
       // Moving to root
-      return [...cleaned, updatedFolder].sort((a, b) =>
-        a.title.localeCompare(b.title),
-      );
+      return sortByTitle([...cleaned, updatedFolder]);
     }
 
     // Moving inside another folder
@@ -486,9 +467,7 @@ export function moveFolder(
         f.id === parentId
           ? {
               ...f,
-              folders: [...(f.folders ?? []), updatedFolder].sort((a, b) =>
-                a.title.localeCompare(b.title),
-              ),
+              folders: sortByTitle([...(f.folders ?? []), updatedFolder])
             }
           : { ...f, folders: addToParent(f.folders ?? []) },
       );
@@ -503,32 +482,19 @@ export async function renameFolder(
   uuid: string,
   setFolders: React.Dispatch<React.SetStateAction<Folder[]>>,
 ) {
-  const updatedFolder: Folder = {
-    ...folder,
-    title: newTitle.trim() || "Untitled Folder",
-  };
   try {
-    const savedFolder = await saveFolderToDb(updatedFolder, uuid);
-    const folderWithContent = {
-      ...savedFolder,
-      folders: folder.folders,
-      notes: folder.notes,
-    };
-    if (folderWithContent) {
-      setFolders((prev) => {
-        const updateFolders = (folders: Folder[]): Folder[] =>
-          folders.map((f) => {
-            if (f.id === folderWithContent.id) {
-              return folderWithContent;
-            }
-            return {
-              ...f,
-              folders: updateFolders(f.folders ?? []),
-            };
-          });
-        return updateFolders(prev);
-      });
-    }
+    const saved = await saveFolderToDb(
+      { ...folder, title: newTitle.trim() || "Untitled Folder" },
+      uuid,
+    );
+
+    setFolders((prev) =>
+      mapFolders(prev, (f) =>
+        f.id === saved.id
+          ? { ...saved, folders: f.folders, notes: f.notes }
+          : f,
+      ),
+    );
   } catch {
     toast.error("Failed to rename folder");
   }
@@ -626,11 +592,6 @@ export async function deleteFolder(
   }
 }
 
-//endregion
-//endregion
-//region Demo Actions
-
-//endregion
 export function findFolderPath(folders: Folder[], noteId: string): string[] {
   for (const folder of folders) {
     // Check direct children safely
@@ -689,30 +650,60 @@ export function findNoteInFolders(
   folders: Folder[],
   noteId: string,
 ): Note | undefined {
-  for (const folder of folders) {
-    const note = folder.notes?.find((n) => n.id === noteId);
-    if (note) return note;
-
-    if (folder.folders) {
-      const found = findNoteInFolders(folder.folders, noteId);
-      if (found) return found;
+  let found: Note | undefined;
+  traverseFolders(folders, (folder) => {
+    if (!found) {
+      found = folder.notes?.find((n) => n.id === noteId);
     }
-  }
-  return undefined;
+  });
+  return found;
 }
 
 export function findFolderInFolders(
   folders: Folder[],
   folderId: string,
 ): Folder | undefined {
-  for (const Folder of folders) {
-    const folder = Folder.folders?.find((n) => n.id === folderId);
-    if (folder) return folder;
+  let found: Folder | undefined;
+  traverseFolders(folders, (folder) => {
+    if (!found && folder.id === folderId) {
+      found = folder;
+    }
+  });
+  return found;
+}
 
-    if (Folder.folders) {
-      const found = findFolderInFolders(Folder.folders, folderId);
-      if (found) return found;
+//endregion
+//endregion
+
+//region Helper functions
+export function traverseFolders(
+  folders: Folder[],
+  visit: (folder: Folder) => void,
+) {
+  for (const folder of folders) {
+    visit(folder);
+    if (folder.folders?.length) {
+      traverseFolders(folder.folders, visit);
     }
   }
-  return undefined;
 }
+
+export function mapFolders(
+  folders: Folder[],
+  mapper: (folder: Folder) => Folder,
+): Folder[] {
+  return folders.map((folder) => {
+    const mapped = mapper(folder);
+    return {
+      ...mapped,
+      folders: folder.folders
+        ? mapFolders(folder.folders, mapper)
+        : folder.folders,
+    };
+  });
+}
+
+export function sortByTitle<T extends { title: string }>(items: T[]): T[] {
+  return items.slice().sort((a, b) => a.title.localeCompare(b.title));
+}
+//endregion

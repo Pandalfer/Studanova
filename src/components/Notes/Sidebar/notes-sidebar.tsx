@@ -119,7 +119,7 @@ function NotesSidebarContent({
     return allNotes
       .map((note) => {
         const noteTitle = note.title.toLowerCase();
-        // We strip HTML tags from content before searching so we don't match on <div> or <span>
+        // strip HTML tags from content before searching
         const noteContent = note.content.toLowerCase().replace(/<[^>]*>/g, " ");
 
         let distance = Infinity;

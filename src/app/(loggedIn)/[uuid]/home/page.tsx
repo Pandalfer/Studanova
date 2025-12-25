@@ -66,7 +66,7 @@ export default function LoggedInHome({ params }: PageProps) {
   return (
     <div className="w-full min-h-screen flex items-center justify-center flex-col gap-10">
       <h1 className="text-white text-3xl font-bold">
-        Welcome back, {username}!
+        Welcome, {username}!
       </h1>
       <p className="text-muted mt-2">
         You have {numberOfNotes !== null ? numberOfNotes : "loading..."} notes.
