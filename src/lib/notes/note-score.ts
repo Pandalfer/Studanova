@@ -45,7 +45,7 @@ export function stripText(text: string): string {
 }
 
 export function tokenizeText(text: string): string[] {
-  return text.split(/\s+/).filter(t => t.length > 0);
+  return text.split(/\s+/).filter((t) => t.length > 0);
 }
 
 export function removeStopWords(tokens: string[]): string[] {
@@ -90,9 +90,9 @@ export function removeStopWords(tokens: string[]): string[] {
     "whether",
     "which",
     "with",
-    "would"
+    "would",
   ]);
-  return tokens.filter(token => !stopWords.has(token));
+  return tokens.filter((token) => !stopWords.has(token));
 }
 
 const getDynamicThreshold = (queryLength: number): number => {
@@ -102,7 +102,10 @@ const getDynamicThreshold = (queryLength: number): number => {
   return 3; // Max 3 typos for long strings
 };
 
-export function calculateScores(queryTokens: string[], textTokens: string[]): number {
+export function calculateScores(
+  queryTokens: string[],
+  textTokens: string[],
+): number {
   if (queryTokens.length === 0) return 0;
 
   let totalMatchScore = 0;
@@ -129,7 +132,8 @@ export function calculateScores(queryTokens: string[], textTokens: string[]): nu
       const distance = calculateLevenshteinDistance(qToken, tToken);
 
       if (distance <= threshold) {
-        const fuzzyScore = 1 - (distance / Math.max(qToken.length, tToken.length));
+        const fuzzyScore =
+          1 - distance / Math.max(qToken.length, tToken.length);
         bestTokenScore = Math.max(bestTokenScore, fuzzyScore);
       }
     }

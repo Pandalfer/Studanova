@@ -58,9 +58,12 @@ export function renameNoteInFolders(
 ): Folder[] {
   return mapFolders(folders, (folder) => ({
     ...folder,
-    notes: sortByTitle((folder.notes ?? [])
-      .map((n) => (n.id === updatedNote.id ? updatedNote : n))),
-  }))
+    notes: sortByTitle(
+      (folder.notes ?? []).map((n) =>
+        n.id === updatedNote.id ? updatedNote : n,
+      ),
+    ),
+  }));
 }
 
 export function moveNote(
@@ -169,9 +172,7 @@ export async function duplicateNote(
       return updateFolders(prevFolders);
     });
   } else {
-    setNotes((prev) =>
-      sortByTitle([...prev, newNote]),
-    );
+    setNotes((prev) => sortByTitle([...prev, newNote]));
   }
 }
 
@@ -230,8 +231,7 @@ export async function renameNote(
     if (!savedNote) return;
     if (!savedNote.folderId) {
       setNotes((prev) =>
-        sortByTitle(prev
-          .map((n) => (n.id === savedNote.id ? savedNote : n))),
+        sortByTitle(prev.map((n) => (n.id === savedNote.id ? savedNote : n))),
       );
     } else {
       setFolders((prev) => renameNoteInFolders(prev, savedNote));
@@ -264,9 +264,7 @@ export async function createNewNote(
   };
 
   if (notes && setNotes) {
-    setNotes((prev) =>
-      sortByTitle([...prev, newNote]),
-    );
+    setNotes((prev) => sortByTitle([...prev, newNote]));
   }
 
   setActiveNote?.(newNote);
@@ -325,8 +323,7 @@ export async function selectNote(
 export function sortFoldersRecursively(folders: Folder[]): Folder[] {
   return folders.map((folder) => ({
     ...folder,
-    notes: sortByTitle((folder.notes ?? [])
-      .slice()),
+    notes: sortByTitle((folder.notes ?? []).slice()),
     folders: sortFoldersRecursively(folder.folders ?? []),
   }));
 }
@@ -388,7 +385,7 @@ export async function duplicateFolder(
             if (f.id === duplicated.parentId) {
               return {
                 ...f,
-                folders: sortByTitle([...(f.folders ?? []), duplicated])
+                folders: sortByTitle([...(f.folders ?? []), duplicated]),
               };
             }
             return {
@@ -400,9 +397,7 @@ export async function duplicateFolder(
         return updateFolders(prevFolders);
       });
     } else {
-      setFolders((prev) =>
-        sortByTitle([...prev, duplicated]),
-      );
+      setFolders((prev) => sortByTitle([...prev, duplicated]));
     }
   } catch {
     toast.error("Failed to duplicate folder");
@@ -467,7 +462,7 @@ export function moveFolder(
         f.id === parentId
           ? {
               ...f,
-              folders: sortByTitle([...(f.folders ?? []), updatedFolder])
+              folders: sortByTitle([...(f.folders ?? []), updatedFolder]),
             }
           : { ...f, folders: addToParent(f.folders ?? []) },
       );

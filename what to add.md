@@ -2,12 +2,12 @@
 
 Google and GitHub login options
 Remember me
+flashcards next
 
 Respond to different screen sizes (mobile, tablet, desktop)
 Shared notes between users
 A favourite option to note items
 A last edited timestamp on note items
-The notes editor scrollbar to be the shadcn one
 
 A ... button that opens the context menu
 

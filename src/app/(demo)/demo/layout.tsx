@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import React from "react";
 import { ClientLayoutWrapper } from "./client-layout-wrapper";
 import { Roboto } from "next/font/google";
-import {ScrollArea} from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -22,9 +22,7 @@ export default async function RootLayout({ children }: LayoutProps) {
     <html lang="en" className={roboto.className}>
       <body className="dark overflow-y-hidden">
         <ClientLayoutWrapper>
-          <ScrollArea>
-            {children}
-          </ScrollArea>
+          <ScrollArea>{children}</ScrollArea>
         </ClientLayoutWrapper>
         <Toaster richColors position="top-center" />
       </body>

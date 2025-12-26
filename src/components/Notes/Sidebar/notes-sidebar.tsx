@@ -36,7 +36,11 @@ import {
   findFolderInFolders,
   findNoteInFolders,
 } from "@/lib/notes/note-and-folder-actions";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -58,20 +62,20 @@ interface NotesSidebarProps {
 }
 
 function NotesSidebarContent({
-                               notes,
-                               folders,
-                               onSelectNote,
-                               createNewNote,
-                               onDeleteNote,
-                               onDeleteFolder,
-                               onDuplicateNote,
-                               onDuplicateFolder,
-                               onRenameNote,
-                               onRenameFolder,
-                               activeNoteId,
-                               loading = false,
-                               createNewFolder,
-                             }: NotesSidebarProps) {
+  notes,
+  folders,
+  onSelectNote,
+  createNewNote,
+  onDeleteNote,
+  onDeleteFolder,
+  onDuplicateNote,
+  onDuplicateFolder,
+  onRenameNote,
+  onRenameFolder,
+  activeNoteId,
+  loading = false,
+  createNewFolder,
+}: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
@@ -82,7 +86,9 @@ function NotesSidebarContent({
 
   React.useEffect(() => {
     // Initialize the worker
-    workerRef.current = new Worker(new URL("@/lib/notes/search-worker.ts", import.meta.url));
+    workerRef.current = new Worker(
+      new URL("@/lib/notes/search-worker.ts", import.meta.url),
+    );
 
     // Listen for results coming back from the worker
     workerRef.current.onmessage = (event) => {
@@ -99,7 +105,7 @@ function NotesSidebarContent({
       workerRef.current.postMessage({
         searchQuery: debouncedSearchQuery,
         folders,
-        notes
+        notes,
       });
     }
   }, [debouncedSearchQuery, folders, notes]);
@@ -142,11 +148,11 @@ function NotesSidebarContent({
 
     const timeoutId = setTimeout(() => {
       const activeElement = document.querySelector(
-        '[data-active-note="true"]'
+        '[data-active-note="true"]',
       ) as HTMLElement | null;
 
       const viewport = scrollAreaRef.current?.querySelector(
-        '[data-slot="scroll-area-viewport"]'
+        '[data-slot="scroll-area-viewport"]',
       );
 
       if (!activeElement || !viewport) return;
@@ -159,7 +165,8 @@ function NotesSidebarContent({
         viewport.scrollTop +
         (elementRect.top - viewportRect.top) -
         (viewportRect.height / 2 - elementRect.height / 2);
-      const targetLeft = viewport.scrollLeft + (elementRect.left - viewportRect.left);
+      const targetLeft =
+        viewport.scrollLeft + (elementRect.left - viewportRect.left);
 
       const maxScrollTop = viewport.scrollHeight - viewportRect.height;
       const maxScrollLeft = viewport.scrollWidth - viewportRect.width;
@@ -175,7 +182,6 @@ function NotesSidebarContent({
     return () => clearTimeout(timeoutId);
   }, [activeNoteId]);
 
-
   const handleSelectFolder = (folder: Folder) => {
     const path = findFolderPathByFolderId(folders, folder.id);
     setOpenFolders(path);
@@ -187,8 +193,6 @@ function NotesSidebarContent({
     setOpenFolders(path);
     setSearchQuery("");
   };
-
-
 
   return (
     <div className="flex flex-col h-full">
@@ -203,9 +207,7 @@ function NotesSidebarContent({
               <SquarePen />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            New Note
-          </TooltipContent>
+          <TooltipContent>New Note</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild={true}>
@@ -217,11 +219,8 @@ function NotesSidebarContent({
               <FolderPen />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            New Folder
-          </TooltipContent>
+          <TooltipContent>New Folder</TooltipContent>
         </Tooltip>
-
       </div>
 
       {/* Search Bar */}
@@ -242,9 +241,7 @@ function NotesSidebarContent({
             <Search className="!text-muted" />
           </InputGroupAddon>
           <InputGroupAddon align="inline-end" className={"text-muted"}>
-            {isSearching
-              ? `${matchingNotes.length} results`
-              : null}
+            {isSearching ? `${matchingNotes.length} results` : null}
           </InputGroupAddon>
         </InputGroup>
       </div>
@@ -278,9 +275,9 @@ function NotesSidebarContent({
       ) : (
         // Folders + Notes
         <ScrollArea
-          className={`pl-5 ${
-            isDesktop ? "pr-5" : ""
-          } flex flex-col h-[calc(100%-8.5rem)]`}
+          className={`pl-5 ${isDesktop ? "pr-5" : ""} 
+          ${isSearching ? "h-[calc(100%-10.25rem)] " : "h-[calc(100%-8.5rem)] "}
+          flex flex-col`}
           ref={scrollAreaRef}
         >
           <div className="min-h-full flex flex-col">
@@ -411,13 +408,13 @@ export function NotesSidebar(props: NotesSidebarProps) {
 
           active.data?.current?.type === "note"
             ? props.moveNoteToFolder(
-              active.id as string,
-              over.id == "root" ? undefined : (over.id as string),
-            )
+                active.id as string,
+                over.id == "root" ? undefined : (over.id as string),
+              )
             : props.moveFolderToFolder(
-              activeId as string,
-              over.id === "root" ? undefined : (over.id as string),
-            );
+                activeId as string,
+                over.id === "root" ? undefined : (over.id as string),
+              );
         }}
         onDragCancel={() => setActiveId(null)}
       >
