@@ -7,23 +7,26 @@ export function useSelectionRect(
 
   useEffect(() => {
     const handleSelectionChange = () => {
-      const selection = window.getSelection();
-      if (!selection || selection.toString().trim() === "") {
-        setSelectionRect(null);
-        return;
-      }
+      requestAnimationFrame(() => {
+        const selection = window.getSelection();
+        console.log("Selection changed:", selection); // should now run
+        if (!selection || selection.toString().trim() === "") {
+          setSelectionRect(null);
+          return;
+        }
 
-      if (
-        editorRef.current &&
-        selection.anchorNode &&
-        !editorRef.current.contains(selection.anchorNode)
-      ) {
-        setSelectionRect(null);
-        return;
-      }
+        if (
+          editorRef.current &&
+          selection.anchorNode &&
+          !editorRef.current.contains(selection.anchorNode)
+        ) {
+          setSelectionRect(null);
+          return;
+        }
 
-      const rect = selection.getRangeAt(0).getBoundingClientRect();
-      setSelectionRect(rect);
+        const rect = selection.getRangeAt(0).getBoundingClientRect();
+        setSelectionRect(rect);
+      });
     };
 
     document.addEventListener("selectionchange", handleSelectionChange);
@@ -34,6 +37,7 @@ export function useSelectionRect(
       document.removeEventListener("touchend", handleSelectionChange);
     };
   }, [editorRef]);
+
 
   return selectionRect;
 }

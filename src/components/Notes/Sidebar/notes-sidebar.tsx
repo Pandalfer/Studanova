@@ -36,6 +36,7 @@ import {
   findFolderInFolders,
   findNoteInFolders,
 } from "@/lib/notes/note-and-folder-actions";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -77,6 +78,7 @@ function NotesSidebarContent({
   const isSearching = searchQuery.trim().length > 0;
   const [matchingNotes, setMatchingNotes] = React.useState<Note[]>([]);
   const workerRef = React.useRef<Worker | null>(null);
+  const scrollAreaRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     // Initialize the worker
@@ -137,19 +139,42 @@ function NotesSidebarContent({
 
   React.useEffect(() => {
     if (!activeNoteId) return;
-    const timeoutId = setTimeout(() => {
-      const activeElement = document.querySelector('[data-active-note="true"]');
 
-      if (activeElement) {
-        activeElement.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-        });
-      }
-    }, 150);
+    const timeoutId = setTimeout(() => {
+      const activeElement = document.querySelector(
+        '[data-active-note="true"]'
+      ) as HTMLElement | null;
+
+      const viewport = scrollAreaRef.current?.querySelector(
+        '[data-slot="scroll-area-viewport"]'
+      );
+
+      if (!activeElement || !viewport) return;
+
+      const viewportRect = viewport.getBoundingClientRect();
+      const elementRect = activeElement.getBoundingClientRect();
+
+      // Vertical Calculation
+      const targetTop =
+        viewport.scrollTop +
+        (elementRect.top - viewportRect.top) -
+        (viewportRect.height / 2 - elementRect.height / 2);
+      const targetLeft = viewport.scrollLeft + (elementRect.left - viewportRect.left);
+
+      const maxScrollTop = viewport.scrollHeight - viewportRect.height;
+      const maxScrollLeft = viewport.scrollWidth - viewportRect.width;
+
+      viewport.scrollTo({
+        top: Math.max(0, Math.min(targetTop, maxScrollTop)),
+        // Change from 0 to targetLeft
+        left: Math.max(0, Math.min(targetLeft, maxScrollLeft)),
+        behavior: "smooth",
+      });
+    }, 200);
 
     return () => clearTimeout(timeoutId);
   }, [activeNoteId]);
+
 
   const handleSelectFolder = (folder: Folder) => {
     const path = findFolderPathByFolderId(folders, folder.id);
@@ -163,23 +188,40 @@ function NotesSidebarContent({
     setSearchQuery("");
   };
 
+
+
   return (
     <div className="flex flex-col h-full">
       <div className="justify-center flex p-5 pb-0 shrink-0">
-        <Button
-          onClick={createNewNote}
-          className="aspect-square"
-          variant="ghost"
-        >
-          <SquarePen />
-        </Button>
-        <Button
-          onClick={createNewFolder}
-          className="aspect-square"
-          variant="ghost"
-        >
-          <FolderPen />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild={true}>
+            <Button
+              onClick={createNewNote}
+              className="aspect-square"
+              variant="ghost"
+            >
+              <SquarePen />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            New Note
+          </TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild={true}>
+            <Button
+              onClick={createNewFolder}
+              className="aspect-square"
+              variant="ghost"
+            >
+              <FolderPen />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            New Folder
+          </TooltipContent>
+        </Tooltip>
+
       </div>
 
       {/* Search Bar */}
@@ -239,6 +281,7 @@ function NotesSidebarContent({
           className={`pl-5 ${
             isDesktop ? "pr-5" : ""
           } flex flex-col h-[calc(100%-8.5rem)]`}
+          ref={scrollAreaRef}
         >
           <div className="min-h-full flex flex-col">
             {isSearching ? (
