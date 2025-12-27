@@ -58,6 +58,9 @@ interface NotesSidebarProps {
   createNewFolder: () => void;
   moveNoteToFolder: (noteId: string, folderId?: string) => void;
   moveFolderToFolder: (folderId: string, parentId?: string) => void;
+}
+
+interface NotesSidebarContentProps extends NotesSidebarProps {
   activeId?: string | null; // for DragOverlay
   isDragLocked: boolean;
   setIsDragLocked: (locked: boolean) => void;
@@ -79,7 +82,7 @@ function NotesSidebarContent({
   createNewFolder,
   isDragLocked,
   setIsDragLocked,
-}: NotesSidebarProps) {
+}: NotesSidebarContentProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState("");
