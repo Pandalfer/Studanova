@@ -19,13 +19,11 @@ export default async function RootLayout({ children, params }: LayoutProps) {
   const { uuid } = await params;
 
   return (
-    <html lang="en">
-      <body className="dark">
-        <ClientLayoutWrapper uuid={uuid}>
-          <ScrollArea className="h-screen">{children}</ScrollArea>
-        </ClientLayoutWrapper>
-        <Toaster richColors position="top-center" />
-      </body>
-    </html>
+  <>
+    <ClientLayoutWrapper uuid={uuid}>
+      <ScrollArea className="h-screen">{children}</ScrollArea>
+    </ClientLayoutWrapper>
+    <Toaster richColors position="top-center" />
+  </>
   );
 }

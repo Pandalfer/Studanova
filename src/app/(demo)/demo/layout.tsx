@@ -19,13 +19,13 @@ interface LayoutProps {
 
 export default async function RootLayout({ children }: LayoutProps) {
   return (
-    <html lang="en" className={roboto.className}>
-      <body className="dark overflow-y-hidden">
-        <ClientLayoutWrapper>
-          <ScrollArea>{children}</ScrollArea>
-        </ClientLayoutWrapper>
-        <Toaster richColors position="top-center" />
-      </body>
-    </html>
+  <>
+    <ClientLayoutWrapper>
+      <ScrollArea>{children}</ScrollArea>
+    </ClientLayoutWrapper>
+    <Toaster richColors position="top-center" />
+  </>
+
+
   );
 }

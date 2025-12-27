@@ -20,7 +20,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy, PencilLine, Trash2 } from "lucide-react";
+import {Copy, HandIcon, LockIcon, PencilLine, Trash2} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import {useMediaQuery} from "usehooks-ts";
 
 function FolderItem({
   folder,
@@ -44,6 +45,8 @@ function FolderItem({
   onRenameFolder,
   onDuplicateNote,
   onDuplicateFolder,
+  isDragLocked,
+  setIsDragLocked,
   activeNoteId,
   onSelectFolder,
   renderChildren = true,
@@ -58,10 +61,15 @@ function FolderItem({
   onDeleteFolder: (id: string) => void;
   onDuplicateNote: (note: Note) => void;
   onDuplicateFolder: (folder: Folder) => void;
+  isDragLocked: boolean;
+  setIsDragLocked: (locked: boolean) => void;
   activeNoteId?: string;
   onSelectFolder?: (folder: Folder) => void;
   renderChildren?: boolean;
 }) {
+  const isDesktop = useMediaQuery("(min-width: 640px)", {
+    initializeWithValue: false,
+  });
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(folder.title);
@@ -94,6 +102,7 @@ function FolderItem({
   } = useDraggable({
     id: folder.id,
     data: { type: "folder" },
+    disabled: isDragLocked && !isDesktop,
   });
 
   const finishRename = () => {
@@ -160,6 +169,12 @@ function FolderItem({
                 </AccordionTrigger>
               </ContextMenuTrigger>
               <ContextMenuContent className={"w-48 rounded-md shadow-lg"}>
+                {!isDesktop && (
+                  <ContextMenuItem onSelect={() => setIsDragLocked(!isDragLocked)}>
+                    {isDragLocked ? <HandIcon className="mr-2 h-4 w-4" /> : <LockIcon className="mr-2 h-4 w-4" />}
+                    {isDragLocked ? "Enable Dragging" : "Lock Position"}
+                  </ContextMenuItem>
+                )}
                 <ContextMenuItem
                   onClick={() => {
                     onDuplicateFolder(folder);
@@ -292,6 +307,8 @@ function FolderItem({
                         onDeleteFolder={onDeleteFolder}
                         onDuplicateNote={onDuplicateNote}
                         onDuplicateFolder={onDuplicateFolder}
+                        isDragLocked={isDragLocked}
+                        setIsDragLocked={setIsDragLocked}
                         activeNoteId={activeNoteId}
                         onSelectFolder={onSelectFolder}
                         renderChildren={renderChildren} // propagate the flag
@@ -316,6 +333,8 @@ function FolderItem({
                           onDeleteNote={onDeleteNote}
                           onDuplicateNote={onDuplicateNote}
                           activeNoteId={activeNoteId}
+                          isDragLocked={isDragLocked}
+                          setIsDragLocked={setIsDragLocked}
                         />
                       </div>
                     ))}

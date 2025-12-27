@@ -17,7 +17,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { Copy, ExternalLink, Link, PencilLine, Trash2 } from "lucide-react";
+import {Copy, ExternalLink, HandIcon, Link, LockIcon, PencilLine, Trash2} from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -29,6 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/notes/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
+import {useMediaQuery} from "usehooks-ts";
 function NoteItem({
   note,
   activeNoteId,
@@ -37,6 +38,8 @@ function NoteItem({
   onDuplicateNote,
   onRenameNote,
   handleNoteSelect,
+  isDragLocked,
+  setIsDragLocked,
 }: {
   note: Note;
   activeNoteId?: string;
@@ -45,7 +48,12 @@ function NoteItem({
   onDuplicateNote: (note: Note) => void;
   onRenameNote: (note: Note, newTitle: string) => void;
   handleNoteSelect?: (note: Note) => void;
+  isDragLocked: boolean;
+  setIsDragLocked: (locked: boolean) => void;
 }) {
+  const isDesktop = useMediaQuery("(min-width: 640px)", {
+    initializeWithValue: false,
+  });
   const { uuid } = useParams() as { uuid: string };
 
   const isDemo = usePathname().includes("demo");
@@ -77,6 +85,7 @@ function NoteItem({
   const { attributes, listeners, setNodeRef } = useDraggable({
     id: note.id,
     data: { type: "note" },
+    disabled: isDragLocked && !isDesktop,
   });
   const handleSelect = useCallback(
     () => onSelectNote(note),
@@ -84,7 +93,7 @@ function NoteItem({
   );
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={{}}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={{}} className={`touch-none ${!isDesktop ? "select-none" : ""}`}>
       <ContextMenu modal={false}>
         <ContextMenuTrigger asChild>
           <div
@@ -108,6 +117,13 @@ function NoteItem({
         </ContextMenuTrigger>
 
         <ContextMenuContent className="w-48 rounded-md shadow-lg">
+          {!isDesktop && (
+            <ContextMenuItem onSelect={() => setIsDragLocked(!isDragLocked)}>
+              {isDragLocked ? <HandIcon className="mr-2 h-4 w-4" /> : <LockIcon className="mr-2 h-4 w-4" />}
+              {isDragLocked ? "Enable Dragging" : "Lock Position"}
+            </ContextMenuItem>
+          )}
+
           {/* Rename with popup */}
           <AlertDialog
             open={renameDialogOpen}

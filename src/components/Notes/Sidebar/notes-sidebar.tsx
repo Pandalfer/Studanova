@@ -59,6 +59,8 @@ interface NotesSidebarProps {
   moveNoteToFolder: (noteId: string, folderId?: string) => void;
   moveFolderToFolder: (folderId: string, parentId?: string) => void;
   activeId?: string | null; // for DragOverlay
+  isDragLocked: boolean;
+  setIsDragLocked: (locked: boolean) => void;
 }
 
 function NotesSidebarContent({
@@ -75,6 +77,8 @@ function NotesSidebarContent({
   activeNoteId,
   loading = false,
   createNewFolder,
+  isDragLocked,
+  setIsDragLocked,
 }: NotesSidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -196,6 +200,11 @@ function NotesSidebarContent({
 
   return (
     <div className="flex flex-col h-full">
+      {!isDragLocked && (
+        <div className="bg-primary text-primary-foreground text-[10px] py-1 text-center font-bold uppercase tracking-widest">
+          Drag Mode Active
+        </div>
+      )}
       <div className="justify-center flex p-5 pb-0 shrink-0">
         <Tooltip>
           <TooltipTrigger asChild={true}>
@@ -294,6 +303,8 @@ function NotesSidebarContent({
                       onDeleteNote,
                       onDuplicateNote,
                       activeNoteId,
+                      isDragLocked,
+                      setIsDragLocked
                     }}
                   />
                 ))}
@@ -317,6 +328,8 @@ function NotesSidebarContent({
                         onDeleteFolder={onDeleteFolder}
                         onDuplicateNote={onDuplicateNote}
                         onDuplicateFolder={onDuplicateFolder}
+                        isDragLocked={isDragLocked}
+                        setIsDragLocked={setIsDragLocked}
                         activeNoteId={activeNoteId}
                         onSelectFolder={handleSelectFolder}
                       />
@@ -333,7 +346,7 @@ function NotesSidebarContent({
                   <div className="flex flex-col flex-1">
                     {notes.map((note) => (
                       <NoteItem
-                        key={note.id}
+                        isDragLocked={isDragLocked} setIsDragLocked={setIsDragLocked} key={note.id}
                         {...{
                           note,
                           onSelectNote,
@@ -341,8 +354,7 @@ function NotesSidebarContent({
                           onDeleteNote,
                           onDuplicateNote,
                           activeNoteId,
-                        }}
-                      />
+                        }}                      />
                     ))}
                   </div>
                 </div>
@@ -356,6 +368,11 @@ function NotesSidebarContent({
 }
 
 export function NotesSidebar(props: NotesSidebarProps) {
+  const [isDragLocked, setIsDragLocked] = React.useState(true);
+  const isDesktop = useMediaQuery("(min-width: 640px)", {
+    initializeWithValue: false,
+  });
+
   class LeftClickMouseSensor extends MouseSensor {
     static activators = [
       {
@@ -375,11 +392,16 @@ export function NotesSidebar(props: NotesSidebarProps) {
   }
 
   const mouseSensor = useSensor(LeftClickMouseSensor, {
-    activationConstraint: { distance: 5 },
+    activationConstraint: { distance: 10 },
+    enable: true,
   });
 
   const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: { distance: 5 },
+    activationConstraint: {
+      delay: 250,
+      tolerance: 5,
+    },
+    enabled: isDesktop ? true : isDragLocked,
   });
 
   const sensors = useSensors(mouseSensor, touchSensor);
@@ -400,6 +422,7 @@ export function NotesSidebar(props: NotesSidebarProps) {
         onDragStart={({ active }) => setActiveId(active.id as string)}
         onDragEnd={({ active, over }) => {
           setActiveId(null);
+          setIsDragLocked(true);
           if (!over) return;
 
           if (over.data?.current?.type !== "folder") return;
@@ -416,9 +439,13 @@ export function NotesSidebar(props: NotesSidebarProps) {
                 over.id === "root" ? undefined : (over.id as string),
               );
         }}
-        onDragCancel={() => setActiveId(null)}
+        onDragCancel={() => {
+          setActiveId(null);
+          setIsDragLocked(true);
+        }}
       >
-        <NotesSidebarContent {...props} activeId={activeId} />
+        <NotesSidebarContent {...props} activeId={activeId} isDragLocked={isDragLocked}
+                             setIsDragLocked={setIsDragLocked} />
         <DragOverlay>
           {activeNote ? (
             <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
