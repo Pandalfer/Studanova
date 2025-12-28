@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import DOMPurify from "dompurify";
+import {useMediaQuery} from "usehooks-ts";
 
 interface NoteEditorProps {
   note: Note;
@@ -28,20 +29,19 @@ export default function NotesEditor({
   const [content, setContent] = useState(note.content);
   const internalRef = useRef<HTMLDivElement>(null);
   const refToUse = editorRef || internalRef;
+  const isDesktop = useMediaQuery("(min-width: 640px)", {
+    initializeWithValue: false,
+  });
 
-  // Only initialize content on mount or when note changes
   useEffect(() => {
-    // Only reset editor if switching to a different note
     if (refToUse.current) {
       if (refToUse.current.innerHTML !== note.content) {
         refToUse.current.innerHTML = note.content;
         setContent(note.content);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [note.id]); // only depend on note.id, not note.content
+  }, [note.id]);
 
-  // Track dirty state
   useEffect(() => {
     const dirty = title !== note.title || content !== note.content;
     onDirtyChange(dirty);
@@ -87,7 +87,7 @@ export default function NotesEditor({
   }
 
   return (
-    <div key={note.id} className="w-190 mx-auto flex flex-col h-full pt-15">
+    <div key={note.id} className={`mx-auto flex flex-col h-full pt-15 ${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"}`}>
       <NotesToolbar editorRef={refToUse} setContent={setContent} />
       <Input
         value={title}

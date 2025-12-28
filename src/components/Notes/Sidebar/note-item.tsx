@@ -94,7 +94,7 @@ function NoteItem({
 
   return (
     <div ref={setNodeRef} {...attributes} {...listeners} style={{}} className={`touch-none ${!isDesktop ? "select-none" : ""}`}>
-      <ContextMenu modal={false}>
+      <ContextMenu modal={!isDesktop}>
         <ContextMenuTrigger asChild>
           <div
             className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors flex items-center h-12

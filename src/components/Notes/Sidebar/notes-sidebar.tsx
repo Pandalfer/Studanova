@@ -41,6 +41,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -418,52 +419,79 @@ export function NotesSidebar(props: NotesSidebarProps) {
     props.folders.find((f) => f.id === activeId) ??
     findFolderInFolders(props.folders, activeId ?? "");
 
+  const content = (
+    <DndContext
+      sensors={sensors}
+      onDragStart={({ active }) => setActiveId(active.id as string)}
+      onDragEnd={({ active, over }) => {
+        setActiveId(null);
+        setIsDragLocked(true);
+        if (!over) return;
+
+        if (over.data?.current?.type !== "folder") return;
+
+        if (active.id === over.id) return; // no-op if dropped on itself
+
+        active.data?.current?.type === "note"
+          ? props.moveNoteToFolder(
+            active.id as string,
+            over.id == "root" ? undefined : (over.id as string),
+          )
+          : props.moveFolderToFolder(
+            activeId as string,
+            over.id === "root" ? undefined : (over.id as string),
+          );
+      }}
+      onDragCancel={() => {
+        setActiveId(null);
+        setIsDragLocked(true);
+      }}
+    >
+      <NotesSidebarContent
+        {...props}
+        activeId={activeId}
+        isDragLocked={isDragLocked}
+        setIsDragLocked={setIsDragLocked}
+      />
+
+      <DragOverlay>
+        {activeNote ? (
+          <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
+            <NotepadText className={"pr-2"} />
+            <p className={"truncate font-bold "}>{activeNote.title}</p>
+          </div>
+        ) : null}
+        {activeFolder ? (
+          <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
+            <FolderIcon className={"pr-2"} />
+            <p className={"truncate font-bold "}>{activeFolder.title}</p>
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
+  );
+
+  if (isDesktop) {
+    return (
+      <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
+        {content}
+      </aside>
+    );
+  }
+
   return (
-    <aside className="h-screen fixed right-0 top-0 z-40 border-l bg-card transition-all duration-300 ease-in-out w-80">
-      <DndContext
-        sensors={sensors}
-        onDragStart={({ active }) => setActiveId(active.id as string)}
-        onDragEnd={({ active, over }) => {
-          setActiveId(null);
-          setIsDragLocked(true);
-          if (!over) return;
-
-          if (over.data?.current?.type !== "folder") return;
-
-          if (active.id === over.id) return; // no-op if dropped on itself
-
-          active.data?.current?.type === "note"
-            ? props.moveNoteToFolder(
-                active.id as string,
-                over.id == "root" ? undefined : (over.id as string),
-              )
-            : props.moveFolderToFolder(
-                activeId as string,
-                over.id === "root" ? undefined : (over.id as string),
-              );
-        }}
-        onDragCancel={() => {
-          setActiveId(null);
-          setIsDragLocked(true);
-        }}
-      >
-        <NotesSidebarContent {...props} activeId={activeId} isDragLocked={isDragLocked}
-                             setIsDragLocked={setIsDragLocked} />
-        <DragOverlay>
-          {activeNote ? (
-            <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
-              <NotepadText className={"pr-2"} />
-              <p className={"truncate font-bold "}>{activeNote.title}</p>
-            </div>
-          ) : null}
-          {activeFolder ? (
-            <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
-              <FolderIcon className={"pr-2"} />
-              <p className={"truncate font-bold "}>{activeFolder.title}</p>
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
-    </aside>
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="icon" className="fixed right-4 bottom-4 z-50 rounded-full">
+          <NotepadText />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="p-0 w-80">
+        <SheetHeader className="sr-only">
+          <SheetTitle>Notes</SheetTitle>
+        </SheetHeader>
+        {content}
+      </SheetContent>
+    </Sheet>
   );
 }
