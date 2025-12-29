@@ -15,7 +15,6 @@ import { Folder, Note } from "@/lib/types";
 import NoteItem from "./note-item";
 import FolderItem from "@/components/Notes/Sidebar/folder-item";
 import React from "react";
-import { useMediaQuery } from "usehooks-ts";
 import { DndContext, DragOverlay, useDroppable } from "@dnd-kit/core";
 import {
   MouseSensor,
@@ -41,7 +40,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { useIsDesktop } from "@/lib/utils";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -125,9 +131,7 @@ function NotesSidebarContent({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
 
   const { setNodeRef: setRootNodeRef, isOver: isRootOver } = useDroppable({
     id: "root",
@@ -259,11 +263,11 @@ function NotesSidebarContent({
         </InputGroup>
       </div>
 
-      {isSearching ? (
+      {isSearching && (
         <div className="px-5 pb-2 text-sm text-muted font-bold">
           Best results
         </div>
-      ) : null}
+      )}
       {/* Loading Skeleton */}
       {loading ? (
         <ScrollArea className="flex-1 pr-5 pl-5">
@@ -308,7 +312,7 @@ function NotesSidebarContent({
                       onDuplicateNote,
                       activeNoteId,
                       isDragLocked,
-                      setIsDragLocked
+                      setIsDragLocked,
                     }}
                   />
                 ))}
@@ -350,7 +354,9 @@ function NotesSidebarContent({
                   <div className="flex flex-col flex-1">
                     {notes.map((note) => (
                       <NoteItem
-                        isDragLocked={isDragLocked} setIsDragLocked={setIsDragLocked} key={note.id}
+                        isDragLocked={isDragLocked}
+                        setIsDragLocked={setIsDragLocked}
+                        key={note.id}
                         {...{
                           note,
                           onSelectNote,
@@ -358,7 +364,8 @@ function NotesSidebarContent({
                           onDeleteNote,
                           onDuplicateNote,
                           activeNoteId,
-                        }}                      />
+                        }}
+                      />
                     ))}
                   </div>
                 </div>
@@ -373,9 +380,7 @@ function NotesSidebarContent({
 
 export function NotesSidebar(props: NotesSidebarProps) {
   const [isDragLocked, setIsDragLocked] = React.useState(true);
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
 
   class LeftClickMouseSensor extends MouseSensor {
     static activators = [
@@ -434,13 +439,13 @@ export function NotesSidebar(props: NotesSidebarProps) {
 
         active.data?.current?.type === "note"
           ? props.moveNoteToFolder(
-            active.id as string,
-            over.id == "root" ? undefined : (over.id as string),
-          )
+              active.id as string,
+              over.id == "root" ? undefined : (over.id as string),
+            )
           : props.moveFolderToFolder(
-            activeId as string,
-            over.id === "root" ? undefined : (over.id as string),
-          );
+              activeId as string,
+              over.id === "root" ? undefined : (over.id as string),
+            );
       }}
       onDragCancel={() => {
         setActiveId(null);
@@ -455,18 +460,18 @@ export function NotesSidebar(props: NotesSidebarProps) {
       />
 
       <DragOverlay>
-        {activeNote ? (
+        {activeNote && (
           <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
             <NotepadText className={"pr-2"} />
             <p className={"truncate font-bold "}>{activeNote.title}</p>
           </div>
-        ) : null}
-        {activeFolder ? (
+        )}
+        {activeFolder && (
           <div className="p-3 rounded-md bg-popover shadow-lg flex flex-row">
             <FolderIcon className={"pr-2"} />
             <p className={"truncate font-bold "}>{activeFolder.title}</p>
           </div>
-        ) : null}
+        )}
       </DragOverlay>
     </DndContext>
   );
@@ -482,7 +487,11 @@ export function NotesSidebar(props: NotesSidebarProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="fixed right-4 bottom-4 z-50 rounded-full">
+        <Button
+          variant="outline"
+          size="icon"
+          className="fixed right-4 bottom-4 z-50 rounded-full"
+        >
           <NotepadText />
         </Button>
       </SheetTrigger>

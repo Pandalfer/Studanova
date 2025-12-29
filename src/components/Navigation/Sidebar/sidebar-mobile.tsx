@@ -23,11 +23,7 @@ export function SidebarMobile({ sidebarItems, username }: SidebarMobileProps) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="fixed top-3 left-3 z-50"
-        >
+        <Button size="icon" variant="ghost" className="fixed top-3 left-3 z-50">
           <Menu size={20} />
         </Button>
       </SheetTrigger>

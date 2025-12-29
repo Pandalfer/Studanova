@@ -4,9 +4,9 @@
 import React, { useEffect, useState } from "react";
 import { SidebarDesktop } from "@/components/Navigation/Sidebar/sidebar-desktop";
 import { Home, Notebook } from "lucide-react";
-import { useMediaQuery } from "usehooks-ts";
 import { SidebarMobile } from "@/components/Navigation/Sidebar/sidebar-mobile";
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
+import { useIsDesktop } from "@/lib/utils";
 
 interface SidebarProps {
   uuid?: string;
@@ -21,9 +21,7 @@ export function Sidebar({
   setIsCollapsed,
   isDemo = false,
 }: SidebarProps) {
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
 
   const [username, setUsername] = useState<string>("Loading...");
   const [error, setError] = useState<string>("");

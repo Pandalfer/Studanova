@@ -12,16 +12,14 @@ export const metadata: Metadata = {
 
 // Renamed to NestedLayout to reflect its purpose
 export default function NestedLayout({
-                                       children,
-                                     }: {
+  children,
+}: {
   children: React.ReactNode;
 }) {
   return (
     <>
       <Navbar />
-      <main className="flex-1">
-        {children}
-      </main>
+      <main className="flex-1">{children}</main>
       <Toaster richColors position="top-center" />
       <Footer />
     </>

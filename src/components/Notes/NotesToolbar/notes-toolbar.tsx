@@ -3,7 +3,6 @@
 
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useMediaQuery } from "usehooks-ts";
 import { useSelectionRect } from "@/lib/notes/notes-toolbar/use-selection-rect";
 import { useToolbarPosition } from "@/lib/notes/notes-toolbar/use-toolbar-position";
 import {
@@ -24,6 +23,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsDesktop } from "@/lib/utils";
 
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
@@ -35,9 +35,7 @@ export default function NotesToolbar({
   setContent,
 }: NotesToolbarProps) {
   const [visible, setVisible] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const selectionRect = useSelectionRect(editorRef);

@@ -2,12 +2,6 @@
 
 import { Note } from "@/lib/types";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
   AlertDialog,
   AlertDialogTrigger,
   AlertDialogContent,
@@ -17,7 +11,16 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import {Copy, ExternalLink, HandIcon, Link, LockIcon, PencilLine, Trash2} from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  HandIcon,
+  Link,
+  LockIcon,
+  MoreHorizontal,
+  PencilLine,
+  Trash2,
+} from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { useParams, usePathname } from "next/navigation";
 import {
@@ -29,7 +32,13 @@ import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/notes/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
-import {useMediaQuery} from "usehooks-ts";
+import { useIsDesktop } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 function NoteItem({
   note,
   activeNoteId,
@@ -51,14 +60,13 @@ function NoteItem({
   isDragLocked: boolean;
   setIsDragLocked: (locked: boolean) => void;
 }) {
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
   const { uuid } = useParams() as { uuid: string };
 
   const isDemo = usePathname().includes("demo");
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dropdownOpen, setdropdownOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(note.title);
 
   const clearBodyPointerEvents = () => {
@@ -93,35 +101,56 @@ function NoteItem({
   );
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={{}} className={`touch-none ${!isDesktop ? "select-none" : ""}`}>
-      <ContextMenu modal={!isDesktop}>
-        <ContextMenuTrigger asChild>
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={{}}
+      className={`touch-none ${!isDesktop ? "select-none" : ""}`}
+    >
+      <DropdownMenu
+        modal={!isDesktop}
+        onOpenChange={setdropdownOpen}
+        open={dropdownOpen}
+      >
+        <DropdownMenuTrigger
+          asChild
+          onPointerDown={(e) => e.preventDefault()}
+          onClick={(e) => e.preventDefault()}
+        >
           <div
-            className={`w-full min-w-60 p-3 rounded-md cursor-pointer transition-colors flex items-center h-12
-            ${
-              activeNoteId === note.id
-                ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90 hover:bg-primary/90"
-                : "dark:hover:bg-accent hover:bg-accent"
-            }`}
+            className={`group w-full min-w-60 p-3 rounded-md cursor-pointer flex items-center h-12
+              ${
+                activeNoteId === note.id
+                  ? "bg-primary text-primary-foreground shadow-xs dark:hover:bg-primary/90 hover:bg-primary/90"
+                  : "dark:hover:bg-accent hover:bg-accent"
+              }`}
             onClick={() => {
               handleSelect();
               handleNoteSelect?.(note);
             }}
-            data-active-note={activeNoteId === note.id}
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setdropdownOpen(true);
+            }}
           >
-            <h3 className="text-sm font-medium leading-tight truncate w-full">
+            <h3 className="text-sm font-medium truncate w-full">
               {note.title.substring(0, 40)}
               {note.title.length > 40 ? "..." : ""}
             </h3>
           </div>
-        </ContextMenuTrigger>
+        </DropdownMenuTrigger>
 
-        <ContextMenuContent className="w-48 rounded-md shadow-lg">
+        <DropdownMenuContent className="w-48 rounded-md shadow-lg">
           {!isDesktop && (
-            <ContextMenuItem onSelect={() => setIsDragLocked(!isDragLocked)}>
-              {isDragLocked ? <HandIcon className="mr-2 h-4 w-4" /> : <LockIcon className="mr-2 h-4 w-4" />}
+            <DropdownMenuItem onSelect={() => setIsDragLocked(!isDragLocked)}>
+              {isDragLocked ? (
+                <HandIcon className="mr-2 h-4 w-4" />
+              ) : (
+                <LockIcon className="mr-2 h-4 w-4" />
+              )}
               {isDragLocked ? "Enable Dragging" : "Lock Position"}
-            </ContextMenuItem>
+            </DropdownMenuItem>
           )}
 
           {/* Rename with popup */}
@@ -130,7 +159,7 @@ function NoteItem({
             onOpenChange={setRenameDialogOpen}
           >
             <AlertDialogTrigger asChild>
-              <ContextMenuItem
+              <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
                   setRenameDialogOpen(true);
@@ -143,7 +172,7 @@ function NoteItem({
                 }}
               >
                 <PencilLine /> Rename
-              </ContextMenuItem>
+              </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -180,27 +209,27 @@ function NoteItem({
 
           {!isDemo && (
             <>
-              <ContextMenuItem
+              <DropdownMenuItem
                 onClick={async () => {
                   await copyUrlToClipboard(uuid, note.id);
                   toast.success("Url copied to clipboard!");
                 }}
               >
                 <Link /> Copy Link
-              </ContextMenuItem>
-              <ContextMenuItem
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => {
                   openNoteInNewTab(uuid, note.id);
                 }}
               >
                 <ExternalLink /> Open in new tab
-              </ContextMenuItem>
+              </DropdownMenuItem>
             </>
           )}
 
-          <ContextMenuItem onClick={() => onDuplicateNote?.(note)}>
+          <DropdownMenuItem onClick={() => onDuplicateNote?.(note)}>
             <Copy /> Duplicate Note
-          </ContextMenuItem>
+          </DropdownMenuItem>
 
           {/* Delete Dialog */}
           <AlertDialog
@@ -211,15 +240,15 @@ function NoteItem({
             }}
           >
             <AlertDialogTrigger asChild>
-              <ContextMenuItem
-                className="text-destructive dark:hover:bg-destructive-bg hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
+              <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
                   setDialogOpen(true);
                 }}
+                variant={"destructive"}
               >
                 <Trash2 className="h-4 w-4 mr-2" /> Delete
-              </ContextMenuItem>
+              </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent onCloseAutoFocus={(e) => e.preventDefault()}>
               <AlertDialogHeader>
@@ -255,8 +284,8 @@ function NoteItem({
           <h3 className="text-muted font-bold text-center text-xs cursor-default pb-2">
             Created On {formatDate(note.createdAt)}
           </h3>
-        </ContextMenuContent>
-      </ContextMenu>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

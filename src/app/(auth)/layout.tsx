@@ -17,10 +17,10 @@ export default function RootLayout({
   return (
     <>
       <div className="fixed top-0 left-0 z-50 w-full p-4">
-        <Logo size={50}/>
+        <Logo size={50} />
       </div>
       {children}
-      <Toaster richColors position="top-center"/>
+      <Toaster richColors position="top-center" />
     </>
   );
 }

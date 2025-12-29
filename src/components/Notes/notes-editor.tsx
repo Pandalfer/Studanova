@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import NotesToolbar from "@/components/Notes/NotesToolbar/notes-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import DOMPurify from "dompurify";
-import {useMediaQuery} from "usehooks-ts";
+import { useIsDesktop } from "@/lib/utils";
 
 interface NoteEditorProps {
   note: Note;
@@ -29,9 +29,7 @@ export default function NotesEditor({
   const [content, setContent] = useState(note.content);
   const internalRef = useRef<HTMLDivElement>(null);
   const refToUse = editorRef || internalRef;
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
 
   useEffect(() => {
     if (refToUse.current) {
@@ -87,7 +85,10 @@ export default function NotesEditor({
   }
 
   return (
-    <div key={note.id} className={`mx-auto flex flex-col h-full pt-15 ${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"}`}>
+    <div
+      key={note.id}
+      className={`mx-auto flex flex-col h-full pt-15 ${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"}`}
+    >
       <NotesToolbar editorRef={refToUse} setContent={setContent} />
       <Input
         value={title}

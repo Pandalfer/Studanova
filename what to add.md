@@ -9,13 +9,11 @@ Respond to different screen sizes (mobile, tablet, desktop)
 Added later:
 Shared notes between users
 A favourite option to note items
-A last edited timestamp on note items
 
+A last edited timestamp on note items
 A ... button that opens the context menu
 
 MAKE LIGHT MODE USABLE
-
-add a 404 page ( Oops! we could find this page in the textbook )
 
 # 🧭 Suggested Pages & Features
 

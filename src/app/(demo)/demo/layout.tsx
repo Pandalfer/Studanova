@@ -19,13 +19,11 @@ interface LayoutProps {
 
 export default async function RootLayout({ children }: LayoutProps) {
   return (
-  <>
-    <ClientLayoutWrapper>
-      <ScrollArea>{children}</ScrollArea>
-    </ClientLayoutWrapper>
-    <Toaster richColors position="top-center" />
-  </>
-
-
+    <>
+      <ClientLayoutWrapper>
+        <ScrollArea>{children}</ScrollArea>
+      </ClientLayoutWrapper>
+      <Toaster richColors position="top-center" />
+    </>
   );
 }

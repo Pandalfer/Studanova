@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/Navigation/Sidebar/sidebar";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import {useMediaQuery} from "usehooks-ts";
+import { useIsDesktop } from "@/lib/utils";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;
@@ -15,9 +15,7 @@ export function ClientLayoutWrapper({
   children,
   uuid,
 }: ClientLayoutWrapperProps) {
-  const isDesktop = useMediaQuery("(min-width: 640px)", {
-    initializeWithValue: false,
-  });
+  const isDesktop = useIsDesktop();
 
   const pathname = usePathname();
 
