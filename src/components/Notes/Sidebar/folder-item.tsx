@@ -28,11 +28,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { useIsDesktop } from "@/lib/utils";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 function FolderItem({
   folder,
@@ -70,7 +70,6 @@ function FolderItem({
   const isDesktop = useIsDesktop();
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [newTitle, setNewTitle] = useState(folder.title);
 
   const isClosestFolder = useMemo(
@@ -151,25 +150,14 @@ function FolderItem({
           }}
         >
           <AccordionItem value={folder.id}>
-            <DropdownMenu
-              modal={!isDesktop}
-              onOpenChange={setDropdownOpen}
-              open={dropdownOpen}
-            >
-              <DropdownMenuTrigger
-                asChild
-                onPointerDown={(e) => e.preventDefault()}
-                onClick={(e) => e.preventDefault()}
-              >
+            <ContextMenu modal={!isDesktop}>
+              <ContextMenuTrigger asChild>
                 <AccordionTrigger
                   className={`h-12 min-w-60 w-full flex items-center ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
                   arrow="left"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     onSelectFolder?.(folder);
-                  }}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    setDropdownOpen(true);
                   }}
                 >
                   <h3 className="text-sm font-medium leading-tight truncate w-full font-bold">
@@ -177,10 +165,10 @@ function FolderItem({
                     {folder.title.length > 25 ? "..." : ""}
                   </h3>
                 </AccordionTrigger>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className={"w-48 rounded-md shadow-lg"}>
+              </ContextMenuTrigger>
+              <ContextMenuContent className={"w-48 rounded-md shadow-lg"}>
                 {!isDesktop && (
-                  <DropdownMenuItem
+                  <ContextMenuItem
                     onSelect={() => setIsDragLocked(!isDragLocked)}
                   >
                     {isDragLocked ? (
@@ -189,21 +177,21 @@ function FolderItem({
                       <LockIcon className="mr-2 h-4 w-4" />
                     )}
                     {isDragLocked ? "Enable Dragging" : "Lock Position"}
-                  </DropdownMenuItem>
+                  </ContextMenuItem>
                 )}
-                <DropdownMenuItem
+                <ContextMenuItem
                   onClick={() => {
                     onDuplicateFolder(folder);
                   }}
                 >
                   <Copy /> Duplicate Folder
-                </DropdownMenuItem>
+                </ContextMenuItem>
                 <AlertDialog
                   open={renameDialogOpen}
                   onOpenChange={setRenameDialogOpen}
                 >
                   <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
+                    <ContextMenuItem
                       onSelect={(e) => {
                         e.preventDefault();
                         setRenameDialogOpen(true);
@@ -218,7 +206,7 @@ function FolderItem({
                       }}
                     >
                       <PencilLine /> Rename
-                    </DropdownMenuItem>
+                    </ContextMenuItem>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -254,7 +242,7 @@ function FolderItem({
                 </AlertDialog>
                 <AlertDialog open={deleteDialogOpen}>
                   <AlertDialogTrigger asChild>
-                    <DropdownMenuItem
+                    <ContextMenuItem
                       className="text-destructive dark:hover:bg-destructive-bg hover:bg-destructive-bg focus:bg-popover transition-colors duration-300"
                       onSelect={(e) => {
                         e.preventDefault();
@@ -262,7 +250,7 @@ function FolderItem({
                       }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" /> Delete
-                    </DropdownMenuItem>
+                    </ContextMenuItem>
                   </AlertDialogTrigger>
                   <AlertDialogContent
                     onCloseAutoFocus={(e) => e.preventDefault()}
@@ -298,8 +286,8 @@ function FolderItem({
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </ContextMenuContent>
+            </ContextMenu>
 
             <AccordionContent className="mt-2">
               {renderChildren && (
