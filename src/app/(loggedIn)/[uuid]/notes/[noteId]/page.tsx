@@ -70,7 +70,6 @@ export default function NotesPage({ params }: PageProps) {
                 id: "",
                 title: "",
                 content: "",
-                createdAt: Date.now(),
               }}
               title=""
               setTitle={() => {}}

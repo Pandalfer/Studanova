@@ -34,7 +34,6 @@ model Note {
   title      String
   studentId  String   @db.Uuid
   content    String
-  createdAt  DateTime @default(now())
   student    Student  @relation(fields: [studentId], references: [id])
   lastEdited DateTime @default(now()) @updatedAt
 

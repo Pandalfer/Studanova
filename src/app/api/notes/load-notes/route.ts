@@ -26,7 +26,6 @@ export async function POST(req: NextRequest) {
       id: note.id.toString(),
       title: note.title,
       content: note.content,
-      createdAt: note.createdAt.getTime(), // timestamp
       lastEdited: note.lastEdited,
     }));
 

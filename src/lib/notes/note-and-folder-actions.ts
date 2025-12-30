@@ -141,7 +141,6 @@ export async function duplicateNote(
     id: nanoid(),
     title: note.title + " (Copy)",
     content: note.content,
-    createdAt: Date.now(),
     folderId: note.folderId ?? undefined,
   };
 
@@ -260,7 +259,6 @@ export async function createNewNote(
     id: nanoid(),
     title: "Untitled Note",
     content: "",
-    createdAt: Date.now(),
   };
 
   if (notes && setNotes) {
@@ -350,7 +348,6 @@ export async function duplicateFolder(
       const newNote: Note = {
         ...note,
         id: nanoid(),
-        createdAt: Date.now(),
         folderId: savedFolder.id,
       };
       try {

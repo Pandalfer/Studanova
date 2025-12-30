@@ -193,7 +193,6 @@ export function useDemoNotes() {
       id: uuidv4(),
       title: "Untitled Note",
       content: "",
-      createdAt: Date.now(),
       folderId: undefined,
     };
 
@@ -263,7 +262,6 @@ export function useDemoNotes() {
       ...note,
       id: uuidv4(),
       title: `${note.title} (Copy)`,
-      createdAt: Date.now(),
 
       folderId: note.folderId,
     };
@@ -478,7 +476,6 @@ export function useDemoNotes() {
         notes: f.notes.map((n) => ({
           ...n,
           id: uuidv4(),
-          createdAt: Date.now(),
         })),
         folders: f.folders?.map(deepCopyFolder) || [],
       };

@@ -6,7 +6,6 @@ type NoteDTO = {
   id: string;
   title: string;
   content: string;
-  createdAt: number; // stored as a timestamp
   folderId?: string;
 };
 
@@ -59,7 +58,6 @@ export async function POST(req: NextRequest) {
           id: n.id,
           title: n.title,
           content: n.content,
-          createdAt: n.createdAt.getTime(),
           folderId: n.folderId || undefined,
         })),
         folders: [], // children will be filled later

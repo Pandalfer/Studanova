@@ -63,6 +63,7 @@ export default function Navbar() {
           className={`absolute top-0 right-0 h-full w-3/4 sm:w-1/2 bg-background text-white shadow-lg transform transition-transform duration-300 ease-in-out ${
             open ? "translate-x-0" : "translate-x-full"
           }`}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button

@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, title, content, createdAt, studentId, folderId } =
+    const { id, title, content, studentId, folderId } =
       await req.json();
 
     if (!studentId) {
@@ -30,7 +30,6 @@ export async function POST(req: NextRequest) {
             id: id || nanoid(), // keep client ID if passed, else generate
             title,
             content,
-            createdAt: createdAt ? new Date(createdAt) : new Date(),
             studentId,
             folderId: folderId ?? null,
           },
@@ -43,7 +42,6 @@ export async function POST(req: NextRequest) {
           id: nanoid(),
           title,
           content,
-          createdAt: createdAt ? new Date(createdAt) : new Date(),
           studentId,
           folderId: folderId ?? null,
         },
@@ -53,7 +51,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       note: {
         ...note,
-        createdAt: note.createdAt.toISOString(),
       },
     });
   } catch (error) {
