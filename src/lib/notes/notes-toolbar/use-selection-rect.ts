@@ -21,7 +21,12 @@ export function useSelectionRect(
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === "a" && editorRef.current) {
+      if (
+        e.ctrlKey &&
+        e.key === "a" &&
+        editorRef.current &&
+        editorRef.current.contains(document.activeElement)
+      ) {
         e.preventDefault();
 
         const selection = window.getSelection();
@@ -32,11 +37,12 @@ export function useSelectionRect(
 
         selection.removeAllRanges();
         selection.addRange(range);
+
         const rect = selection.getRangeAt(0).getBoundingClientRect();
-        console.log(rect);
         setSelectionRect(rect);
       }
     };
+
 
     document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("keydown", handleKeyDown);

@@ -111,8 +111,18 @@ export function loadDemoNotes(): Note[] {
   return JSON.parse(localStorage.getItem(NOTES_KEY) ?? "[]");
 }
 
-export function formatDate(timestamp: number): string {
+export function formatRelativeDate(timestamp: number | string): string {
   const date = new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes > 1 ? "s" : ""} ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",

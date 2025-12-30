@@ -31,6 +31,33 @@ export default function NotesEditor({
   const refToUse = editorRef || internalRef;
   const isDesktop = useIsDesktop();
 
+  const [editorSelected, setEditorSelected] = useState(false);
+
+  useEffect(() => {
+    const handleSelectionChange = () => {
+      const selection = window.getSelection();
+      if (!selection || !refToUse.current) {
+        setEditorSelected(false);
+        return;
+      }
+
+      const anchorNode = selection.anchorNode;
+      const isInsideEditor =
+        anchorNode &&
+        refToUse.current.contains(
+          anchorNode.nodeType === Node.TEXT_NODE
+            ? anchorNode.parentNode
+            : anchorNode
+        );
+
+      setEditorSelected(!!isInsideEditor);
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+    return () =>
+      document.removeEventListener("selectionchange", handleSelectionChange);
+  }, [refToUse]);
+
   useEffect(() => {
     if (refToUse.current) {
       if (refToUse.current.innerHTML !== note.content) {
@@ -89,7 +116,7 @@ export default function NotesEditor({
       key={note.id}
       className={`mx-auto flex flex-col h-full pt-15 ${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"}`}
     >
-      <NotesToolbar editorRef={refToUse} setContent={setContent} />
+      <NotesToolbar editorRef={refToUse} setContent={setContent} editorSelected={editorSelected} />
       <Input
         value={title}
         onChange={(e) => setTitle(e.target.value)}

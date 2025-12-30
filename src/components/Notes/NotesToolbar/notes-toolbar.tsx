@@ -28,11 +28,13 @@ import { useIsDesktop } from "@/lib/utils";
 interface NotesToolbarProps {
   editorRef: React.RefObject<HTMLDivElement | null>;
   setContent: (html: string) => void;
+  editorSelected: boolean;
 }
 
 export default function NotesToolbar({
   editorRef,
   setContent,
+  editorSelected,
 }: NotesToolbarProps) {
   const [visible, setVisible] = useState(false);
   const isDesktop = useIsDesktop();
@@ -41,8 +43,8 @@ export default function NotesToolbar({
   const selectionRect = useSelectionRect(editorRef);
 
   React.useEffect(() => {
-    setVisible(!!selectionRect);
-  }, [selectionRect]);
+    setVisible(editorSelected && !!selectionRect);
+  }, [editorSelected, selectionRect]);
 
   const pos = useToolbarPosition(selectionRect, toolbarRef, isDesktop);
 

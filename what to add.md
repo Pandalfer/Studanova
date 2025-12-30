@@ -11,7 +11,6 @@ Shared notes between users
 A favourite option to note items
 
 A last edited timestamp on note items
-A ... button that opens the context menu
 
 MAKE LIGHT MODE USABLE
 

@@ -15,6 +15,7 @@ export interface Note {
   title: string;
   content: string;
   createdAt: number;
+  lastEdited?: number;
   folderId?: string;
 }
 

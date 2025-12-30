@@ -29,7 +29,7 @@ import {
 } from "@/lib/notes/note-and-folder-actions";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
-import { formatDate } from "@/lib/notes/note-storage";
+import { formatRelativeDate} from "@/lib/notes/note-storage";
 import { Input } from "@/components/ui/input";
 import { useDraggable } from "@dnd-kit/core";
 import { useIsDesktop } from "@/lib/utils";
@@ -269,7 +269,7 @@ function NoteItem({
 
           <Separator className="m-2" />
           <h3 className="text-muted font-bold text-center text-xs cursor-default pb-2">
-            Created On {formatDate(note.createdAt)}
+            {note?.lastEdited ? "Last Edited " + formatRelativeDate(note.lastEdited) : "Error loading data"}
           </h3>
         </ContextMenuContent>
       </ContextMenu>

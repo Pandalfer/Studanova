@@ -1,11 +1,11 @@
 "use client";
 
 import { useNotes } from "@/hooks/use-notes";
-import { use, useEffect } from "react";
+import {act, use, useEffect} from "react";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useRouter, usePathname } from "next/navigation";
-import { loadFolders, loadNotes } from "@/lib/notes/note-storage";
+import { formatRelativeDate, loadFolders, loadNotes} from "@/lib/notes/note-storage";
 import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
 
 interface PageProps {
@@ -77,14 +77,19 @@ export default function NotesPage({ params }: PageProps) {
               loading={true}
             />
           ) : activeNote ? (
-            <NotesEditor
-              note={activeNote}
-              title={title}
-              setTitle={setTitle}
-              editorRef={editorRef}
-              onDirtyChange={setIsDirty}
-              loading={false}
-            />
+            <div>
+              <div className="absolute top-5 right-5 text-sm text-muted-foreground">
+                {activeNote?.lastEdited ? "Last Edited " + formatRelativeDate(activeNote.lastEdited) : "Error loading data"}
+              </div>
+              <NotesEditor
+                note={activeNote}
+                title={title}
+                setTitle={setTitle}
+                editorRef={editorRef}
+                onDirtyChange={setIsDirty}
+                loading={false}
+              />
+            </div>
           ) : (
             <div></div>
           )}

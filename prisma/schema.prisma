@@ -30,12 +30,13 @@ model Assignment {
 }
 
 model Note {
-  id        String   @id
-  title     String
-  studentId String   @db.Uuid
-  content   String
-  createdAt DateTime @default(now())
-  student   Student  @relation(fields: [studentId], references: [id])
+  id         String   @id
+  title      String
+  studentId  String   @db.Uuid
+  content    String
+  createdAt  DateTime @default(now())
+  student    Student  @relation(fields: [studentId], references: [id])
+  lastEdited DateTime @default(now()) @updatedAt
 
   folderId String? @db.Uuid
   folder   Folder? @relation(fields: [folderId], references: [id])
