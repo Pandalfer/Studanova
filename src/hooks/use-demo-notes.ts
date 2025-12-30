@@ -139,6 +139,7 @@ export function useDemoNotes() {
           ...existingNote,
           title: currentTitle,
           content: currentContent,
+          lastEdited: Date.now(),
         };
         const { newRootNotes, newFolders } = placeNoteInTree(
           updatedNote,
@@ -194,6 +195,7 @@ export function useDemoNotes() {
       title: "Untitled Note",
       content: "",
       folderId: undefined,
+      lastEdited: Date.now(),
     };
 
     const newRootNotes = [...rootNotes, newNote].sort((a, b) =>

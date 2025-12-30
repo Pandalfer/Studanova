@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import PrimaryActionButton from "@/components/primary-action-button";
 import { toast } from "sonner";
+import {loadDemoFolders, loadDemoNotes} from "@/lib/notes/note-storage";
 
 export default function SignUp() {
   const [username, setUsername] = useState("");
@@ -74,6 +75,9 @@ export default function SignUp() {
       return;
     }
 
+    const demoNotes = loadDemoNotes();
+    const demoFolders = loadDemoFolders();
+
     const response = await fetch("/api/user/sign-up", {
       method: "POST",
       headers: {
@@ -83,6 +87,8 @@ export default function SignUp() {
         username,
         email,
         password,
+        notes: demoNotes,
+        folders: demoFolders,
       }),
     });
 
