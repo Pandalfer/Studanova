@@ -6,7 +6,7 @@ import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useRouter, usePathname } from "next/navigation";
 import { formatRelativeDate, loadFolders, loadNotes} from "@/lib/notes/note-storage";
-import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
+import {useIsDesktop} from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -18,6 +18,7 @@ export default function NotesPage({ params }: PageProps) {
   const pathSegments = pathname.split("/");
   const noteIdFromPath = pathSegments[3]; // /uuid/notes/noteId
   const { uuid } = use(params);
+  const isDesktop = useIsDesktop();
 
   const {
     notes,
@@ -77,10 +78,11 @@ export default function NotesPage({ params }: PageProps) {
               loading={true}
             />
           ) : activeNote ? (
-            <div>
-              <div className="absolute top-5 right-5 text-sm text-muted-foreground">
-                {activeNote?.lastEdited ? "Last Edited " + formatRelativeDate(activeNote.lastEdited) : "Error loading data"}
+            <div className="relative h-full flex-1">
+              <div className="absolute top-5 right-5 text-sm text-muted-foreground z-10">
+                {activeNote?.lastEdited ? "Last Edited " + formatRelativeDate(activeNote.lastEdited) : ""}
               </div>
+
               <NotesEditor
                 note={activeNote}
                 title={title}

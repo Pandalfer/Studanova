@@ -134,7 +134,10 @@ export default function NotesEditor({
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          className="editor-content cursor-text w-full h-full outline-none break-words whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
+          className="editor-content cursor-text w-full h-full outline-none break-words break-all whitespace-pre-wrap p-1 [overflow-wrap:anywhere] overflow-x-hidden"
+          style={{
+            wordBreak: "break-word",
+          }}
         />
       </div>
     </div>
