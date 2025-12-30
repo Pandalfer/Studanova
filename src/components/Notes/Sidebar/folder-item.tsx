@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Copy, HandIcon, LockIcon, PencilLine, Trash2 } from "lucide-react";
+import {ChevronDownIcon, Copy, HandIcon, LockIcon, PencilLine, Trash2} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { useIsDesktop } from "@/lib/utils";
+import {cn, useIsDesktop} from "@/lib/utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -125,6 +125,8 @@ function FolderItem({
     }, 50);
   };
 
+  const isOpen = openFolders.includes(folder.id);
+
   return (
     <div
       ref={setNodeRef}
@@ -153,14 +155,22 @@ function FolderItem({
             <ContextMenu modal={!isDesktop}>
               <ContextMenuTrigger asChild>
                 <AccordionTrigger
-                  className={`h-12 min-w-60 w-full flex items-center ${isOver ? " " : "hover:bg-accent dark:hover:bg-accent"} truncate`}
-                  arrow="left"
+                  className={cn(
+                    "h-12 min-w-60 w-full flex items-center gap-2 truncate",
+                    isOver ? " " : "hover:bg-accent dark:hover:bg-accent"
+                  )}
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectFolder?.(folder);
                   }}
                 >
-                  <h3 className="text-sm font-medium leading-tight truncate w-full font-bold">
+                  <ChevronDownIcon
+                    className={cn(
+                      "ml-2 text-muted-foreground size-4 shrink-0 transition-transform duration-200",
+                      isOpen ? "rotate-180" : "rotate-0"
+                    )}
+                  />
+                  <h3 className="text-sm font-medium leading-tight truncate w-full font-bold text-left">
                     {folder.title.substring(0, 25)}
                     {folder.title.length > 25 ? "..." : ""}
                   </h3>

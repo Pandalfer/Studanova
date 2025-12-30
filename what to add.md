@@ -4,13 +4,9 @@ Google and GitHub login options
 Remember me
 flashcards next
 
-Respond to different screen sizes (mobile, tablet, desktop)
-
 Added later:
 Shared notes between users
 A favourite option to note items
-
-A last edited timestamp on note items
 
 MAKE LIGHT MODE USABLE
 
