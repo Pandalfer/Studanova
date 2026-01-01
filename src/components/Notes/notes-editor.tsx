@@ -47,7 +47,7 @@ export default function NotesEditor({
         refToUse.current.contains(
           anchorNode.nodeType === Node.TEXT_NODE
             ? anchorNode.parentNode
-            : anchorNode
+            : anchorNode,
         );
 
       setEditorSelected(!!isInsideEditor);
@@ -116,7 +116,11 @@ export default function NotesEditor({
       key={note.id}
       className={`mx-auto flex flex-col h-full pt-15 ${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"}`}
     >
-      <NotesToolbar editorRef={refToUse} setContent={setContent} editorSelected={editorSelected} />
+      <NotesToolbar
+        editorRef={refToUse}
+        setContent={setContent}
+        editorSelected={editorSelected}
+      />
       <Input
         value={title}
         onChange={(e) => setTitle(e.target.value)}

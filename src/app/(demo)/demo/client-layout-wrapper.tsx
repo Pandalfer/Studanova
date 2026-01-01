@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Sidebar } from "@/components/Navigation/Sidebar/sidebar";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
-import {useIsDesktop} from "@/lib/utils";
+import { useIsDesktop } from "@/lib/utils";
 
 interface ClientLayoutWrapperProps {
   children: React.ReactNode;

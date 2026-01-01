@@ -14,7 +14,14 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import {ChevronDownIcon, Copy, HandIcon, LockIcon, PencilLine, Trash2} from "lucide-react";
+import {
+  ChevronDownIcon,
+  Copy,
+  HandIcon,
+  LockIcon,
+  PencilLine,
+  Trash2,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +33,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import {cn, useIsDesktop} from "@/lib/utils";
+import { cn, useIsDesktop } from "@/lib/utils";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -157,7 +164,7 @@ function FolderItem({
                 <AccordionTrigger
                   className={cn(
                     "h-12 min-w-60 w-full flex items-center gap-2 truncate",
-                    isOver ? " " : "hover:bg-accent dark:hover:bg-accent"
+                    isOver ? " " : "hover:bg-accent dark:hover:bg-accent",
                   )}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -167,7 +174,7 @@ function FolderItem({
                   <ChevronDownIcon
                     className={cn(
                       "ml-2 text-muted-foreground size-4 shrink-0 transition-transform duration-200",
-                      isOpen ? "rotate-180" : "rotate-0"
+                      isOpen ? "rotate-180" : "rotate-0",
                     )}
                   />
                   <h3 className="text-sm font-medium leading-tight truncate w-full font-bold text-left">

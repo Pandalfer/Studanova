@@ -118,7 +118,8 @@ export function formatRelativeDate(timestamp: number | string): string {
   const diffMinutes = Math.floor(diffMs / 60000);
 
   if (diffMinutes < 1) return "just now";
-  if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes > 1 ? "s" : ""} ago`;
+  if (diffMinutes < 60)
+    return `${diffMinutes} min${diffMinutes > 1 ? "s" : ""} ago`;
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;

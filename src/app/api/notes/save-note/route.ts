@@ -4,8 +4,7 @@ import { nanoid } from "nanoid";
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, title, content, studentId, folderId } =
-      await req.json();
+    const { id, title, content, studentId, folderId } = await req.json();
 
     if (!studentId) {
       return NextResponse.json({ error: "Missing studentId" }, { status: 400 });

@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff } from "lucide-react";
 import PrimaryActionButton from "@/components/primary-action-button";
 import { toast } from "sonner";
-import {loadDemoFolders, loadDemoNotes} from "@/lib/notes/note-storage";
+import { loadDemoFolders, loadDemoNotes } from "@/lib/notes/note-storage";
 
 export default function SignUp() {
   const [username, setUsername] = useState("");

@@ -1,12 +1,16 @@
 "use client";
 
 import { useNotes } from "@/hooks/use-notes";
-import {act, use, useEffect} from "react";
+import { act, use, useEffect } from "react";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useRouter, usePathname } from "next/navigation";
-import { formatRelativeDate, loadFolders, loadNotes} from "@/lib/notes/note-storage";
-import {useIsDesktop} from "@/lib/utils";
+import {
+  formatRelativeDate,
+  loadFolders,
+  loadNotes,
+} from "@/lib/notes/note-storage";
+import { useIsDesktop } from "@/lib/utils";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -79,7 +83,9 @@ export default function NotesPage({ params }: PageProps) {
           ) : activeNote ? (
             <div className="relative h-full flex-1">
               <div className="absolute top-5 right-5 text-sm text-muted-foreground z-10">
-                {activeNote?.lastEdited ? "Last Edited " + formatRelativeDate(activeNote.lastEdited) : ""}
+                {activeNote?.lastEdited
+                  ? "Last Edited " + formatRelativeDate(activeNote.lastEdited)
+                  : ""}
               </div>
 
               <NotesEditor

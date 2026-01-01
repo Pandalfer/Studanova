@@ -43,7 +43,6 @@ export function useSelectionRect(
       }
     };
 
-
     document.addEventListener("selectionchange", handleSelectionChange);
     document.addEventListener("keydown", handleKeyDown);
 

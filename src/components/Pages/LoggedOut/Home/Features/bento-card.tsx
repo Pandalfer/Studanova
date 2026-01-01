@@ -28,11 +28,11 @@ export default function BentoCard({
 
   return (
     <div
-      className={`rounded-2xl p-6 text-white shadow-lg flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-card ${colSpan[col.toString()]} ${rowSpan[row.toString()]}`}
+      className={`rounded-2xl p-6 text-foreground shadow-lg flex flex-col justify-between transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl bg-card ${colSpan[col.toString()]} ${rowSpan[row.toString()]}`}
     >
       <div className="text-3xl">{icon}</div>
       <div className="mt-4 font-semibold text-xl">{title}</div>
-      <p className="mt-1 text-sm text-white/80">{description}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{description}</p>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 async function createFolders(
   folders: Folder[],
   studentId: string,
-  parentId?: string
+  parentId?: string,
 ) {
   for (const folder of folders) {
     const createdFolder = await prisma.folder.create({
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "Username already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
     console.error(err);
     return NextResponse.json(
       { error: "Failed to create user" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
