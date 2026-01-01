@@ -1,27 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/hash";
-import { Folder, Note } from "@/lib/types";
+import { Folder } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
+import { Prisma } from "@prisma/client";
 
 async function createFolders(
+  tx: Prisma.TransactionClient,
   folders: Folder[],
   studentId: string,
   parentId?: string,
 ) {
   for (const folder of folders) {
-    const createdFolder = await prisma.folder.create({
+    const createdFolder = await tx.folder.create({
       data: {
         title: folder.title,
-        parentId: parentId || null,
+        parentId: parentId ?? null,
         studentId,
       },
     });
 
     for (const note of folder.notes) {
-      await prisma.note.create({
+      await tx.note.create({
         data: {
-          id: uuidv4(), // generate an id if missing
+          id: uuidv4(),
           title: note.title,
           content: note.content,
           lastEdited: note.lastEdited ? new Date(note.lastEdited) : undefined,
@@ -32,7 +34,7 @@ async function createFolders(
     }
 
     if (folder.folders.length > 0) {
-      await createFolders(folder.folders, studentId, createdFolder.id);
+      await createFolders(tx, folder.folders, studentId, createdFolder.id);
     }
   }
 }
@@ -45,10 +47,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Check if username exists
     const existingUser = await prisma.student.findUnique({
       where: { username },
     });
+
     if (existingUser) {
       return NextResponse.json(
         { error: "Username already exists" },
@@ -56,41 +58,56 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create student first (id auto-generated)
-    const user = await prisma.student.create({
-      data: { username, email, password: hashedPassword },
+    let createdUserId: string | null = null;
+
+    await prisma.$transaction(async (tx) => {
+      const user = await tx.student.create({
+        data: { username, email, password: hashedPassword },
+      });
+
+      createdUserId = user.id;
+
+      if (folders?.length) {
+        await createFolders(tx, folders, user.id);
+      }
+
+      if (notes?.length) {
+        for (const note of notes) {
+          await tx.note.create({
+            data: {
+              id: uuidv4(),
+              title: note.title,
+              content: note.content,
+              lastEdited: note.lastEdited
+                ? new Date(note.lastEdited)
+                : undefined,
+              folderId: null,
+              studentId: user.id,
+            },
+          });
+        }
+      }
     });
 
-    // Create folders and notes recursively
-    if (folders && folders.length > 0) {
-      await createFolders(folders, user.id);
+    if (!createdUserId) {
+      return NextResponse.json(
+        { error: "User creation failed" },
+        { status: 500 },
+      );
     }
 
-    if (notes && notes.length > 0) {
-      for (const note of notes) {
-        await prisma.note.create({
-          data: {
-            id: uuidv4(),
-            title: note.title,
-            content: note.content,
-            lastEdited: note.lastEdited ? new Date(note.lastEdited) : undefined,
-            folderId: null,
-            studentId: user.id,
-          },
-        });
-      }
-    }
-
-    // Load newly created folders & notes to return
     const userFolders = await prisma.folder.findMany({
-      where: { studentId: user.id },
+      where: { studentId: createdUserId },
       include: { notes: true, folders: true },
     });
 
-    return NextResponse.json({ ...user, Folder: userFolders });
+    return NextResponse.json({
+      success: true,
+      studentId: createdUserId,
+      folders: userFolders,
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

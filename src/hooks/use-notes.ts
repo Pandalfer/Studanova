@@ -12,6 +12,7 @@ import {
   deleteNote,
   duplicateFolder,
   duplicateNote,
+  handleImport,
   moveFolder,
   moveNote,
   renameFolder,
@@ -19,6 +20,7 @@ import {
   renameNoteInFolders,
   selectNote,
 } from "@/lib/notes/note-and-folder-actions";
+import { toast } from "sonner";
 
 export function useNotes(
   uuid: string,
@@ -99,7 +101,6 @@ export function useNotes(
     };
   }, [title, editorRef.current?.innerHTML, isDirty, activeNote, uuid]);
 
-  // Warn before leaving with unsaved changes
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isDirty) {
@@ -192,5 +193,9 @@ export function useNotes(
         setTitle,
         setNotes,
       ),
+    onImportNotes: async (files: FileList) => {
+      await handleImport(files, uuid, router);
+      window.location.reload();
+    },
   };
 }

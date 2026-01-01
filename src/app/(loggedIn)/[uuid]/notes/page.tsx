@@ -28,6 +28,7 @@ export default function NotesPage({ params }: PageProps) {
     moveNoteToFolder,
     moveFolderToFolder,
     onSelectNote,
+    onImportNotes,
   } = useNotes(uuid, router);
 
   return (
@@ -46,7 +47,9 @@ export default function NotesPage({ params }: PageProps) {
         onDuplicateFolder={onDuplicateFolder}
         onRenameNote={onRenameNote}
         onRenameFolder={onRenameFolder}
+        handleImport={onImportNotes}
         loading={loading}
+        isDemo={false}
       />
       <div className="flex-1 h-screen">
         <NotesEmptyState

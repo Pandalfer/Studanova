@@ -39,6 +39,7 @@ export default function NotesPage({ params }: PageProps) {
     moveNoteToFolder,
     moveFolderToFolder,
     onSelectNote,
+    onImportNotes,
     activeNote,
     title,
     setTitle,
@@ -61,9 +62,11 @@ export default function NotesPage({ params }: PageProps) {
         onDeleteFolder={onDeleteFolder}
         onRenameNote={onRenameNote}
         onRenameFolder={onRenameFolder}
+        handleImport={onImportNotes}
         activeNoteId={activeNote?.id}
         loading={loading}
         folders={folders}
+        isDemo={false}
       />
 
       <div className="flex-1 h-screen">

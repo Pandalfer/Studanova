@@ -27,6 +27,16 @@ export interface Folder {
   parentId?: string;
 }
 
+export interface ImportFolder {
+  title: string;
+  notes: {
+    title: string;
+    content: string;
+    lastEdited?: number;
+  }[];
+  folders: ImportFolder[];
+}
+
 export interface FolderInput {
   title: string;
 }

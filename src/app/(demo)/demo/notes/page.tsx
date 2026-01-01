@@ -47,6 +47,7 @@ export default function DemoNotesPage() {
         onDeleteNote={deleteNote}
         onDeleteFolder={deleteFolder}
         activeNoteId={activeNote?.id}
+        isDemo={true}
       />
       <div className="flex-1 h-screen">
         {activeNote ? (

@@ -1,4 +1,4 @@
-import { Folder, FolderInput, Note } from "@/lib/types";
+import { Folder, FolderInput, ImportFolder, Note } from "@/lib/types";
 import {
   deleteFolderFromDb,
   deleteNoteFromDb,
@@ -504,6 +504,94 @@ export async function createNewFolder(
     toast.error("Failed to create folder");
     console.error("Failed to create folder:", err);
   }
+}
+
+export async function handleImport(
+  files: FileList,
+  studentId: string,
+  router: AppRouterInstance,
+) {
+  const importPromise = (async () => {
+    const { rootFolderName, tree } = await processFilesIntoTree(files);
+    const response = await fetch("/api/user/import-notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentId,
+        tree,
+        rootFolderName,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to save to database");
+    }
+
+    router.refresh();
+  })();
+
+  toast.promise(importPromise, {
+    loading: "Processing your vault...",
+    success: "Import complete!",
+    error: (err) => `Import failed: ${err.message}`,
+  });
+}
+
+export async function processFilesIntoTree(files: FileList) {
+  const fileArray = Array.from(files);
+  if (fileArray.length === 0) return { rootFolderName: "", tree: [] };
+
+  const rootFolderName = fileArray[0].webkitRelativePath.split("/")[0];
+
+  // We force a single root object to ensure the API always has a "tree" to loop through
+  const mainRoot: ImportFolder = {
+    title: rootFolderName,
+    folders: [],
+    notes: [],
+  };
+
+  for (const file of fileArray) {
+    if (!file.name.endsWith(".md")) continue;
+
+    const pathSegments = file.webkitRelativePath.split("/");
+    pathSegments.shift(); // Remove the top-level "MyVault" name
+
+    const fileName = pathSegments.pop()?.replace(".md", "") || "Untitled";
+    const content = await file.text();
+
+    const newNote = {
+      title: fileName,
+      content: content,
+      lastEdited: Date.now(),
+    };
+
+    // If no segments left, the note is in the vault root
+    if (pathSegments.length === 0) {
+      mainRoot.notes.push(newNote);
+      continue;
+    }
+
+    // Traverse the subfolders
+    let currentLevel = mainRoot.folders;
+    let targetFolder: ImportFolder | null = null;
+
+    for (const segment of pathSegments) {
+      let folder = currentLevel.find((f) => f.title === segment);
+      if (!folder) {
+        folder = { title: segment, folders: [], notes: [] };
+        currentLevel.push(folder);
+      }
+      targetFolder = folder;
+      currentLevel = folder.folders;
+    }
+
+    if (targetFolder) targetFolder.notes.push(newNote);
+  }
+
+  // We return mainRoot as the ONLY item in the tree.
+  // This guarantees the API sees 1 folder and starts recursing.
+  return { rootFolderName: "", tree: [mainRoot] };
 }
 
 export function deleteFolderFromFolders(

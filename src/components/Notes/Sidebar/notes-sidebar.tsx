@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import {
   Folder as FolderIcon,
+  FolderDown,
   FolderPen,
   NotepadText,
   Search,
@@ -48,6 +49,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useIsDesktop } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface NotesSidebarProps {
   notes: Note[];
@@ -65,6 +74,8 @@ interface NotesSidebarProps {
   createNewFolder: () => void;
   moveNoteToFolder: (noteId: string, folderId?: string) => void;
   moveFolderToFolder: (folderId: string, parentId?: string) => void;
+  handleImport?: (files: FileList) => void;
+  isDemo: boolean;
 }
 
 interface NotesSidebarContentProps extends NotesSidebarProps {
@@ -89,6 +100,8 @@ function NotesSidebarContent({
   createNewFolder,
   isDragLocked,
   setIsDragLocked,
+  isDemo,
+  handleImport,
 }: NotesSidebarContentProps) {
   const [openFolders, setOpenFolders] = React.useState<string[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -237,6 +250,86 @@ function NotesSidebarContent({
             </Button>
           </TooltipTrigger>
           <TooltipContent>New Folder</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <Dialog>
+            {/* 1. TooltipTrigger must be the immediate parent of the button */}
+            <TooltipTrigger asChild>
+              {/* 2. DialogTrigger must also be asChild so they share the same button element */}
+              <DialogTrigger asChild>
+                <Button
+                  className={`aspect-square ${isDemo ? "opacity-50" : ""}`}
+                  variant="ghost"
+                  onClick={(e) => {
+                    if (isDemo) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      toast.info(
+                        "Sign in to upload notes from Obsidian or Notion.",
+                      );
+                    }
+                  }}
+                >
+                  <FolderDown />
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              {isDemo ? "Sign in to Import" : "Import Notes"}
+            </TooltipContent>
+
+            {/* 3. DialogContent stays inside the Dialog but outside the Trigger logic */}
+            {!isDemo && (
+              <DialogContent className="sm:max-w-md">
+                <DialogTitle>Import Notes</DialogTitle>
+                <div className="space-y-4">
+                  <div
+                    className="group relative flex flex-col items-center justify-center space-y-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-6 transition-colors hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
+                    onClick={() =>
+                      document.getElementById("obsidian-import")?.click()
+                    }
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted group-hover:bg-background transition-colors">
+                      <FolderDown className="h-6 w-6 text-muted-foreground group-hover:text-primary" />
+                    </div>
+
+                    <div className="text-center">
+                      <p className="text-sm font-medium">
+                        Click or drag folder to upload
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Obsidian Vault or Notion Export
+                      </p>
+                    </div>
+
+                    <Input
+                      id="obsidian-import"
+                      type="file"
+                      className="hidden"
+                      multiple
+                      {...({
+                        webkitdirectory: "true",
+                        directory: "true",
+                      } as React.HTMLAttributes<HTMLInputElement>)}
+                      onChange={async (e) => {
+                        const files = e.target.files;
+                        if (files && files.length > 0) {
+                          // This calls the function in your props
+                          // which will handle the processing and the API fetch
+                          handleImport?.(files);
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="rounded-md bg-blue-500/10 p-3 text-[12px] text-blue-600 dark:text-blue-400">
+                    <strong>Tip:</strong> If you are using Notion, export as
+                    Markdown & CSV first, then unzip and upload the folder here.
+                  </div>
+                </div>
+              </DialogContent>
+            )}
+          </Dialog>
         </Tooltip>
       </div>
 
