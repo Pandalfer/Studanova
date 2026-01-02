@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
           title: n.title,
           content: n.content,
           folderId: n.folderId || undefined,
+          lastEdited: n.lastEdited,
         })),
         folders: [], // children will be filled later
         parentId: f.parentId || undefined,

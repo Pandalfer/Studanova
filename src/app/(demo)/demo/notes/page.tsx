@@ -4,6 +4,7 @@ import NotesEmptyState from "@/components/Notes/empty-state";
 import { NotesSidebar } from "@/components/Notes/Sidebar/notes-sidebar";
 import NotesEditor from "@/components/Notes/notes-editor";
 import { useDemoNotes } from "@/hooks/use-demo-notes";
+import { formatRelativeDate } from "@/lib/notes/note-storage";
 
 export default function DemoNotesPage() {
   const {
@@ -51,13 +52,22 @@ export default function DemoNotesPage() {
       />
       <div className="flex-1 h-screen">
         {activeNote ? (
-          <NotesEditor
-            note={activeNote}
-            title={title}
-            setTitle={setTitle}
-            editorRef={editorRef}
-            onDirtyChange={setIsDirty}
-          />
+          <div className="relative h-full flex-1">
+            <div className="absolute top-5 right-5 text-sm text-muted-foreground z-10">
+              {activeNote?.lastEdited
+                ? "Last Edited " + formatRelativeDate(activeNote.lastEdited)
+                : ""}
+            </div>
+
+            <NotesEditor
+              note={activeNote}
+              title={title}
+              setTitle={setTitle}
+              editorRef={editorRef}
+              onDirtyChange={setIsDirty}
+              loading={false}
+            />
+          </div>
         ) : (
           <NotesEmptyState message="Select or create a note to get started" />
         )}

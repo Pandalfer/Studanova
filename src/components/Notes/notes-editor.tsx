@@ -100,13 +100,11 @@ export default function NotesEditor({
     return (
       <div className="w-190 mx-auto flex flex-col h-full pt-15">
         <Skeleton className="h-16 w-full mb-3 rounded-md bg-popover" />
-        <ScrollArea className="flex-1 w-full">
-          <div className="flex flex-col gap-2 p-2">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-6 w-full rounded-md bg-popover" />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-2 p-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-6 w-full rounded-md bg-popover" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -127,7 +125,7 @@ export default function NotesEditor({
         placeholder="Note Title"
         className="h-16 !text-3xl p-5 font-bold border-none px-0 focus-visible:ring-0"
       />
-      <div className="relative w-full h-full flex-1 text-toolbar-white">
+      <div className="relative w-full flex-1 text-toolbar-white">
         {isEmptyContent(content) && (
           <div className="absolute top-1 left-1 pointer-events-none text-muted">
             {placeholder}
@@ -138,7 +136,7 @@ export default function NotesEditor({
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          className="editor-content cursor-text w-full h-full outline-none break-words break-all whitespace-pre-wrap p-1 [overflow-wrap:anywhere] overflow-x-hidden"
+          className="editor-content cursor-text w-full outline-none break-words break-all whitespace-pre-wrap p-1 [overflow-wrap:anywhere]"
           style={{
             wordBreak: "break-word",
           }}
