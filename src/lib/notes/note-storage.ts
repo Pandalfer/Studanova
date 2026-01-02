@@ -94,7 +94,7 @@ export async function deleteFolderFromDb(id: string): Promise<void> {
     body: JSON.stringify({ id }),
   });
   if (!res.ok) {
-    throw new Error("Failed to delete folder");
+    throw new Error("Failed to delete flashcards");
   }
 }
 

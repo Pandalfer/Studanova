@@ -40,3 +40,15 @@ export interface ImportFolder {
 export interface FolderInput {
   title: string;
 }
+
+export interface Flashcard {
+  id: string;
+  question: string;
+  answer: string;
+}
+
+export interface FlashcardGroup {
+  id: string;
+  title: string;
+  flashcards?: Flashcard[];
+}

@@ -430,7 +430,7 @@ export function useDemoNotes() {
       );
     };
     if (targetParentId && isDescendant(folderToMove, targetParentId)) {
-      toast.error("Cannot move a folder into its own sub-folder");
+      toast.error("Cannot move a flashcards into its own sub-flashcards");
       return;
     }
     const recursiveRemove = (list: Folder[]): Folder[] => {

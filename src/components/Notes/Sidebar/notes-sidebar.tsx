@@ -114,7 +114,7 @@ function NotesSidebarContent({
   React.useEffect(() => {
     // Initialize the worker
     workerRef.current = new Worker(
-      new URL("@/lib/notes/search-worker.ts", import.meta.url),
+      new URL("@/lib/notes/notes-search-worker.ts", import.meta.url),
     );
 
     // Listen for results coming back from the worker

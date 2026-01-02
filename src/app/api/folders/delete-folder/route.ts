@@ -5,10 +5,10 @@ export async function POST(req: NextRequest) {
   try {
     const { id } = await req.json();
     if (!id) {
-      return NextResponse.json({ error: "Missing folder id" }, { status: 400 });
+      return NextResponse.json({ error: "Missing flashcards id" }, { status: 400 });
     }
 
-    // Step 1: Collect all descendant folder IDs
+    // Step 1: Collect all descendant flashcards IDs
     const collectFolderIds = async (folderId: string): Promise<string[]> => {
       const childFolders = await prisma.folder.findMany({
         where: { parentId: folderId },
@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting folder and contents:", error);
+    console.error("Error deleting flashcards and contents:", error);
     return NextResponse.json(
-      { error: "Failed to delete folder and its contents" },
+      { error: "Failed to delete flashcards and its contents" },
       { status: 500 },
     );
   }

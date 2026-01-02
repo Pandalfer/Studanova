@@ -91,7 +91,7 @@ export function moveNote(
     let nextNotes: Note[];
 
     if (folderId) {
-      // Moving into a folder → remove from root
+      // Moving into a flashcards → remove from root
       nextNotes = prevNotes.filter((n) => n.id !== noteId);
     } else {
       // Moving to root
@@ -354,7 +354,7 @@ export async function duplicateFolder(
         const savedNote = await saveNoteToDb(newNote, uuid);
         savedNotes.push(savedNote);
       } catch (error) {
-        console.error("Failed to duplicate note in folder: ", error);
+        console.error("Failed to duplicate note in flashcards: ", error);
       }
     }
     const savedFolders: Folder[] = [];
@@ -397,7 +397,7 @@ export async function duplicateFolder(
       setFolders((prev) => sortByTitle([...prev, duplicated]));
     }
   } catch {
-    toast.error("Failed to duplicate folder");
+    toast.error("Failed to duplicate flashcards");
   }
 }
 
@@ -424,7 +424,7 @@ export function moveFolder(
   const childrenFolders = collectAllFolders([oldFolder]);
   const childrenFolderIds = childrenFolders.map((f) => f.id);
   if (parentId && childrenFolderIds.includes(parentId)) {
-    // Prevent moving a folder into one of its own subfolders
+    // Prevent moving a flashcards into one of its own subfolders
     return;
   }
 
@@ -432,8 +432,8 @@ export function moveFolder(
   try {
     saveFolderToDb(updatedFolder, uuid);
   } catch (err) {
-    toast.error("Failed to move folder");
-    console.error("Failed to move folder in DB:", err);
+    toast.error("Failed to move flashcards");
+    console.error("Failed to move flashcards in DB:", err);
     return;
   }
 
@@ -453,7 +453,7 @@ export function moveFolder(
       return sortByTitle([...cleaned, updatedFolder]);
     }
 
-    // Moving inside another folder
+    // Moving inside another flashcards
     const addToParent = (folders: Folder[]): Folder[] =>
       folders.map((f) =>
         f.id === parentId
@@ -488,7 +488,7 @@ export async function renameFolder(
       ),
     );
   } catch {
-    toast.error("Failed to rename folder");
+    toast.error("Failed to rename flashcards");
   }
 }
 
@@ -501,8 +501,8 @@ export async function createNewFolder(
     const savedFolder = await saveFolderToDb(folderInput, uuid);
     setFolders((prev) => sortFoldersRecursively([...prev, savedFolder]));
   } catch (err) {
-    toast.error("Failed to create folder");
-    console.error("Failed to create folder:", err);
+    toast.error("Failed to create flashcards");
+    console.error("Failed to create flashcards:", err);
   }
 }
 
@@ -590,7 +590,7 @@ export async function processFilesIntoTree(files: FileList) {
   }
 
   // We return mainRoot as the ONLY item in the tree.
-  // This guarantees the API sees 1 folder and starts recursing.
+  // This guarantees the API sees 1 flashcards and starts recursing.
   return { rootFolderName: "", tree: [mainRoot] };
 }
 
@@ -622,7 +622,7 @@ export function deleteFolderFromFolders(
 }
 
 function isNoteInFolderTree(noteId: string, folder: Folder): boolean {
-  // Check notes in the current folder
+  // Check notes in the current flashcards
   if ((folder.notes ?? []).some((n) => n.id === noteId)) {
     return true;
   }
@@ -651,8 +651,8 @@ export async function deleteFolder(
   try {
     await deleteFolderFromDb(folderId);
   } catch (err) {
-    toast.error("Failed to delete folder");
-    console.error("Failed to delete folder from DB:", err);
+    toast.error("Failed to delete flashcards");
+    console.error("Failed to delete flashcards from DB:", err);
     return;
   }
   const folderToDelete = collectAllFolders(folders).find(

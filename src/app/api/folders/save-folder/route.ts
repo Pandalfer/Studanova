@@ -40,9 +40,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ folder });
   } catch (error) {
-    console.error("Error saving folder:", error);
+    console.error("Error saving flashcards:", error);
     return NextResponse.json(
-      { error: "Failed to save folder" },
+      { error: "Failed to save flashcards" },
       { status: 500 },
     );
   }

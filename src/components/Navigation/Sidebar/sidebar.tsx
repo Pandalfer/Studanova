@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState } from "react";
 import { SidebarDesktop } from "@/components/Navigation/Sidebar/sidebar-desktop";
-import { Home, Notebook } from "lucide-react";
+import {Home, Notebook, SquareStack} from "lucide-react";
 import { SidebarMobile } from "@/components/Navigation/Sidebar/sidebar-mobile";
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
 import { useIsDesktop } from "@/lib/utils";
@@ -61,6 +61,7 @@ export function Sidebar({
     links: [
       { label: "Home", href: `${basePath}/home`, icon: Home },
       { label: "Notes", href: `${basePath}/notes`, icon: Notebook },
+      { label: "Flashcards", href: `${basePath}/flashcards`, icon: SquareStack },
     ],
     extras: (
       <div className={"flex flex-col gap-2"}>

@@ -28,7 +28,7 @@ async function createFolderForStudent(studentId: string, folderTitle: string) {
       },
     },
   });
-  console.log("Created folder:", folder);
+  console.log("Created flashcards:", folder);
   return folder;
 }
 //
@@ -45,7 +45,7 @@ createFolderForStudent(
   "Study Materials",
 )
   .catch((e) => {
-    console.error("Error creating folder:", e);
+    console.error("Error creating flashcards:", e);
   })
   .finally(async () => {
     await client.$disconnect();

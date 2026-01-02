@@ -9,8 +9,8 @@ type NoteDTO = {
   folderId?: string;
 };
 
-// Shape of a folder sent back to the frontend
-// Each folder can contain notes and nested folders
+// Shape of a flashcards sent back to the frontend
+// Each flashcards can contain notes and nested folders
 type FolderDTO = {
   id: string;
   title: string;
@@ -44,12 +44,12 @@ export async function POST(req: NextRequest) {
       orderBy: { title: "asc" }, // sort folders alphabetically
     });
 
-    // Map to hold each folder object by its id
+    // Map to hold each flashcards object by its id
     // Makes it easy to look up parent/child relationships
     const byId = new Map<string, FolderDTO>();
     const roots: FolderDTO[] = []; // top-level folders (with no parent)
 
-    // First pass: convert each folder record into a FolderDTO
+    // First pass: convert each flashcards record into a FolderDTO
     for (const f of rows) {
       byId.set(f.id, {
         id: f.id,
@@ -70,16 +70,16 @@ export async function POST(req: NextRequest) {
     for (const f of rows) {
       const node = byId.get(f.id)!;
       if (f.parentId) {
-        // If this folder has a parent, attach it under that parent
+        // If this flashcards has a parent, attach it under that parent
         const parent = byId.get(f.parentId);
         if (parent) {
           parent.folders.push(node);
         } else {
-          // If the parent is missing, treat it as a root folder
+          // If the parent is missing, treat it as a root flashcards
           roots.push(node);
         }
       } else {
-        // No parentId means this is a root folder
+        // No parentId means this is a root flashcards
         roots.push(node);
       }
     }
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     sortTree(roots);
     sortNotes(roots);
 
-    // Return the full folder tree as JSON
+    // Return the full flashcards tree as JSON
     return NextResponse.json({ folders: roots });
   } catch (e) {
     console.error("Failed to load folders", e);
