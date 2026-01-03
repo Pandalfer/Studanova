@@ -9,13 +9,14 @@ datasource db {
 }
 
 model Student {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username    String       @unique
-  email       String
-  password    String
-  assignments Assignment[]
-  Note        Note[]
-  Folder      Folder[]
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String         @unique
+  email        String
+  password     String
+  assignments  Assignment[]
+  Note         Note[]
+  Folder       Folder[]
+  FlashcardSet FlashcardSet[]
 }
 
 model Assignment {
@@ -51,4 +52,21 @@ model Folder {
 
   studentId String  @db.Uuid
   student   Student @relation(fields: [studentId], references: [id])
+}
+
+model Flashcard {
+  id       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question String
+  answer   String
+  setId    String       @db.Uuid
+  set      FlashcardSet @relation(fields: [setId], references: [id])
+}
+
+model FlashcardSet {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String?
+  studentId   String      @db.Uuid
+  student     Student     @relation(fields: [studentId], references: [id])
+  flashcards  Flashcard[]
 }

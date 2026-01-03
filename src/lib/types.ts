@@ -42,13 +42,16 @@ export interface FolderInput {
 }
 
 export interface Flashcard {
-  id: string;
+  id?: string;
   question: string;
   answer: string;
+  setId: string;
 }
 
-export interface FlashcardGroup {
-  id: string;
+export interface FlashcardSet {
+  id?: string;
   title: string;
+  description?: string;
   flashcards?: Flashcard[];
+  studentId: string;
 }

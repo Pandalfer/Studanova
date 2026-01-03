@@ -24,9 +24,7 @@ export function NoteSearcher({ uuid, setSelectedNote }: NoteSearcherProps) {
 	const [notes, setNotes] = React.useState<Note[]>([]);
 	const [isLoading, setIsLoading] = React.useState(false);
 	const [id, setId] = React.useState("");
-	const [selectedNote, SetSelectedNote] = React.useState<Note | null>(null);
 
-	// FIX 1: Added [uuid] dependency array to prevent infinite loop
 	useEffect(() => {
 		(async () => {
 			try {
@@ -55,7 +53,6 @@ export function NoteSearcher({ uuid, setSelectedNote }: NoteSearcherProps) {
 		};
 	}, []);
 
-	// FIX 2: Send folders as empty array if not used, to satisfy worker requirements
 	React.useEffect(() => {
 		if (workerRef.current) {
 			workerRef.current.postMessage({
@@ -72,8 +69,7 @@ export function NoteSearcher({ uuid, setSelectedNote }: NoteSearcherProps) {
 		const newId = selectedId === id ? "" : selectedId;
 		setId(newId);
 		const foundNote = notes.find((n) => n.id === newId) || null;
-		SetSelectedNote(foundNote);
-		setSelectedNote(selectedNote);
+		setSelectedNote(foundNote);
 
 		setOpen(false);
 	};
@@ -85,7 +81,7 @@ export function NoteSearcher({ uuid, setSelectedNote }: NoteSearcherProps) {
 					variant="outline"
 					role="combobox"
 					aria-expanded={open}
-					className="w-[250px] justify-between"
+					className="w-full justify-between"
 				>
 					{id
 						? notes.find((note) => note.id === id)?.title
