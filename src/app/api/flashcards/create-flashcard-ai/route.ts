@@ -21,14 +21,8 @@ export async function POST(req: Request) {
     });
 
     const rawContent = completion.choices[0].message.content || "";
-
-    // 1. Clean the response (remove potential markdown backticks)
     const jsonString = rawContent.replace(/```json|```/g, "").trim();
-
-    // 2. Parse the string into a JavaScript object
     const parsedData = JSON.parse(jsonString);
-
-    // 3. Return the parsed object directly
     return NextResponse.json(parsedData);
   } catch (error: unknown) {
     if (error instanceof APIError) {

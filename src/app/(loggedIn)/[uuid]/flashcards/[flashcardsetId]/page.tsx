@@ -3,9 +3,9 @@
 import { usePathname } from "next/navigation";
 import { Flashcard, FlashcardSet } from "@/lib/types";
 import { use, useEffect, useState } from "react";
-import { loadFlashcardSet } from "@/lib/flashcard-actions";
+import {loadFlashcards} from "@/lib/flashcard-actions";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FlashcardItem } from "./flashcard";
+import {FlashcardItem, FlashcardItemSkeleton} from "./flashcard";
 import { Button } from "@/components/ui/button";
 import {ChevronLeft, ChevronRight, Shuffle} from "lucide-react";
 import {toast} from "sonner";
@@ -57,7 +57,7 @@ export default function FlashcardsPage({ params }: PageProps) {
     const fetchCards = async () => {
       setLoading(true);
       try {
-        const data = await loadFlashcardSet(flashcardsetIdFromPath, uuid);
+        const data = await loadFlashcards(flashcardsetIdFromPath, uuid);
         setFlashcardSet(data ?? null);
         setFlashcards(data.flashcards ?? []);
       } catch (error) {
@@ -107,22 +107,7 @@ export default function FlashcardsPage({ params }: PageProps) {
       <div className="flex flex-col gap-6">
         <div className="relative group">
           {loading ? (
-            <div
-              className="w-full h-64 md:h-80 rounded-xl border bg-card shadow-sm flex flex-col p-6 md:p-8 relative overflow-hidden">
-              {/* Question Label Skeleton */}
-              <Skeleton className="h-4 w-20 mb-6 opacity-50"/>
-
-              {/* Main Content Skeleton */}
-              <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                <Skeleton className="h-6 w-[80%]"/>
-                <Skeleton className="h-6 w-[50%]"/>
-              </div>
-
-              {/* Footer/Hint Skeleton */}
-              <div className="mt-auto flex justify-center">
-                <Skeleton className="h-3 w-24 opacity-30"/>
-              </div>
-            </div>
+            <FlashcardItemSkeleton />
           ) : flashcards.length > 0 ? (
             <FlashcardItem fc={flashcards[activeFlashcard]} key={flashcards[activeFlashcard].id}/>
           ) : (

@@ -4,7 +4,7 @@ import {
   tokenizeText,
   stripText,
   removeStopWords,
-} from "./note-score"; // Adjust paths as needed
+} from "./search-score"; // Adjust paths as needed
 import { collectAllNotes } from "./note-and-folder-actions";
 
 addEventListener("message", (event) => {

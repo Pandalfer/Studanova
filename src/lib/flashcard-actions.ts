@@ -44,7 +44,7 @@ export async function saveFlashcardSet(
   return data.flashcardSet;
 }
 
-export async function loadFlashcardSet(
+export async function loadFlashcards(
   setId: string,
   uuid: string,
 ): Promise<FlashcardSet> {
@@ -60,4 +60,21 @@ export async function loadFlashcardSet(
   }
   const data = await res.json();
   return data.flashcardSet;
+}
+
+export async function loadFlashcardSets(
+  uuid: string,
+): Promise<FlashcardSet[]> {
+  const res = await fetch("/api/flashcards/load-flashcard-sets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ uuid }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to load flashcard sets");
+  }
+  const data = await res.json();
+  return data.flashcardSets;
 }

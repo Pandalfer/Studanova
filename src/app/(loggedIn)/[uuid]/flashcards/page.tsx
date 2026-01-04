@@ -4,9 +4,15 @@ import * as React from "react";
 import { NoteSearcher } from "@/components/Flashcards/note-searcher";
 import {use, useEffect, useState} from "react";
 import { Flashcard, FlashcardSet, Note } from "@/lib/types";
-import {saveFlashcard, saveFlashcardsBulk, saveFlashcardSet} from "@/lib/flashcard-actions";
+import {
+  loadFlashcards,
+  loadFlashcardSets,
+  saveFlashcard,
+  saveFlashcardsBulk,
+  saveFlashcardSet
+} from "@/lib/flashcard-actions";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import {Plus, Search, X} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +25,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import {loadDemoFolders, loadDemoNotes, loadFolders, loadNotes} from "@/lib/notes/note-storage";
 import {collectAllNotes} from "@/lib/notes/note-and-folder-actions";
+import {FlashcardSet as FlashcardSetComponent, FlashcardSetSkeleton} from "@/components/Flashcards/flashcard-set";
+import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
@@ -29,6 +37,42 @@ export default function FlashcardsHomePage({ params }: PageProps) {
   const router = useRouter();
   const [allNotes, setAllNotes] = useState<Note[]>([]);
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
+  const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
+  const [isLoadingSets, setIsLoadingSets] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredSets, setFilteredSets] = useState<FlashcardSet[]>([]);
+  const workerRef = React.useRef<Worker | null>(null);
+
+  useEffect(() => {
+    workerRef.current = new Worker(
+      new URL("@/lib/flashcards/flashcard-search-worker.ts", import.meta.url)
+    );
+    workerRef.current.onmessage = (event) => {
+      setFilteredSets(event.data);
+    };
+    return () => workerRef.current?.terminate();
+  }, []);
+
+  // Trigger Search when query or sets change
+  useEffect(() => {
+    if (workerRef.current) {
+      workerRef.current.postMessage({ searchQuery, sets: flashcardSets });
+    }
+  }, [searchQuery, flashcardSets]);
+
+  useEffect(() => {
+    const fetchFlashcardSets = async () => {
+      try {
+        setIsLoadingSets(true);
+        setFlashcardSets(await loadFlashcardSets(uuid));
+      } catch (err) {
+        console.error("Error loading flashcard sets:", err);
+      } finally {
+        setIsLoadingSets(false);
+      }
+    }
+    fetchFlashcardSets();
+  }, [uuid]);
 
   useEffect(() => {
     const fetchNotesInBackground = async () => {
@@ -100,51 +144,67 @@ export default function FlashcardsHomePage({ params }: PageProps) {
   };
 
   return (
-    <div>
-      <div className={"flex flex-row w-full justify-between items-start"}>
-        <h1 className={"text-3xl font-bold text-foreground pl-5 pt-15 md:pt-5"}>
-          Flashcard Sets
-        </h1>
-        <div className={"flex flex-row gap-5 mr-5 mt-5"}>
-          <Button variant={"default"}>
-            <Plus /> New Flashcard set
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Flashcard Sets
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your study sets or generate new ones using AI.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="outline" className="flex-1 md:flex-none">
+            <Plus className="mr-2 h-4 w-4"/> New Set
           </Button>
+
           <Dialog
             modal={false}
             open={aiGenerateOpen}
             onOpenChange={setAiGenerateOpen}
           >
             <DialogTrigger asChild>
-              <Button variant="secondary">
-                <Plus /> Create Flashcards Automatically
+              <Button variant="default" className="flex-1 md:flex-none">
+                <Plus className="mr-2 h-4 w-4"/> AI Generate
               </Button>
             </DialogTrigger>
 
             <DialogContent>
               <DialogTitle>Create flashcards</DialogTitle>
+              <form onSubmit={generateFlashcards} className="space-y-6 pt-4">
+                <div className="space-y-2">
+                  <Label>Source Note</Label>
+                  <NoteSearcher
+                    setSelectedNote={setNote}
+                    notes={allNotes}
+                    isLoading={isLoadingNotes}
+                  />
+                </div>
 
-              <form onSubmit={generateFlashcards} className="space-y-4">
-                <NoteSearcher
-                  setSelectedNote={setNote}
-                  notes={allNotes}
-                  isLoading={isLoadingNotes}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="count">Number of flashcards</Label>
+                  <Input
+                    id="count"
+                    name="count"
+                    type="number"
+                    min={1}
+                    max={50}
+                    required
+                    defaultValue={5}
+                  />
+                </div>
 
-                <Label className={"text-md leading-none font-semibold"}>
-                  Number of flashcards
-                </Label>
-
-                <Input
-                  name="count"
-                  type="number"
-                  placeholder="Number of flashcards"
-                  min={1}
-                  max={50}
-                  required
-                  defaultValue={5}
-                />
-
-                <div className="flex justify-end gap-3">
+                <div className="flex justify-end gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => setAiGenerateOpen(false)}
+                  >
+                    Cancel
+                  </Button>
                   <Button type="submit" disabled={!note}>
                     Generate
                   </Button>
@@ -154,6 +214,50 @@ export default function FlashcardsHomePage({ params }: PageProps) {
           </Dialog>
         </div>
       </div>
+
+      <div className="mb-8 w-full">
+        <InputGroup className={"rounded-3xl"}>
+          <InputGroupInput
+            placeholder="Search sets by title or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          <InputGroupAddon>
+            {searchQuery ? (
+              <X className="h-4 w-4 cursor-pointer" onClick={() => setSearchQuery("")}/>
+            ) : (
+              <Search className="h-4 w-4 text-muted-foreground"/>
+            )}
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
+
+      {/* Grid Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {isLoadingSets ? (
+          Array.from({ length: 4 }).map((_, i) => <FlashcardSetSkeleton key={i} />)
+        ) : filteredSets.length > 0 ? (
+          filteredSets.map((set) => (
+            <FlashcardSetComponent key={set.id} uuid={uuid} {...set} />
+          ))
+        ) : (
+          <div
+            className="col-span-full py-24 flex flex-col items-center justify-center rounded-2xl">
+            <p
+              className="text-lg font-medium text-foreground pb-2">{searchQuery ? "No sets match your search" : "No flashcard sets"}</p>
+            {!searchQuery && (
+              <div className={"flex flex-col items-center justify-center"}>
+                <p className="text-muted-foreground mb-6">Get started by creating a set manually or using AI.</p>
+                <Button onClick={() => setAiGenerateOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4"/> Create First Set
+                </Button>
+              </div>
+            )}
+
+          </div>
+        )}
+      </div>
     </div>
-  );
+  )
+    ;
 }

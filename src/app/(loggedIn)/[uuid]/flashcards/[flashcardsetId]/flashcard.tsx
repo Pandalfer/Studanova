@@ -1,6 +1,7 @@
 import { Flashcard } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export function FlashcardItem({ fc }: { fc: Flashcard }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -73,4 +74,25 @@ export function FlashcardItem({ fc }: { fc: Flashcard }) {
       </div>
     </div>
   );
+}
+
+export function FlashcardItemSkeleton() {
+  return (
+    <div
+      className="w-full h-64 md:h-80 rounded-xl border bg-card shadow-sm flex flex-col p-6 md:p-8 relative overflow-hidden">
+      {/* Question Label Skeleton */}
+      <Skeleton className="h-4 w-20 mb-6 opacity-50"/>
+
+      {/* Main Content Skeleton */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-4">
+        <Skeleton className="h-6 w-[80%]"/>
+        <Skeleton className="h-6 w-[50%]"/>
+      </div>
+
+      {/* Footer/Hint Skeleton */}
+      <div className="mt-auto flex justify-center">
+        <Skeleton className="h-3 w-24 opacity-30"/>
+      </div>
+    </div>
+  )
 }
