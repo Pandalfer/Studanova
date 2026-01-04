@@ -2,18 +2,30 @@
 
 Studanova is a productivity tool for students built with [Next.js](https://nextjs.org).
 
-## Technical Features
+#### Key Technical Highlights
 
-- Page skeletons
-- UUIDs
-- dnd-kit functionality (drag and dropping notes and folders)
-- Database error handling
-- Recursive tree logic (depth first search)
-- DOMPurify (sanitising user input to prevent XSS attacks)
-- Toasts (notifications)
-- Argon2 hashing (secure password storage)
-- Custom React hooks
-- Custom toolbar for rich text editing
-- Debounced auto-save for notes
-- Levenshtein distance formula with fuzzy search (typo-tolerant search)
-- Mobile responsiveness
+- Recursive folder & note tree using depth-first traversal
+- Drag-and-drop note and folder management (dnd-kit)
+- Debounced autosave to minimise database writes
+- Fuzzy search using Levenshtein distance for typo tolerance
+- Custom rich-text editor toolbar
+- Mobile-responsive UI with skeleton loaders
+
+#### Backend & Security
+
+- Supabase (PostgreSQL) backend with Prisma ORM
+- Argon2 password hashing
+- DOMPurify sanitisation to prevent XSS
+- Centralised database error handling
+- UUID-based entity IDs
+
+#### Architecture
+
+- Next.js App Router
+- Server actions for database mutations
+- Custom React hooks for shared logic
+- Clear client/server boundary separation for performance and security
+
+#### In Progress
+
+- AI-generated flashcards using Groq, grounded in user notes

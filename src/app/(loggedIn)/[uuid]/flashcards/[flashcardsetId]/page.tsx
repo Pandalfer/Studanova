@@ -7,13 +7,15 @@ import { loadFlashcardSet } from "@/lib/flashcard-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FlashcardItem } from "./flashcard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {ChevronLeft, ChevronRight, Shuffle} from "lucide-react";
+import {toast} from "sonner";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
 
-export default function FlashcardsetPage({ params }: PageProps) {
+export default function FlashcardsPage({ params }: PageProps) {
   const { uuid } = use(params);
   const pathname = usePathname();
   const pathSegments = pathname.split("/");
@@ -30,6 +32,25 @@ export default function FlashcardsetPage({ params }: PageProps) {
   const changeFlashcard = (direction: "next" | "prev") => {
     if (direction === "next" && !isLast) setActiveFlashcard((prev) => prev + 1);
     if (direction === "prev" && !isFirst) setActiveFlashcard((prev) => prev - 1);
+  };
+
+  const shuffleFlashcards = () => {
+    setFlashcards((prevCards) => {
+      const newCards = [...prevCards];
+      let currentIndex = newCards.length;
+
+      while (currentIndex !== 0) {
+        const randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [newCards[currentIndex], newCards[randomIndex]] = [
+          newCards[randomIndex], newCards[currentIndex],
+        ];
+      }
+
+      return newCards;
+    });
+    toast.success("Flashcards shuffled!");
+    setActiveFlashcard(0);
   };
 
   useEffect(() => {
@@ -69,15 +90,41 @@ export default function FlashcardsetPage({ params }: PageProps) {
         )}
       </div>
 
+      <div className={"flex flex-row items-center justify-center mb-6"}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant={"ghost"}  onClick={shuffleFlashcards} >
+              <Shuffle/>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            Shuffle Flashcards
+          </TooltipContent>
+        </Tooltip>
+
+      </div>
+
       <div className="flex flex-col gap-6">
         <div className="relative group">
           {loading ? (
-            <div className="w-full aspect-[4/3] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center p-12">
-              <Skeleton className="h-6 w-3/4 mb-4" />
-              <Skeleton className="h-6 w-1/2" />
+            <div
+              className="w-full h-64 md:h-80 rounded-xl border bg-card shadow-sm flex flex-col p-6 md:p-8 relative overflow-hidden">
+              {/* Question Label Skeleton */}
+              <Skeleton className="h-4 w-20 mb-6 opacity-50"/>
+
+              {/* Main Content Skeleton */}
+              <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                <Skeleton className="h-6 w-[80%]"/>
+                <Skeleton className="h-6 w-[50%]"/>
+              </div>
+
+              {/* Footer/Hint Skeleton */}
+              <div className="mt-auto flex justify-center">
+                <Skeleton className="h-3 w-24 opacity-30"/>
+              </div>
             </div>
           ) : flashcards.length > 0 ? (
-            <FlashcardItem fc={flashcards[activeFlashcard]} key={flashcards[activeFlashcard].id} />
+            <FlashcardItem fc={flashcards[activeFlashcard]} key={flashcards[activeFlashcard].id}/>
           ) : (
             <div className="py-20 text-center border rounded-xl bg-muted/20">
               <p className="text-muted-foreground">No flashcards found.</p>
@@ -85,38 +132,49 @@ export default function FlashcardsetPage({ params }: PageProps) {
           )}
         </div>
 
-        {!loading && flashcards.length > 0 && (
-          <div className="space-y-6 w-full max-w-sm mx-auto">
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-xl h-14 font-semibold shadow-sm transition-all active:scale-95"
-                disabled={isFirst}
-                onClick={() => changeFlashcard("prev")}
-              >
-                <ChevronLeft className="mr-2 h-5 w-5" /> Previous
-              </Button>
+        <div className="space-y-6 w-full max-w-sm mx-auto">
+          <div className="grid grid-cols-2 gap-4">
+            {loading ? (
+              <>
+                <Skeleton className="rounded-xl h-14 w-full"/>
+                <Skeleton className="rounded-xl h-14 w-full"/>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl h-14 font-semibold shadow-sm"
+                  disabled={isFirst}
+                  onClick={() => changeFlashcard("prev")}
+                >
+                  <ChevronLeft className="mr-2 h-5 w-5"/> Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl h-14 font-semibold shadow-sm"
+                  disabled={isLast}
+                  onClick={() => changeFlashcard("next")}
+                >
+                  Next <ChevronRight className="ml-2 h-5 w-5"/>
+                </Button>
+              </>
+            )}
+          </div>
 
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-xl h-14 font-semibold shadow-sm transition-all active:scale-95"
-                disabled={isLast}
-                onClick={() => changeFlashcard("next")}
-              >
-                Next <ChevronRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-
-            <div className="w-full bg-popover h-2 rounded-full overflow-hidden">
+          {/* Progress Bar Skeleton or Actual */}
+          <div className="w-full bg-popover h-2 rounded-full overflow-hidden">
+            {loading ? (
+              <div className="h-full w-0"/> // Hidden during load
+            ) : (
               <div
                 className="bg-foreground h-full transition-all duration-300 ease-in-out"
-                style={{ width: `${((activeFlashcard + 1) / flashcards.length) * 100}%` }}
+                style={{width: `${((activeFlashcard + 1) / flashcards.length) * 100}%`}}
               />
-            </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

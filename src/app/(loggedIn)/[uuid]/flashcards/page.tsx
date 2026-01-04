@@ -2,7 +2,7 @@
 import * as React from "react";
 
 import { NoteSearcher } from "@/components/Flashcards/note-searcher";
-import { use } from "react";
+import {use, useEffect, useState} from "react";
 import { Flashcard, FlashcardSet, Note } from "@/lib/types";
 import { saveFlashcard, saveFlashcardSet } from "@/lib/flashcard-actions";
 import { Button } from "@/components/ui/button";
@@ -17,18 +17,34 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import {loadDemoFolders, loadDemoNotes, loadFolders, loadNotes} from "@/lib/notes/note-storage";
+import {collectAllNotes} from "@/lib/notes/note-and-folder-actions";
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
-export default function FlashcardsPage({ params }: PageProps) {
+export default function FlashcardsHomePage({ params }: PageProps) {
   const { uuid } = use(params);
   const [note, setNote] = React.useState<Note | null>(null);
   const [aiGenerateOpen, setAiGenerateOpen] = React.useState(false);
   const router = useRouter();
+  const [allNotes, setAllNotes] = useState<Note[]>([]);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
 
-  const setSelectedNote = async (note: Note | null) => {
-    setNote(note);
-  };
+  useEffect(() => {
+    const fetchNotesInBackground = async () => {
+      try {
+        setIsLoadingNotes(true);
+        const loadedNotes = uuid ? await loadNotes(uuid) : loadDemoNotes();
+        const loadedFolders = uuid ? await loadFolders(uuid) : loadDemoFolders();
+        setAllNotes([...loadedNotes, ...collectAllNotes(loadedFolders)]);
+      } catch (err) {
+        console.error("Error pre-loading notes:", err);
+      } finally {
+        setIsLoadingNotes(false);
+      }
+    };
+    fetchNotesInBackground();
+  }, [uuid]);
 
   const generateFlashcards = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -98,7 +114,11 @@ export default function FlashcardsPage({ params }: PageProps) {
               <DialogTitle>Create flashcards</DialogTitle>
 
               <form onSubmit={generateFlashcards} className="space-y-4">
-                <NoteSearcher setSelectedNote={setSelectedNote} uuid={uuid} />
+                <NoteSearcher
+                  setSelectedNote={setNote}
+                  notes={allNotes}
+                  isLoading={isLoadingNotes}
+                />
 
                 <Label className={"text-md leading-none font-semibold"}>
                   Number of flashcards

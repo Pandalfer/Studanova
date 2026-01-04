@@ -16,45 +16,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import * as React from "react";
 import { Note } from "@/lib/types";
-import { useEffect } from "react";
-import {
-  loadDemoFolders,
-  loadDemoNotes,
-  loadFolders,
-  loadNotes,
-} from "@/lib/notes/note-storage";
-import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type NoteSearcherProps = {
-  uuid?: string;
   setSelectedNote: (note: Note | null) => void;
+  notes: Note[];
+  isLoading: boolean;
 };
 
-export function NoteSearcher({ uuid, setSelectedNote }: NoteSearcherProps) {
+export function NoteSearcher({ setSelectedNote, notes, isLoading }: NoteSearcherProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const isSearching = searchQuery.trim().length > 0;
   const [matchingNotes, setMatchingNotes] = React.useState<Note[]>([]); // Changed type to Note
   const workerRef = React.useRef<Worker | null>(null);
-  const [notes, setNotes] = React.useState<Note[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
   const [id, setId] = React.useState("");
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setIsLoading(true);
-        const loadedNotes = uuid ? await loadNotes(uuid) : loadDemoNotes();
-        const loadedFolders = uuid
-          ? await loadFolders(uuid)
-          : loadDemoFolders();
-        setNotes([...loadedNotes, ...collectAllNotes(loadedFolders)]);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [uuid]);
 
   // Initialize Worker
   React.useEffect(() => {
