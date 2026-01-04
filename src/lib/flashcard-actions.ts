@@ -13,6 +13,20 @@ export async function saveFlashcard(flashcard: Flashcard): Promise<void> {
   }
 }
 
+export async function saveFlashcardsBulk(flashcards: { question: string, answer: string }[], setId: string): Promise<void> {
+  const res = await fetch("/api/flashcards/save-flashcards-bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ flashcards, setId }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to bulk save flashcards");
+  }
+}
+
 export async function saveFlashcardSet(
   flashcardSet: FlashcardSet,
 ): Promise<FlashcardSet> {

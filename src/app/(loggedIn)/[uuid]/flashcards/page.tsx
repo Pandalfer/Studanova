@@ -4,7 +4,7 @@ import * as React from "react";
 import { NoteSearcher } from "@/components/Flashcards/note-searcher";
 import {use, useEffect, useState} from "react";
 import { Flashcard, FlashcardSet, Note } from "@/lib/types";
-import { saveFlashcard, saveFlashcardSet } from "@/lib/flashcard-actions";
+import {saveFlashcard, saveFlashcardsBulk, saveFlashcardSet} from "@/lib/flashcard-actions";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import {
@@ -55,34 +55,44 @@ export default function FlashcardsHomePage({ params }: PageProps) {
 
     try {
       setAiGenerateOpen(false);
-      const res = await fetch("/api/flashcards/create-flashcard-ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: `Act as a flashcard creator. Return ONLY a raw JSON object. Do not include markdown formatting. Be concise and short. Structure: { 'title': string, 'flashcards': [{ 'question': string, 'answer': string }] }. Create ${count} flashcards. Content: ${note.content}`,
-        }),
-      });
+      toast.promise(
+        (async () => {
+          // 1. AI Generation
+          const res = await fetch("/api/flashcards/create-flashcard-ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: `Act as a flashcard creator. Return ONLY a raw JSON object. Do not include markdown formatting. Be concise and short. Structure: { 'title': string, 'flashcards': [{ 'question': string, 'answer': string }] }. Create ${count} flashcards. Content: ${note.content}`,
+            }),
+          });
 
-      if (!res.ok) throw new Error("AI generation failed");
+          if (!res.ok) throw new Error("AI generation failed");
+          const data = await res.json();
 
-      const data = await res.json();
-      if (!Array.isArray(data.flashcards)) return;
+          if (!Array.isArray(data.flashcards)) throw new Error("Invalid AI response");
 
-      const flashcardSet = await saveFlashcardSet({
-        title: data.title,
-        description: `Flashcards generated from note: ${note.title}`,
-        studentId: uuid,
-      } as FlashcardSet);
+          // 2. Save the Set
+          const flashcardSet = await saveFlashcardSet({
+            title: data.title,
+            description: `Flashcards generated from note: ${note.title}`,
+            studentId: uuid,
+          } as FlashcardSet);
 
-      for (const fc of data.flashcards) {
-        await saveFlashcard({
-          question: fc.question,
-          answer: fc.answer,
-          setId: flashcardSet.id,
-        } as Flashcard);
-      }
+          if (!flashcardSet?.id) throw new Error("Failed to retrieve the new Set ID");
 
-      router.push(`/${uuid}/flashcards/${flashcardSet.id}`);
+          const flashcardsToSave = data.flashcards.slice(0, Number(count));
+          await saveFlashcardsBulk(flashcardsToSave, flashcardSet.id);
+
+          // 4. Redirect
+          router.push(`/${uuid}/flashcards/${flashcardSet.id}`);
+
+          return data.title; // Pass title to the success message
+        })(),
+        {
+          loading: "Generating flashcards with AI...",
+          error: "Failed to create flashcards. Please try again.",
+        }
+      );
     } catch (error) {
       console.log(error);
       toast.error("Failed to generate flashcards.");
