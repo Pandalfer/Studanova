@@ -5,7 +5,10 @@ export async function POST(req: NextRequest) {
   try {
     const { id } = await req.json();
     if (!id) {
-      return NextResponse.json({ error: "Missing flashcards id" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing flashcards id" },
+        { status: 400 },
+      );
     }
 
     // Step 1: Collect all descendant flashcards IDs

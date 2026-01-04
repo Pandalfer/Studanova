@@ -1,53 +1,123 @@
 "use client";
 
-import {usePathname} from "next/navigation";
-import {Flashcard} from "@/lib/types";
-import {use, useEffect, useState} from "react";
-import {loadFlashcards} from "@/lib/flashcard-actions";
+import { usePathname } from "next/navigation";
+import { Flashcard, FlashcardSet } from "@/lib/types";
+import { use, useEffect, useState } from "react";
+import { loadFlashcardSet } from "@/lib/flashcard-actions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FlashcardItem } from "./flashcard";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 interface PageProps {
-	params: Promise<{ uuid: string }>;
+  params: Promise<{ uuid: string }>;
 }
+
 export default function FlashcardsetPage({ params }: PageProps) {
-	const {uuid} = use(params);
-	const pathname = usePathname();
-	const pathSegments = pathname.split("/");
-	const flashcardsetIdFromPath = pathSegments[3]; // /uuid/flashcards/flashcardsetId
-	const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const { uuid } = use(params);
+  const pathname = usePathname();
+  const pathSegments = pathname.split("/");
+  const flashcardsetIdFromPath = pathSegments[3];
 
-	useEffect(() => {
-		const fetchCards = async () => {
-			try {
-				const data = await loadFlashcards(flashcardsetIdFromPath, uuid);
-				// 2. Fallback to empty array if data is null/undefined
-				setFlashcards(data ?? []);
-			} catch (error) {
-				console.error("Failed to fetch:", error);
-				setFlashcards([]); // 3. Reset to empty array on error to prevent crash
-			}
-		};
-		fetchCards();
-	}, [flashcardsetIdFromPath, uuid]);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [flashcardSet, setFlashcardSet] = useState<FlashcardSet | null>(null);
+  const [activeFlashcard, setActiveFlashcard] = useState<number>(0);
 
-	return (
-		<div className="p-8 max-w-4xl mx-auto">
-			<h1 className="text-2xl font-bold mb-6">Flashcard Set</h1>
+  const isFirst = activeFlashcard === 0;
+  const isLast = activeFlashcard === flashcards.length - 1;
 
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-				{flashcards.length > 0 ? (
-					flashcards.map((fc) => (
-						<div key={fc.id} className="p-6 bg-card border rounded-xl shadow-sm space-y-2">
-							<div className="text-sm font-bold uppercase text-muted-foreground">Question</div>
-							<p className="text-lg">{fc.question}</p>
-							<hr className="my-4"/>
-							<div className="text-sm font-bold uppercase text-muted-foreground">Answer</div>
-							<p className="text-foreground/80">{fc.answer}</p>
-						</div>
-					))
-				) : (
-					<p className="text-muted-foreground italic">No flashcards found in this set.</p>
-				)}
-			</div>
-		</div>
-	)
+  const changeFlashcard = (direction: "next" | "prev") => {
+    if (direction === "next" && !isLast) setActiveFlashcard((prev) => prev + 1);
+    if (direction === "prev" && !isFirst) setActiveFlashcard((prev) => prev - 1);
+  };
 
+  useEffect(() => {
+    const fetchCards = async () => {
+      setLoading(true);
+      try {
+        const data = await loadFlashcardSet(flashcardsetIdFromPath, uuid);
+        setFlashcardSet(data ?? null);
+        setFlashcards(data.flashcards ?? []);
+      } catch (error) {
+        console.error("Failed to fetch:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCards();
+  }, [flashcardsetIdFromPath, uuid]);
+
+  return (
+    <div className="px-6 flex flex-col justify-center min-h-[90vh] max-w-2xl mx-auto w-full">
+
+      <div className="mb-6 text-center space-y-2">
+        {loading ? (
+          <div className="flex flex-col items-center gap-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        ) : (
+          <>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {flashcardSet?.title || "Flashcards"}
+            </h1>
+            <p className="text-muted-foreground text-sm font-medium">
+              Card {activeFlashcard + 1} of {flashcards.length}
+            </p>
+          </>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-6">
+        <div className="relative group">
+          {loading ? (
+            <div className="w-full aspect-[4/3] rounded-3xl border-2 border-dashed flex flex-col items-center justify-center p-12">
+              <Skeleton className="h-6 w-3/4 mb-4" />
+              <Skeleton className="h-6 w-1/2" />
+            </div>
+          ) : flashcards.length > 0 ? (
+            <FlashcardItem fc={flashcards[activeFlashcard]} key={flashcards[activeFlashcard].id} />
+          ) : (
+            <div className="py-20 text-center border rounded-xl bg-muted/20">
+              <p className="text-muted-foreground">No flashcards found.</p>
+            </div>
+          )}
+        </div>
+
+        {!loading && flashcards.length > 0 && (
+          <div className="space-y-6 w-full max-w-sm mx-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-xl h-14 font-semibold shadow-sm transition-all active:scale-95"
+                disabled={isFirst}
+                onClick={() => changeFlashcard("prev")}
+              >
+                <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+              </Button>
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-xl h-14 font-semibold shadow-sm transition-all active:scale-95"
+                disabled={isLast}
+                onClick={() => changeFlashcard("next")}
+              >
+                Next <ChevronRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+
+            <div className="w-full bg-popover h-2 rounded-full overflow-hidden">
+              <div
+                className="bg-foreground h-full transition-all duration-300 ease-in-out"
+                style={{ width: `${((activeFlashcard + 1) / flashcards.length) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
