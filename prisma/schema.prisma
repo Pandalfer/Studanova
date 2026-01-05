@@ -60,6 +60,7 @@ model Flashcard {
   answer   String
   setId    String       @db.Uuid
   set      FlashcardSet @relation(fields: [setId], references: [id])
+  progress Int          @default(0)
 }
 
 model FlashcardSet {

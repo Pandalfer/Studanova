@@ -5,10 +5,10 @@ import { NoteSearcher } from "@/components/Flashcards/note-searcher";
 import {use, useEffect, useState} from "react";
 import { FlashcardSet, Note } from "@/lib/types";
 import {
+  createFlashcardsBulk,
   loadFlashcardSets,
-  saveFlashcardsBulk,
   saveFlashcardSet
-} from "@/lib/flashcard-actions";
+} from "@/lib/flashcards/flashcard-actions";
 import { Button } from "@/components/ui/button";
 import {Plus, Search, X} from "lucide-react";
 import {
@@ -123,7 +123,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
           if (!flashcardSet?.id) throw new Error("Failed to retrieve the new Set ID");
 
           const flashcardsToSave = data.flashcards.slice(0, Number(count));
-          await saveFlashcardsBulk(flashcardsToSave, flashcardSet.id);
+          await createFlashcardsBulk(flashcardsToSave, flashcardSet.id);
 
           // 4. Redirect
           router.push(`/${uuid}/flashcards/${flashcardSet.id}`);

@@ -46,6 +46,7 @@ export interface Flashcard {
   question: string;
   answer: string;
   setId: string;
+  progress: number;
 }
 
 export interface FlashcardSet {

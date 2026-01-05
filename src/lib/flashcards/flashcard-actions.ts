@@ -13,8 +13,8 @@ export async function saveFlashcard(flashcard: Flashcard): Promise<void> {
   }
 }
 
-export async function saveFlashcardsBulk(flashcards: { question: string, answer: string }[], setId: string): Promise<void> {
-  const res = await fetch("/api/flashcards/save-flashcards-bulk", {
+export async function createFlashcardsBulk(flashcards: { question: string, answer: string }[], setId: string): Promise<void> {
+  const res = await fetch("/api/flashcards/create-flashcards-bulk", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -77,4 +77,18 @@ export async function loadFlashcardSets(
   }
   const data = await res.json();
   return data.flashcardSets;
+}
+
+export async function resetDeckProgress(setId: string): Promise<void> {
+  const res = await fetch("/api/flashcards/reset-progress", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ setId }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to reset deck progress");
+  }
 }

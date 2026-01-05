@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
 				question: fc.question,
 				answer: fc.answer,
 				setId: setId,
+				progress: 0,
 			})),
 		});
 

@@ -2,11 +2,8 @@
 
 Google and GitHub login options
 Remember me
-flashcards next
 
-Added later:
-Shared notes between users
-A favourite option to note items
+Manual Flashcard creation
 
 MAKE LIGHT MODE USABLE
 
