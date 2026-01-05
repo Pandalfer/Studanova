@@ -3,11 +3,9 @@ import * as React from "react";
 
 import { NoteSearcher } from "@/components/Flashcards/note-searcher";
 import {use, useEffect, useState} from "react";
-import { Flashcard, FlashcardSet, Note } from "@/lib/types";
+import { FlashcardSet, Note } from "@/lib/types";
 import {
-  loadFlashcards,
   loadFlashcardSets,
-  saveFlashcard,
   saveFlashcardsBulk,
   saveFlashcardSet
 } from "@/lib/flashcard-actions";
@@ -145,15 +143,11 @@ export default function FlashcardsHomePage({ params }: PageProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold">
             Flashcard Sets
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your study sets or generate new ones using AI.
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -215,49 +209,50 @@ export default function FlashcardsHomePage({ params }: PageProps) {
         </div>
       </div>
 
-      <div className="mb-8 w-full">
-        <InputGroup className={"rounded-3xl"}>
+      <div className="mb-10 w-full">
+        <InputGroup className="rounded-full h-12 text-base">
           <InputGroupInput
-            placeholder="Search sets by title or description..."
+            className="h-12"
+            placeholder="Search flashcard sets"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <InputGroupAddon>
+          <InputGroupAddon className="pl-4 pr-1">
             {searchQuery ? (
-              <X className="h-4 w-4 cursor-pointer" onClick={() => setSearchQuery("")}/>
+              <X
+                className="h-5 w-5 cursor-pointer"
+                onClick={() => setSearchQuery("")}
+              />
             ) : (
-              <Search className="h-4 w-4 text-muted-foreground"/>
+              <Search className="h-5 w-5 text-muted-foreground"/>
             )}
           </InputGroupAddon>
         </InputGroup>
       </div>
-
-      {/* Grid Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="flex flex-col gap-3">
         {isLoadingSets ? (
-          Array.from({ length: 4 }).map((_, i) => <FlashcardSetSkeleton key={i} />)
+          Array.from({length: 4}).map((_, i) => <FlashcardSetSkeleton key={i}/>)
         ) : filteredSets.length > 0 ? (
           filteredSets.map((set) => (
             <FlashcardSetComponent key={set.id} uuid={uuid} {...set} />
           ))
+
         ) : (
-          <div
-            className="col-span-full py-24 flex flex-col items-center justify-center rounded-2xl">
-            <p
-              className="text-lg font-medium text-foreground pb-2">{searchQuery ? "No sets match your search" : "No flashcard sets"}</p>
+          <div className="w-full py-24 flex flex-col items-center justify-center">
+            <p className="text-lg text-foreground pb-2">
+              {searchQuery ? "No sets match your search" : "No flashcard sets"}
+            </p>
             {!searchQuery && (
-              <div className={"flex flex-col items-center justify-center"}>
+              <div className="flex flex-col items-center justify-center text-center px-4">
                 <p className="text-muted-foreground mb-6">Get started by creating a set manually or using AI.</p>
                 <Button onClick={() => setAiGenerateOpen(true)}>
                   <Plus className="mr-2 h-4 w-4"/> Create First Set
                 </Button>
               </div>
             )}
-
           </div>
         )}
       </div>
     </div>
-  )
-    ;
+  );
 }
