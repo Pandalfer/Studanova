@@ -1,9 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import { Flashcard, FlashcardSet } from "@/lib/types";
 import { use, useEffect, useState } from "react";
-import {loadFlashcards, resetDeckProgress, saveFlashcard} from "@/lib/flashcards/flashcard-actions";
+import {loadFlashcards, loadFlashcardSets, resetDeckProgress, saveFlashcard} from "@/lib/flashcards/flashcard-actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import {FlashcardItem, FlashcardItemSkeleton} from "@/components/Flashcards/flashcard";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ export default function FlashcardsPage({ params }: PageProps) {
   const [flashcardSet, setFlashcardSet] = useState<FlashcardSet | null>(null);
   const [activeFlashcard, setActiveFlashcard] = useState<number>(0);
   const [trackProgress, setTrackProgress] = useState(true);
+  const router = useRouter();
 
   const isFirst = activeFlashcard === 0;
   const isLast = activeFlashcard === flashcards.length - 1;
@@ -82,14 +83,28 @@ export default function FlashcardsPage({ params }: PageProps) {
   };
 
   const fetchCards = async () => {
+    if (!flashcardsetIdFromPath) return; // Prevent call if ID is missing
+
     setLoading(true);
     try {
+      // 1. Validate the set exists
+      const flashcardSets = await loadFlashcardSets(uuid);
+      const found = flashcardSets.find((n) => n.id === flashcardsetIdFromPath);
+
+      if (!found) {
+        router.push(`/${uuid}/flashcards`);
+        return;
+      }
       const data = await loadFlashcards(flashcardsetIdFromPath, uuid);
-      setFlashcardSet(data ?? null);
-      setFlashcards(data.flashcards ?? []);
-      setTrackedFlashcards((data.flashcards ?? []).filter((fc) => fc.progress !== 1));
+
+      if (data) {
+        setFlashcardSet(data);
+        const cards = data.flashcards ?? [];
+        setFlashcards(cards);
+        setTrackedFlashcards(cards.filter((fc) => fc.progress !== 1));
+      }
     } catch (error) {
-      console.error("Failed to fetch:", error);
+      console.error("Fetch Error:", error);
     } finally {
       setLoading(false);
     }
