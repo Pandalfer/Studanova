@@ -103,9 +103,9 @@ function NoteItem({
     <div
       ref={setNodeRef}
       {...attributes}
-      {...listeners}
+      {...(!isDragLocked || isDesktop ? listeners : {})}
       style={{}}
-      className={`touch-none ${!isDesktop ? "select-none" : ""}`}
+      className={`${!isDesktop ? "select-none" : ""}`}
     >
       <ContextMenu modal={!isDesktop}>
         <ContextMenuTrigger asChild>

@@ -2,15 +2,15 @@
 import * as React from "react";
 
 import { NoteSearcher } from "@/components/Flashcards/note-searcher";
-import {use, useEffect, useState} from "react";
+import { use, useEffect, useState } from "react";
 import { FlashcardSet, Note } from "@/lib/types";
 import {
   createFlashcardsBulk,
   loadFlashcardSets,
-  saveFlashcardSet
+  saveFlashcardSet,
 } from "@/lib/flashcards/flashcard-actions";
 import { Button } from "@/components/ui/button";
-import {Plus, Search, X} from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +21,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {loadDemoFolders, loadDemoNotes, loadFolders, loadNotes} from "@/lib/notes/note-storage";
-import {collectAllNotes} from "@/lib/notes/note-and-folder-actions";
-import {FlashcardSet as FlashcardSetComponent, FlashcardSetSkeleton} from "@/components/Flashcards/flashcard-set";
-import {InputGroup, InputGroupAddon, InputGroupInput} from "@/components/ui/input-group";
+import {
+  loadDemoFolders,
+  loadDemoNotes,
+  loadFolders,
+  loadNotes,
+} from "@/lib/notes/note-storage";
+import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
+import {
+  FlashcardSet as FlashcardSetComponent,
+  FlashcardSetSkeleton,
+} from "@/components/Flashcards/flashcard-set";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
@@ -43,7 +55,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
 
   useEffect(() => {
     workerRef.current = new Worker(
-      new URL("@/lib/flashcards/flashcard-search-worker.ts", import.meta.url)
+      new URL("@/lib/flashcards/flashcard-search-worker.ts", import.meta.url),
     );
     workerRef.current.onmessage = (event) => {
       setFilteredSets(event.data);
@@ -68,7 +80,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
       } finally {
         setIsLoadingSets(false);
       }
-    }
+    };
     fetchFlashcardSets();
   }, [uuid]);
 
@@ -77,7 +89,9 @@ export default function FlashcardsHomePage({ params }: PageProps) {
       try {
         setIsLoadingNotes(true);
         const loadedNotes = uuid ? await loadNotes(uuid) : loadDemoNotes();
-        const loadedFolders = uuid ? await loadFolders(uuid) : loadDemoFolders();
+        const loadedFolders = uuid
+          ? await loadFolders(uuid)
+          : loadDemoFolders();
         setAllNotes([...loadedNotes, ...collectAllNotes(loadedFolders)]);
       } catch (err) {
         console.error("Error pre-loading notes:", err);
@@ -111,7 +125,8 @@ export default function FlashcardsHomePage({ params }: PageProps) {
           if (!res.ok) throw new Error("AI generation failed");
           const data = await res.json();
 
-          if (!Array.isArray(data.flashcards)) throw new Error("Invalid AI response");
+          if (!Array.isArray(data.flashcards))
+            throw new Error("Invalid AI response");
 
           // 2. Save the Set
           const flashcardSet = await saveFlashcardSet({
@@ -120,7 +135,8 @@ export default function FlashcardsHomePage({ params }: PageProps) {
             studentId: uuid,
           } as FlashcardSet);
 
-          if (!flashcardSet?.id) throw new Error("Failed to retrieve the new Set ID");
+          if (!flashcardSet?.id)
+            throw new Error("Failed to retrieve the new Set ID");
 
           const flashcardsToSave = data.flashcards.slice(0, Number(count));
           await createFlashcardsBulk(flashcardsToSave, flashcardSet.id);
@@ -133,7 +149,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
         {
           loading: "Generating flashcards with AI...",
           error: "Failed to create flashcards. Please try again.",
-        }
+        },
       );
     } catch (error) {
       console.log(error);
@@ -145,14 +161,14 @@ export default function FlashcardsHomePage({ params }: PageProps) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
         <div>
-          <h1 className="text-2xl font-semibold">
+          <h1 className="text-2xl font-semibold mt-5 text-center sm:text-left md:mt-0">
             Flashcard Sets
           </h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="outline" className="flex-1 md:flex-none">
-            <Plus className="mr-2 h-4 w-4"/> New Set
+            <Plus className="mr-2 h-4 w-4" /> New Set
           </Button>
 
           <Dialog
@@ -162,7 +178,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
           >
             <DialogTrigger asChild>
               <Button variant="default" className="flex-1 md:flex-none">
-                <Plus className="mr-2 h-4 w-4"/> AI Generate
+                <Plus className="mr-2 h-4 w-4" /> AI Generate
               </Button>
             </DialogTrigger>
 
@@ -224,19 +240,20 @@ export default function FlashcardsHomePage({ params }: PageProps) {
                 onClick={() => setSearchQuery("")}
               />
             ) : (
-              <Search className="h-5 w-5 text-muted-foreground"/>
+              <Search className="h-5 w-5 text-muted-foreground" />
             )}
           </InputGroupAddon>
         </InputGroup>
       </div>
       <div className="flex flex-col gap-3">
         {isLoadingSets ? (
-          Array.from({length: 4}).map((_, i) => <FlashcardSetSkeleton key={i}/>)
+          Array.from({ length: 4 }).map((_, i) => (
+            <FlashcardSetSkeleton key={i} />
+          ))
         ) : filteredSets.length > 0 ? (
           filteredSets.map((set) => (
             <FlashcardSetComponent key={set.id} uuid={uuid} {...set} />
           ))
-
         ) : (
           <div className="w-full py-24 flex flex-col items-center justify-center">
             <p className="text-lg text-foreground pb-2">
@@ -244,9 +261,11 @@ export default function FlashcardsHomePage({ params }: PageProps) {
             </p>
             {!searchQuery && (
               <div className="flex flex-col items-center justify-center text-center px-4">
-                <p className="text-muted-foreground mb-6">Get started by creating a set manually or using AI.</p>
+                <p className="text-muted-foreground mb-6">
+                  Get started by creating a set manually or using AI.
+                </p>
                 <Button onClick={() => setAiGenerateOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4"/> Create First Set
+                  <Plus className="mr-2 h-4 w-4" /> Create First Set
                 </Button>
               </div>
             )}

@@ -24,7 +24,11 @@ type NoteSearcherProps = {
   isLoading: boolean;
 };
 
-export function NoteSearcher({ setSelectedNote, notes, isLoading }: NoteSearcherProps) {
+export function NoteSearcher({
+  setSelectedNote,
+  notes,
+  isLoading,
+}: NoteSearcherProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const isSearching = searchQuery.trim().length > 0;

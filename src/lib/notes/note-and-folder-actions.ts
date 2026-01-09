@@ -513,7 +513,7 @@ export async function handleImport(
 ) {
   const importPromise = (async () => {
     const { rootFolderName, tree } = await processFilesIntoTree(files);
-    const response = await fetch("/api/user/import-notes", {
+    const response = await fetch("/api/notes/import-notes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

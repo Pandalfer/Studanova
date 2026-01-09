@@ -13,7 +13,10 @@ export async function saveFlashcard(flashcard: Flashcard): Promise<void> {
   }
 }
 
-export async function createFlashcardsBulk(flashcards: { question: string, answer: string }[], setId: string): Promise<void> {
+export async function createFlashcardsBulk(
+  flashcards: { question: string; answer: string }[],
+  setId: string,
+): Promise<void> {
   const res = await fetch("/api/flashcards/create-flashcards-bulk", {
     method: "POST",
     headers: {
@@ -62,9 +65,7 @@ export async function loadFlashcards(
   return data.flashcardSet;
 }
 
-export async function loadFlashcardSets(
-  uuid: string,
-): Promise<FlashcardSet[]> {
+export async function loadFlashcardSets(uuid: string): Promise<FlashcardSet[]> {
   const res = await fetch("/api/flashcards/load-flashcard-sets", {
     method: "POST",
     headers: {

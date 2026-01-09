@@ -1,7 +1,7 @@
 import { Flashcard } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import {Skeleton} from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function FlashcardItem({ fc }: { fc: Flashcard }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -39,10 +39,12 @@ export function FlashcardItem({ fc }: { fc: Flashcard }) {
               Question
             </div>
             <div className="flex-1 flex items-center justify-center text-center overflow-hidden">
-              <p className={cn(
-                "font-medium leading-tight transition-all",
-                getTextSize(fc.question, true)
-              )}>
+              <p
+                className={cn(
+                  "font-medium leading-tight transition-all",
+                  getTextSize(fc.question, true),
+                )}
+              >
                 {fc.question}
               </p>
             </div>
@@ -59,10 +61,12 @@ export function FlashcardItem({ fc }: { fc: Flashcard }) {
               Answer
             </div>
             <div className="flex-1 flex items-center justify-center text-center overflow-hidden">
-              <p className={cn(
-                "text-foreground/90 transition-all",
-                getTextSize(fc.answer, false)
-              )}>
+              <p
+                className={cn(
+                  "text-foreground/90 transition-all",
+                  getTextSize(fc.answer, false),
+                )}
+              >
                 {fc.answer}
               </p>
             </div>
@@ -78,21 +82,20 @@ export function FlashcardItem({ fc }: { fc: Flashcard }) {
 
 export function FlashcardItemSkeleton() {
   return (
-    <div
-      className="w-full h-64 md:h-80 rounded-xl border bg-card shadow-sm flex flex-col p-6 md:p-8 relative overflow-hidden">
+    <div className="w-full h-64 md:h-80 rounded-xl border bg-card shadow-sm flex flex-col p-6 md:p-8 relative overflow-hidden">
       {/* Question Label Skeleton */}
-      <Skeleton className="h-4 w-20 mb-6 opacity-50"/>
+      <Skeleton className="h-4 w-20 mb-6 opacity-50" />
 
       {/* Main Content Skeleton */}
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
-        <Skeleton className="h-6 w-[80%]"/>
-        <Skeleton className="h-6 w-[50%]"/>
+        <Skeleton className="h-6 w-[80%]" />
+        <Skeleton className="h-6 w-[50%]" />
       </div>
 
       {/* Footer/Hint Skeleton */}
       <div className="mt-auto flex justify-center">
-        <Skeleton className="h-3 w-24 opacity-30"/>
+        <Skeleton className="h-3 w-24 opacity-30" />
       </div>
     </div>
-  )
+  );
 }

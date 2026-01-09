@@ -164,7 +164,8 @@ function FolderItem({
                 <AccordionTrigger
                   className={cn(
                     "h-12 min-w-60 w-full flex items-center gap-2 truncate",
-                    isOver ? " " : "hover:bg-accent dark:hover:bg-accent",
+                    !isDesktop && "select-none",
+                    isOver ? "" : "hover:bg-accent dark:hover:bg-accent",
                   )}
                   onClick={(e) => {
                     e.stopPropagation();

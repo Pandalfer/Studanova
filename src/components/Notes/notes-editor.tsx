@@ -98,7 +98,9 @@ export default function NotesEditor({
 
   if (loading) {
     return (
-      <div className="w-190 mx-auto flex flex-col h-full pt-15">
+      <div
+        className={`${isDesktop ? "lg:max-w-190 md:max-w-80 w-[80%]" : "w-full pl-5 pr-5"} mx-auto flex flex-col h-full pt-15`}
+      >
         <Skeleton className="h-16 w-full mb-3 rounded-md bg-popover" />
         <div className="flex flex-col gap-2 p-2">
           {Array.from({ length: 8 }).map((_, i) => (
