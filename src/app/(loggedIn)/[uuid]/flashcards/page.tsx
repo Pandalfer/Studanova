@@ -6,7 +6,6 @@ import { use, useEffect, useState } from "react";
 import { FlashcardSet, Note } from "@/lib/types";
 import {
   createFlashcardsBulk,
-  loadFlashcardSets,
   saveFlashcardSet,
 } from "@/lib/flashcards/flashcard-actions";
 import { Button } from "@/components/ui/button";
@@ -37,6 +36,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import {loadFlashcardSets} from "@/lib/server-actions/flashcards";
 interface PageProps {
   params: Promise<{ uuid: string }>;
 }
