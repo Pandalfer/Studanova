@@ -1,115 +1,95 @@
-"use server"
-
 import { Flashcard, FlashcardSet } from "@/lib/types";
-import Groq from "groq-sdk";
-import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
 
-const groq = new Groq({ apiKey: process.env.FLASHCARD_API_KEY! });
-
-// --- AI GENERATION ---
-export async function generateAndSaveFlashcardsAction(
-  noteContent: string,
-  noteTitle: string,
-  count: number,
-  studentId: string
-) {
-  try {
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.1-70b-versatile",
-      messages: [
-        {
-          role: "system",
-          content: `You are an expert tutor. Create exactly ${count} flashcards. 
-          Return ONLY a JSON object: {"title": "...", "cards": [{"question": "...", "answer": "..."}]}`
-        },
-        { role: "user", content: noteContent }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    const data = JSON.parse(completion.choices[0].message.content || "{}");
-    const cards = data.cards || [];
-
-    const newSet = await prisma.$transaction(async (tx) => {
-      return await tx.flashcardSet.create({
-        data: {
-          title: data.title || `${noteTitle} Review`,
-          description: `Generated from: ${noteTitle}`,
-          studentId: studentId,
-          flashcards: {
-            create: cards.map((fc: Flashcard) => ({
-              question: fc.question,
-              answer: fc.answer,
-              progress: 0,
-            })),
-          },
-        },
-      });
-    });
-
-    revalidatePath(`/${studentId}/flashcards`);
-    return { success: true, setId: newSet.id };
-  } catch (error) {
-    console.error("AI Action Error:", error);
-    return { success: false, error: "AI Generation failed" };
+export async function saveFlashcard(flashcard: Flashcard): Promise<void> {
+  const res = await fetch("/api/flashcards/save-flashcard", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...flashcard }),
+  });
+  if (!res.ok) {
+    throw new Error("Failed to save flashcard");
   }
 }
 
-// --- DATA LOADING ---
-export async function loadFlashcardSets(uuid: string) {
-  try {
-    const sets = await prisma.flashcardSet.findMany({
-      where: { studentId: uuid },
-      orderBy: { title: "asc" },
-      include: { flashcards: true },
-    });
+export async function createFlashcardsBulk(
+  flashcards: { question: string; answer: string }[],
+  setId: string,
+): Promise<void> {
+  const res = await fetch("/api/flashcards/create-flashcards-bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ flashcards, setId }),
+  });
 
-    // Map to ensure types match your frontend FlashcardSet interface
-    const formattedSets: FlashcardSet[] = sets.map((s) => ({
-      id: s.id,
-      title: s.title,
-      description: s.description ?? "",
-      studentId: s.studentId,
-      flashcards: s.flashcards.map(f => ({
-        id: f.id,
-        question: f.question,
-        answer: f.answer,
-        setId: f.setId,
-        progress: f.progress
-      }))
-    }));
-
-    return { success: true, flashcardSets: formattedSets };
-  } catch (error) {
-    return { success: false, error: "Failed to load sets" };
+  if (!res.ok) {
+    throw new Error("Failed to bulk save flashcards");
   }
 }
 
-export async function loadFlashcards(setId: string, uuid: string) {
-  // Direct Prisma call instead of fetch
-  const set = await prisma.flashcardSet.findUnique({
-    where: { id: setId, studentId: uuid },
-    include: { flashcards: true }
+export async function saveFlashcardSet(
+  flashcardSet: FlashcardSet,
+): Promise<FlashcardSet> {
+  const res = await fetch("/api/flashcards/save-flashcard-set", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...flashcardSet }),
   });
-  return set as FlashcardSet | null;
+  if (!res.ok) {
+    throw new Error("Failed to save flashcard set");
+  }
+  const data = await res.json();
+  return data.flashcardSet;
 }
 
-// --- UPDATES & DELETES ---
-export async function saveFlashcard(flashcard: Flashcard) {
-  return await prisma.flashcard.update({
-    where: { id: flashcard.id },
-    data: {
-      question: flashcard.question,
-      answer: flashcard.answer,
-      progress: flashcard.progress
-    }
+export async function loadFlashcards(
+  setId: string,
+  uuid: string,
+): Promise<FlashcardSet> {
+  const res = await fetch("/api/flashcards/load-flashcards", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ setId, uuid }),
   });
+  if (!res.ok) {
+    throw new Error("Failed to save flashcard set");
+  }
+  const data = await res.json();
+  return data.flashcardSet;
 }
 
-export async function resetDeckProgress(setId: string) {
-  return await prisma.flashcard.updateMany({
-    where: { setId: setId },
-    data: { progress: 0 }
+export async function loadFlashcardSets(uuid: string): Promise<FlashcardSet[]> {
+  const res = await fetch("/api/flashcards/load-flashcard-sets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ uuid }),
   });
+  if (!res.ok) {
+    throw new Error("Failed to load flashcard sets");
+  }
+  const data = await res.json();
+  return data.flashcardSets;
+}
+
+export async function resetDeckProgress(setId: string): Promise<void> {
+  const res = await fetch("/api/flashcards/reset-progress", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ setId }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to reset deck progress");
+  }
 }

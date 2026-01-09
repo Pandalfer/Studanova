@@ -84,8 +84,8 @@ export function useFlashcards(
 		setLoading(true);
 		try {
 			// 1. Validate the set exists
-			const result = await loadFlashcardSets(uuid);
-			const found = result.success && result.flashcardSets ? result.flashcardSets.find((n) => n.id === flashcardsetIdFromPath) : null;
+			const flashcardSets = await loadFlashcardSets(uuid);
+			const found = flashcardSets.find((n) => n.id === flashcardsetIdFromPath);
 
 			if (!found) {
 				router.push(`/${uuid}/flashcards`);
