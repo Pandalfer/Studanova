@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/hash";
-import { Folder, Note } from "@/lib/types";
+import { Folder } from "@/lib/types";
 import { v4 as uuidv4 } from "uuid";
 
 async function createFolders(

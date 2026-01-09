@@ -20,7 +20,6 @@ import {
   renameNoteInFolders,
   selectNote,
 } from "@/lib/notes/note-and-folder-actions";
-import { toast } from "sonner";
 
 export function useNotes(
   uuid: string,
