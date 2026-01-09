@@ -38,7 +38,7 @@ export async function generateAndSaveFlashcardsAction(
           description: `Generated from: ${noteTitle}`,
           studentId: studentId,
           flashcards: {
-            create: cards.map((fc: any) => ({
+            create: cards.map((fc: Flashcard) => ({
               question: fc.question,
               answer: fc.answer,
               progress: 0,
