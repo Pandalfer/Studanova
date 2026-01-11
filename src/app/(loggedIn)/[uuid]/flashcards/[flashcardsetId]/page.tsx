@@ -28,14 +28,12 @@ import { useIsDesktop } from "@/lib/utils";
 import {useFlashcards} from "@/hooks/use-flashcards";
 
 interface PageProps {
-  params: Promise<{ uuid: string }>;
+  params: Promise<{ uuid: string, flashcardsetId: string }>;
 }
 
 export default function FlashcardsPage({ params }: PageProps) {
   const { uuid } = use(params);
-  const pathname = usePathname();
-  const pathSegments = pathname.split("/");
-  const flashcardsetIdFromPath = pathSegments[3];
+  const { flashcardsetId } = use(params);
   const router = useRouter();
 
   const {
@@ -54,7 +52,7 @@ export default function FlashcardsPage({ params }: PageProps) {
     trackedFlashcardRight,
     trackedFlashcardWrong,
     isDesktop,
-  } = useFlashcards(uuid, router, flashcardsetIdFromPath);
+  } = useFlashcards(uuid, router, flashcardsetId);
 
   return (
     <div className="px-6 flex flex-col justify-center min-h-[90vh] max-w-2xl mx-auto w-full mt-5 sm:mt-0">

@@ -1,13 +1,11 @@
 import { FlashcardSet as FlashcardSetType } from "@/lib/types";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useIsDesktop } from "@/lib/utils";
 
 export function FlashcardSet({
   uuid,
   ...set
 }: FlashcardSetType & { uuid: string }) {
-  const isDesktop = useIsDesktop();
   return (
     <Link
       href={`/${uuid}/flashcards/${set.id}`}

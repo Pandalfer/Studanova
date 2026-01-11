@@ -79,28 +79,27 @@ export function useFlashcards(
 	};
 
 	const fetchCards = async () => {
-		if (!flashcardsetIdFromPath) return; // Prevent call if ID is missing
+		if (!flashcardsetIdFromPath || !uuid) return;
 
 		setLoading(true);
 		try {
-			// 1. Validate the set exists
-			const flashcardSets = await loadFlashcardSets(uuid);
-			const found = flashcardSets.find((n) => n.id === flashcardsetIdFromPath);
-
-			if (!found) {
-				router.push(`/${uuid}/flashcards`);
-				return;
-			}
+			// 1. Just call the specific loader
 			const data = await loadFlashcards(flashcardsetIdFromPath, uuid);
 
 			if (data) {
 				setFlashcardSet(data);
 				const cards = data.flashcards ?? [];
 				setFlashcards(cards);
+				// If the DB returns progress, filter them out
 				setTrackedFlashcards(cards.filter((fc) => fc.progress !== 1));
+			} else {
+				// If data is null, the ID was wrong
+				router.push(`/${uuid}/flashcards`);
 			}
 		} catch (error) {
+			// This is likely where your "Unexpected Token <" is caught
 			console.error("Fetch Error:", error);
+			toast.error("Session expired or connection lost. Please refresh.");
 		} finally {
 			setLoading(false);
 		}
