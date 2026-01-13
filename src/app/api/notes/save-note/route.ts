@@ -54,6 +54,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Error saving note:", error);
-    return NextResponse.json({ error: "Failed to save note" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save-flashcard note" },
+      { status: 500 },
+    );
   }
 }

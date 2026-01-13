@@ -1,22 +1,20 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { Flashcard, FlashcardSet } from "@/lib/types";
-import { use, useEffect, useState } from "react";
-import {
-  loadFlashcards,
-  loadFlashcardSets,
-  resetDeckProgress,
-  saveFlashcard,
-} from "@/lib/flashcards/flashcard-actions";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   FlashcardItem,
   FlashcardItemSkeleton,
 } from "@/components/Flashcards/flashcard";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from "lucide-react";
-import { toast } from "sonner";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Pencil,
+  RotateCcw,
+  Shuffle,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -24,11 +22,10 @@ import {
 } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { useIsDesktop } from "@/lib/utils";
-import {useFlashcards} from "@/hooks/use-flashcards";
+import { useFlashcards } from "@/hooks/use-flashcards";
 
 interface PageProps {
-  params: Promise<{ uuid: string, flashcardsetId: string }>;
+  params: Promise<{ uuid: string; flashcardsetId: string }>;
 }
 
 export default function FlashcardsPage({ params }: PageProps) {
@@ -56,6 +53,24 @@ export default function FlashcardsPage({ params }: PageProps) {
 
   return (
     <div className="px-6 flex flex-col justify-center min-h-[90vh] max-w-2xl mx-auto w-full mt-5 sm:mt-0">
+      <div className="absolute right-4 top-4">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                router.push(`/${uuid}/flashcards/${flashcardsetId}/edit`)
+              }
+              className="rounded-full h-10 w-10"
+            >
+              <Pencil className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Edit Set</TooltipContent>
+        </Tooltip>
+      </div>
+
       <div className="mb-6 text-center space-y-2">
         {loading ? (
           <div className="flex flex-col items-center gap-2">

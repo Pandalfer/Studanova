@@ -91,7 +91,7 @@ export function useNotes(
           setIsDirty(false);
         }
       } catch (error) {
-        console.error("Auto-save failed:", error);
+        console.error("Auto-save-flashcard failed:", error);
       }
     }, 2000);
 

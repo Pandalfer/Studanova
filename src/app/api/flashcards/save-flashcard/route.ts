@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
         },
       });
     } else {
-      // 3. Plain creation for new cards
       flashcard = await prisma.flashcard.create({
         data: {
           question,
@@ -37,7 +36,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error saving flashcard:", error);
     return NextResponse.json(
-      { error: "Failed to save flashcard" },
+      { error: "Failed to save-flashcard flashcard" },
       { status: 500 },
     );
   }

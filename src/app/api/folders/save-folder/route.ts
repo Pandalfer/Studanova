@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Error saving flashcards:", error);
     return NextResponse.json(
-      { error: "Failed to save flashcards" },
+      { error: "Failed to save-flashcard flashcards" },
       { status: 500 },
     );
   }

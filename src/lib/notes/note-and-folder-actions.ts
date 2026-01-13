@@ -305,7 +305,7 @@ export async function selectNote(
           prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
         );
     } catch {
-      toast.error("Failed to save before switching note:");
+      toast.error("Failed to save-flashcard before switching note:");
     }
   }
 
@@ -525,7 +525,9 @@ export async function handleImport(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Failed to save to database");
+      throw new Error(
+        errorData.error || "Failed to save-flashcard to database",
+      );
     }
 
     router.refresh();
