@@ -10,6 +10,30 @@ const groq = new Groq({
 
 //region Flashcards
 
+export async function saveFlashcardsBulk(
+  flashcards: (Flashcard & { progress: number })[],
+): Promise<{ success: true } | { success: false; error: string }> {
+  if (!flashcards || !Array.isArray(flashcards) || flashcards.length === 0) {
+    return { success: false, error: "No flashcards provided" };
+  }
+
+  try {
+    await prisma.$transaction(
+      flashcards.map((fc) =>
+        prisma.flashcard.update({
+          where: { id: fc.id },
+          data: { progress: fc.progress },
+        }),
+      ),
+    );
+
+    return { success: true };
+  } catch (error) {
+    console.error("[saveFlashcardsBulk] DB failure:", error);
+    return { success: false, error: "Failed to save flashcards" };
+  }
+}
+
 export async function resetDeckProgress(
   setId: string,
 ): Promise<{ success: true } | { success: false; error: string }> {

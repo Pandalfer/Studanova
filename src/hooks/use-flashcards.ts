@@ -1,11 +1,11 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { Flashcard, FlashcardSet } from "@/lib/types";
 import { toast } from "sonner";
 import { useIsDesktop } from "@/lib/utils";
 import {
   loadFlashcardSet,
-  resetDeckProgress,
+  resetDeckProgress, saveFlashcardsBulk,
 } from "@/lib/server-actions/flashcards";
 
 export function useFlashcards(
@@ -20,6 +20,31 @@ export function useFlashcards(
   const [activeFlashcard, setActiveFlashcard] = useState<number>(0);
   const [trackProgress, setTrackProgress] = useState(true);
 
+  const saveQueue = useRef(<Flashcard[]>([]));
+  const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const SAVE_INTERVAL = 20000;
+
+  const processSaveQueue = async () => {
+    if (saveQueue.current.length === 0) {
+      scheduleFlush();
+      return;
+    }
+
+    const flashcardsToSave = [...saveQueue.current];
+    saveQueue.current = [];
+
+    const res = await saveFlashcardsBulk(flashcardsToSave.map(fc => ({ ...fc, progress: 1 })));
+    if (!res.success) {
+      toast.error("Failed to save flashcards progress.");
+      saveQueue.current.push(...flashcardsToSave);
+    }
+    scheduleFlush();
+  }
+
+  const scheduleFlush = () => {
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(processSaveQueue, SAVE_INTERVAL);
+  };
   const isDesktop = useIsDesktop();
 
   const isFirst = activeFlashcard === 0;
@@ -112,26 +137,23 @@ export function useFlashcards(
   }, [flashcardsetIdFromPath, uuid]);
 
   const trackedFlashcardRight = async (flashcard: Flashcard) => {
-    // 1. Optimistically update UI: Remove from the queue immediately
     setTrackedFlashcards((prev) => prev.filter((f) => f.id !== flashcard.id));
 
-    try {
-      // 2. Persist to DB
-      const res = await fetch("/api/flashcards/save-flashcard", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...flashcard, progress: 1 }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save flashcard");
-      }
-    } catch (err) {
-      toast.error("Failed to save-flashcard progress");
-      setTrackedFlashcards((prev) => [...prev, flashcard]);
-    }
+    saveQueue.current.push(flashcard);
+    scheduleFlush();
   };
+
+  useEffect(() => {
+    const handleUnload = (e: BeforeUnloadEvent) => {
+      if (saveQueue.current.length === 0) return;
+      saveFlashcardsBulk(saveQueue.current.map(fc => ({ ...fc, progress: 1 })));
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handleUnload);
+    return () => window.removeEventListener("beforeunload", handleUnload);
+  }, []);
 
   const trackedFlashcardWrong = async (flashcard: Flashcard) => {
     setTrackedFlashcards((prev) => {
@@ -144,21 +166,6 @@ export function useFlashcards(
         ...withoutCurrent.slice(insertIndex),
       ];
     });
-
-    try {
-      const res = await fetch("/api/flashcards/save-flashcard", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...flashcard, progress: 0 }),
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save flashcard");
-      }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   return {
