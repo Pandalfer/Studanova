@@ -11,26 +11,44 @@ const groq = new Groq({
 //region Flashcards
 
 export async function saveFlashcardsBulk(
-  flashcards: (Flashcard & { progress: number })[],
-): Promise<{ success: true } | { success: false; error: string }> {
-  if (!flashcards || !Array.isArray(flashcards) || flashcards.length === 0) {
-    return { success: false, error: "No flashcards provided" };
-  }
-
+  flashcards: Flashcard[],
+  idsToDelete: string[] = [] // New parameter
+) {
   try {
-    await prisma.$transaction(
-      flashcards.map((fc) =>
-        prisma.flashcard.update({
-          where: { id: fc.id },
-          data: { progress: fc.progress },
-        }),
-      ),
-    );
+    await prisma.$transaction(async (tx) => {
+      if (idsToDelete.length > 0) {
+        await tx.flashcard.deleteMany({
+          where: { id: { in: idsToDelete } }
+        });
+      }
+
+      for (const fc of flashcards) {
+        if (!fc.id || fc.id.startsWith("temp-")) {
+          await tx.flashcard.create({
+            data: {
+              question: fc.question,
+              answer: fc.answer,
+              progress: fc.progress ?? 0,
+              setId: fc.setId,
+            },
+          });
+        } else {
+          await tx.flashcard.update({
+            where: { id: fc.id },
+            data: {
+              question: fc.question,
+              answer: fc.answer,
+              progress: fc.progress,
+            },
+          });
+        }
+      }
+    });
 
     return { success: true };
   } catch (error) {
-    console.error("[saveFlashcardsBulk] DB failure:", error);
-    return { success: false, error: "Failed to save flashcards" };
+    console.error(error);
+    return { success: false, error: "Failed to sync flashcards" };
   }
 }
 
@@ -65,19 +83,17 @@ export async function generateFlashcardsFromNote(params: {
 }): Promise<
   { success: true; data: { setId: string } } | { success: false; error: string }
 > {
-  if (!params.uuid) {
-    return { success: false, error: "Invalid user ID" };
-  }
+  if (!params.uuid) return { success: false, error: "Invalid user ID" };
+
   try {
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: `You are an expert tutor. Create flashcards that test deep understanding, not just definitions. 
-          Return ONLY a JSON object with a key "cards" containing an array of objects.
-          Each object must have "question" and "answer" strings. 
-          Format: {"cards": [{"question": "...", "answer": "..."}]}`,
+          content: `You are an expert tutor. Create flashcards for: ${params.noteTitle}.
+          Return ONLY a JSON object with a key "cards".
+          Format: {"cards": [{"question": "string", "answer": "string"}]}`,
         },
         { role: "user", content: params.noteContent },
       ],
@@ -89,11 +105,13 @@ export async function generateFlashcardsFromNote(params: {
 
     const parsed = JSON.parse(raw);
 
-    if (typeof parsed.title !== "string" || !Array.isArray(parsed.flashcards)) {
+    // FIX 1: Use the correct key "cards" consistently
+    if (!parsed.cards || !Array.isArray(parsed.cards)) {
       return { success: false, error: "AI returned malformed data" };
     }
 
-    const flashcards: Flashcard[] = parsed.flashcards.slice(0, params.count);
+    // FIX 2: Ensure we are slicing the correct array
+    const flashcards = parsed.cards.slice(0, params.count);
 
     if (flashcards.length === 0) {
       return { success: false, error: "No flashcards generated" };
@@ -102,14 +120,15 @@ export async function generateFlashcardsFromNote(params: {
     const result = await prisma.$transaction(async (tx) => {
       const set = await tx.flashcardSet.create({
         data: {
-          title: parsed.title,
-          description: `Flashcards generated from note: ${params.noteTitle}`,
+
+          title: params.noteTitle || "Untitled Set",
+          description: `Generated from: ${params.noteTitle}`,
           studentId: params.uuid,
         },
       });
 
       await tx.flashcard.createMany({
-        data: flashcards.map((f) => ({
+        data: flashcards.map((f: Flashcard) => ({
           question: f.question,
           answer: f.answer,
           setId: set.id,
@@ -122,13 +141,12 @@ export async function generateFlashcardsFromNote(params: {
 
     return { success: true, data: { setId: result } };
   } catch (error) {
-    console.error("AI flashcard generation failed:", error);
-    return {
-      success: false,
-      error: "Failed to generate flashcards",
-    };
+    console.error("Flashcard Gen Error:", error);
+    return { success: false, error: "Failed to generate flashcards" };
   }
 }
+
+
 //endregion
 
 //region Flashcard Sets
@@ -221,4 +239,64 @@ export async function loadFlashcardSet(
     };
   }
 }
+
+export async function saveFlashcardSet(
+  setId: string,
+  data: { title: string; description?: string }
+) {
+  try {
+    const updatedSet = await prisma.flashcardSet.update({
+      where: { id: setId },
+      data: {
+        title: data.title,
+        description: data.description,
+      },
+    });
+
+    return { success: true, data: updatedSet };
+  } catch (error) {
+    console.error("Set Update Error:", error);
+    return { success: false, error: "Failed to update set details" };
+  }
+}
+
+export async function createFlashcardSet(
+  uuid: string,
+  data: { title: string; description?: string }
+): Promise<
+  { success: true; data: FlashcardSet } | { success: false; error: string }
+> {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const set = await tx.flashcardSet.create({
+        data: {
+          title: data.title,
+          description: data.description || "",
+          studentId: uuid,
+        },
+        include: {
+          flashcards: true,
+        }
+      });
+
+      return set;
+    });
+
+    return {
+      success: true,
+      data: {
+        ...result,
+        description: result.description ?? "",
+        flashcards: []
+      }
+    };
+  } catch (error) {
+    console.error("Create Set Error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to create flashcard set"
+    };
+  }
+}
+
 //endregion

@@ -33,8 +33,9 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import {
+  createFlashcardSet,
   generateFlashcardsFromNote,
-  loadFlashcardSets,
+  loadFlashcardSets, saveFlashcardSet,
 } from "@/lib/server-actions/flashcards";
 interface PageProps {
   params: Promise<{ uuid: string }>;
@@ -76,6 +77,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
         const data = await loadFlashcardSets(uuid);
         if (data.success) {
           setFlashcardSets(data.data);
+          setFilteredSets(data.data);
         } else {
           toast.error(data.error);
         }
@@ -125,6 +127,7 @@ export default function FlashcardsHomePage({ params }: PageProps) {
           });
 
           if (!res.success) {
+            console.log("Error generating flashcards:", res.error);
             throw new Error(res.error);
           }
 
@@ -151,7 +154,13 @@ export default function FlashcardsHomePage({ params }: PageProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="outline" className="flex-1 md:flex-none">
+          <Button variant="outline" className="flex-1 md:flex-none" onClick={async () => {
+            const data = await createFlashcardSet(uuid, { title: "New Set", description: "" });
+            if (data.success) {
+              router.push(`/${uuid}/flashcards/${data.data.id}/edit`);
+            } else {
+              toast.error("Failed to create new set.");
+            }}}>
             <Plus className="mr-2 h-4 w-4" /> New Set
           </Button>
 
