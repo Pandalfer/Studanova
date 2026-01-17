@@ -1,6 +1,6 @@
 # Studanova
 
-Studanova is a productivity tool for students built with [Next.js](https://nextjs.org).
+Studanova is a productivity tool for students built with [Next.js](https://nextjs.org). It allows users to import notes from notion and obsidian, convert them into flashcards ( automatically ) and export them to Anki
 
 #### Key Technical Highlights
 

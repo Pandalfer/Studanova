@@ -72,6 +72,10 @@ export function NoteSearcher({
     setOpen(false);
   };
 
+  const selectedNoteTitle = id
+    ? notes.find((note) => note.id === id)?.title
+    : null;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -79,10 +83,20 @@ export function NoteSearcher({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full flex items-center justify-between px-3 overflow-hidden"
         >
-          {id ? notes.find((note) => note.id === id)?.title : "Select Note..."}
-          <ChevronsUpDown className="opacity-50" />
+          <div
+            className="flex-1 min-w-0 text-left"
+            style={{
+              maxWidth: "calc(min(40vw, 400px))"
+            }}
+          >
+            <span className="block truncate">
+              {selectedNoteTitle || "Select Note..."}
+            </span>
+          </div>
+
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[250px] p-0">
@@ -100,16 +114,16 @@ export function NoteSearcher({
                   <CommandItem
                     key={note.id}
                     value={note.id}
-                    onSelect={(currentValue) => {
-                      handleSelect(currentValue);
-                    }}
-                    className={"cursor-pointer"}
-                  >
-                    {note.title}
+                    onSelect={handleSelect}
+                    className="cursor-pointer flex"
+                    >
+                    <span className="truncate flex-1 min-w-0">
+                      {note.title}
+                    </span>
                     <Check
                       className={cn(
-                        "ml-auto",
-                        id === note.id ? "opacity-100" : "opacity-0",
+                        "ml-2 shrink-0",
+                        id === note.id ? "opacity-100" : "opacity-0"
                       )}
                     />
                   </CommandItem>
