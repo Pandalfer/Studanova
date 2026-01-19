@@ -22,13 +22,13 @@ export function FlashcardSet({
         <h2
           className="
 					min-h-[1.25rem] sm:min-h-[2.5rem]
-    text-base font-semibold
-    overflow-hidden
-    text-ellipsis
-    line-clamp-1
-    sm:line-clamp-2
-    mr-5
-  "
+          text-base font-semibold
+          overflow-hidden
+          text-ellipsis
+          line-clamp-1
+          sm:line-clamp-2
+          mr-5
+        "
         >
           {set.title}
         </h2>

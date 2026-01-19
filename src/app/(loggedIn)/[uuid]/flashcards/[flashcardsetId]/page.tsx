@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { use } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   FlashcardItem,
@@ -23,14 +22,28 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useFlashcards } from "@/hooks/use-flashcards";
+import {use} from "react";
+
+interface FlashcardDeckProps {
+  uuid: string;
+  flashcardsetId: string;
+  isDemo?: boolean; // New Prop
+}
 
 interface PageProps {
   params: Promise<{ uuid: string; flashcardsetId: string }>;
 }
 
-export default function FlashcardsPage({ params }: PageProps) {
-  const { uuid } = use(params);
-  const { flashcardsetId } = use(params);
+export default function Page({ params }: PageProps) {
+  const { uuid, flashcardsetId } = use(params);
+  return <FlashcardDeck uuid={uuid} flashcardsetId={flashcardsetId} isDemo={false} />;
+}
+
+export function FlashcardDeck({
+                                uuid,
+                                flashcardsetId,
+                                isDemo = false,
+                              }: FlashcardDeckProps) {
   const router = useRouter();
 
   const {
@@ -48,8 +61,7 @@ export default function FlashcardsPage({ params }: PageProps) {
     setTrackProgress,
     trackedFlashcardRight,
     trackedFlashcardWrong,
-    isDesktop,
-  } = useFlashcards(uuid, router, flashcardsetId);
+  } = useFlashcards(uuid, router, flashcardsetId, isDemo);
 
   return (
     <div className="px-6 flex flex-col justify-center min-h-[90vh] max-w-2xl mx-auto w-full mt-5 sm:mt-0">
@@ -79,12 +91,8 @@ export default function FlashcardsPage({ params }: PageProps) {
           </div>
         ) : (
           <>
-            <h1 className="text-3xl font-bold tracking-tight text-balance">
-              {flashcardSet?.title
-                ? flashcardSet.title.length > 20 && !isDesktop
-                  ? `${flashcardSet.title.slice(0, 20)}...`
-                  : flashcardSet.title
-                : "Flashcards"}
+            <h1 className="text-3xl font-bold tracking-tight text-balance line-clamp-1 break-words">
+              {flashcardSet?.title ?? "Flashcards"}
             </h1>
             {!trackProgress ? (
               <p className="text-muted-foreground text-sm font-medium">
@@ -103,13 +111,10 @@ export default function FlashcardsPage({ params }: PageProps) {
       <div className={"flex flex-row items-center justify-between mb-6"}>
         {loading ? (
           <>
-            {/* Shuffle Button Skeleton */}
             <Skeleton className="h-10 w-10 rounded-md" />
-
-            {/* Switch & Label Skeleton */}
             <div className="flex flex-row items-center gap-2">
-              <Skeleton className="h-4 w-24" /> {/* Label */}
-              <Skeleton className="h-6 w-11 rounded-full" /> {/* Switch */}
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-6 w-11 rounded-full" />
             </div>
           </>
         ) : (
@@ -216,10 +221,9 @@ export default function FlashcardsPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Progress Bar Skeleton or Actual */}
           <div className="w-full bg-popover h-2 rounded-full overflow-hidden">
             {loading ? (
-              <div className="h-full w-0" /> // Hidden during load
+              <div className="h-full w-0" />
             ) : (
               <div
                 className="bg-foreground h-full transition-all duration-300 ease-in-out"

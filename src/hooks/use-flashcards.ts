@@ -1,17 +1,23 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import { Flashcard, FlashcardSet } from "@/lib/types";
 import { toast } from "sonner";
-import { useIsDesktop } from "@/lib/utils";
 import {
   loadFlashcardSet,
-  resetDeckProgress, saveFlashcardsBulk,
+  resetDeckProgress,
+  saveFlashcardsBulk,
 } from "@/lib/server-actions/flashcards";
+import {
+  loadFlashcardSetDemo,
+  resetDeckProgressDemo,
+  saveFlashcardsBulkDemo,
+} from "@/lib/flashcards/flashcard-actions";
 
 export function useFlashcards(
   uuid: string,
   router: AppRouterInstance,
   flashcardsetIdFromPath?: string,
+  isDemo: boolean = false
 ) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [trackedFlashcards, setTrackedFlashcards] = useState<Flashcard[]>([]);
@@ -20,7 +26,7 @@ export function useFlashcards(
   const [activeFlashcard, setActiveFlashcard] = useState<number>(0);
   const [trackProgress, setTrackProgress] = useState(true);
 
-  const saveQueue = useRef(<Flashcard[]>([]));
+  const saveQueue = useRef<Flashcard[]>([]);
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const SAVE_INTERVAL = 20000;
 
@@ -33,19 +39,28 @@ export function useFlashcards(
     const flashcardsToSave = [...saveQueue.current];
     saveQueue.current = [];
 
-    const res = await saveFlashcardsBulk(flashcardsToSave.map(fc => ({ ...fc, progress: 1 })));
+    // 2. Branching Logic for Saving
+    const dataToSave = flashcardsToSave.map((fc) => ({ ...fc, progress: 1 }));
+
+    let res;
+    if (isDemo) {
+      res = await saveFlashcardsBulkDemo(dataToSave);
+    } else {
+      res = await saveFlashcardsBulk(dataToSave);
+    }
+
     if (!res.success) {
       toast.error("Failed to save flashcards progress.");
+      // If fail, put them back in queue
       saveQueue.current.push(...flashcardsToSave);
     }
     scheduleFlush();
-  }
+  };
 
   const scheduleFlush = () => {
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(processSaveQueue, SAVE_INTERVAL);
   };
-  const isDesktop = useIsDesktop();
 
   const isFirst = activeFlashcard === 0;
   const isLast = activeFlashcard === flashcards.length - 1;
@@ -61,10 +76,14 @@ export function useFlashcards(
 
     toast.promise(
       (async () => {
-        // 1. Reset in Database
-        await resetDeckProgress(flashcardSet.id!);
+        // 3. Branching Logic for Resetting
+        if (isDemo) {
+          await resetDeckProgressDemo(flashcardSet.id!);
+        } else {
+          await resetDeckProgress(flashcardSet.id!);
+        }
 
-        // 2. Reset Local State
+        // Reset Local State (Same for both)
         setFlashcards((prev) => prev.map((fc) => ({ ...fc, progress: 0 })));
         setTrackedFlashcards(flashcards.map((fc) => ({ ...fc, progress: 0 })));
         setActiveFlashcard(0);
@@ -75,7 +94,7 @@ export function useFlashcards(
         loading: "Resetting progress...",
         success: (msg) => msg,
         error: "Could not reset deck.",
-      },
+      }
     );
   };
 
@@ -91,16 +110,11 @@ export function useFlashcards(
           newCards[currentIndex],
         ];
       }
-
       return newCards;
     };
     trackProgress
-      ? setTrackedFlashcards((prevCards) => {
-          return shuffle(prevCards);
-        })
-      : setFlashcards((prevCards) => {
-          return shuffle(prevCards);
-        });
+      ? setTrackedFlashcards((prevCards) => shuffle(prevCards))
+      : setFlashcards((prevCards) => shuffle(prevCards));
 
     toast.success("Flashcards shuffled!");
   };
@@ -110,23 +124,25 @@ export function useFlashcards(
 
     setLoading(true);
     try {
-      // 1. Just call the specific loader
-      const data = await loadFlashcardSet(flashcardsetIdFromPath, uuid);
+      // 4. Branching Logic for Loading
+      let data;
+      if (isDemo) {
+        data = await loadFlashcardSetDemo(flashcardsetIdFromPath, uuid);
+      } else {
+        data = await loadFlashcardSet(flashcardsetIdFromPath, uuid);
+      }
 
       if (data.success) {
         setFlashcardSet(data.data);
         const cards = data.data.flashcards ?? [];
         setFlashcards(cards);
-        // If the DB returns progress, filter them out
         setTrackedFlashcards(cards.filter((fc) => fc.progress !== 1));
       } else {
-        // If data is null, the ID was wrong
         router.push(`/${uuid}/flashcards`);
       }
     } catch (error) {
-      // This is likely where your "Unexpected Token <" is caught
       console.error("Fetch Error:", error);
-      toast.error("Session expired or connection lost. Please refresh.");
+      toast.error("Error loading flashcards.");
     } finally {
       setLoading(false);
     }
@@ -134,26 +150,30 @@ export function useFlashcards(
 
   useEffect(() => {
     fetchCards();
-  }, [flashcardsetIdFromPath, uuid]);
+  }, [flashcardsetIdFromPath, uuid, isDemo]); // Add isDemo dependency
 
   const trackedFlashcardRight = async (flashcard: Flashcard) => {
     setTrackedFlashcards((prev) => prev.filter((f) => f.id !== flashcard.id));
-
     saveQueue.current.push(flashcard);
     scheduleFlush();
   };
 
   useEffect(() => {
-    const handleUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (saveQueue.current.length === 0) return;
-      saveFlashcardsBulk(saveQueue.current.map(fc => ({ ...fc, progress: 1 })));
       e.preventDefault();
       e.returnValue = "";
+      const dataToSave = saveQueue.current.map((fc) => ({ ...fc, progress: 1 }));
+      if (isDemo) {
+        saveFlashcardsBulkDemo(dataToSave);
+      } else {
+        saveFlashcardsBulk(dataToSave);
+      }
+      saveQueue.current = [];
     };
-
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, []);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDemo]);
 
   const trackedFlashcardWrong = async (flashcard: Flashcard) => {
     setTrackedFlashcards((prev) => {
@@ -183,6 +203,5 @@ export function useFlashcards(
     setTrackProgress,
     trackedFlashcardRight,
     trackedFlashcardWrong,
-    isDesktop,
   };
 }
