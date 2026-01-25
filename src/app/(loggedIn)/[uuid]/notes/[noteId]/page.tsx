@@ -20,7 +20,7 @@ export default function NotesPage({ params }: PageProps) {
   const router = useRouter();
   const pathname = usePathname();
   const pathSegments = pathname.split("/");
-  const noteIdFromPath = pathSegments[3]; // /uuid/notes/noteId
+  const noteIdFromPath = pathSegments[3];
   const { uuid } = use(params);
   const isDesktop = useIsDesktop();
 

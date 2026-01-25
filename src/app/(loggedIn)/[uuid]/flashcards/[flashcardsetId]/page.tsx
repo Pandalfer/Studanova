@@ -22,12 +22,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useFlashcards } from "@/hooks/use-flashcards";
-import {use} from "react";
+import { use } from "react";
 
 interface FlashcardDeckProps {
   uuid: string;
   flashcardsetId: string;
-  isDemo?: boolean; // New Prop
+  isDemo?: boolean;
 }
 
 interface PageProps {
@@ -36,14 +36,16 @@ interface PageProps {
 
 export default function Page({ params }: PageProps) {
   const { uuid, flashcardsetId } = use(params);
-  return <FlashcardDeck uuid={uuid} flashcardsetId={flashcardsetId} isDemo={false} />;
+  return (
+    <FlashcardDeck uuid={uuid} flashcardsetId={flashcardsetId} isDemo={false} />
+  );
 }
 
 export function FlashcardDeck({
-                                uuid,
-                                flashcardsetId,
-                                isDemo = false,
-                              }: FlashcardDeckProps) {
+  uuid,
+  flashcardsetId,
+  isDemo = false,
+}: FlashcardDeckProps) {
   const router = useRouter();
 
   const {

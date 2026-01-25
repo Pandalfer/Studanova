@@ -33,7 +33,7 @@ export default function SignUp() {
       case "green":
         return "border-green-600 focus-visible:border-green-600 focus-visible:ring-green-600/50";
       default:
-        return "border-border"; // default border class
+        return "border-border";
     }
   }
 

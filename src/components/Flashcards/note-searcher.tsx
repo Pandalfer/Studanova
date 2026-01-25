@@ -32,11 +32,10 @@ export function NoteSearcher({
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const isSearching = searchQuery.trim().length > 0;
-  const [matchingNotes, setMatchingNotes] = React.useState<Note[]>([]); // Changed type to Note
+  const [matchingNotes, setMatchingNotes] = React.useState<Note[]>([]);
   const workerRef = React.useRef<Worker | null>(null);
   const [id, setId] = React.useState("");
 
-  // Initialize Worker
   React.useEffect(() => {
     workerRef.current = new Worker(
       new URL("@/lib/notes/notes-search-worker.ts", import.meta.url),
@@ -56,7 +55,7 @@ export function NoteSearcher({
       workerRef.current.postMessage({
         searchQuery,
         notes,
-        folders: [], // The working version expects this key
+        folders: [],
       });
     }
   }, [searchQuery, notes]);
@@ -88,7 +87,7 @@ export function NoteSearcher({
           <div
             className="flex-1 min-w-0 text-left"
             style={{
-              maxWidth: "calc(min(40vw, 400px))"
+              maxWidth: "calc(min(40vw, 400px))",
             }}
           >
             <span className="block truncate">
@@ -116,14 +115,14 @@ export function NoteSearcher({
                     value={note.id}
                     onSelect={handleSelect}
                     className="cursor-pointer flex"
-                    >
+                  >
                     <span className="truncate flex-1 min-w-0">
                       {note.title}
                     </span>
                     <Check
                       className={cn(
                         "ml-2 shrink-0",
-                        id === note.id ? "opacity-100" : "opacity-0"
+                        id === note.id ? "opacity-100" : "opacity-0",
                       )}
                     />
                   </CommandItem>

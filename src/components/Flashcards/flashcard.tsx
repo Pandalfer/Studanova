@@ -6,18 +6,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function FlashcardItem({ fc }: { fc: Flashcard }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Helper to determine text size based on length
   const getTextSize = (text: string, isQuestion: boolean) => {
     const length = text.length;
     if (isQuestion) {
       if (length > 150) return "text-sm md:text-base";
       if (length > 80) return "text-lg md:text-md";
-      return "text-xl md:text-xl"; // Default large
+      return "text-xl md:text-xl";
     } else {
-      // Answers usually need to be smaller since they are often longer
       if (length > 200) return "text-xs md:text-sm";
       if (length > 100) return "text-sm md:text-lg";
-      return "text-lg md:text-xl"; // Default large
+      return "text-lg md:text-xl";
     }
   };
 

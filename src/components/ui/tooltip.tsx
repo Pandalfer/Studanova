@@ -19,7 +19,7 @@ function TooltipProvider({
 }
 
 function Tooltip({
-  delayDuration = 500, // default 500ms
+  delayDuration = 500,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root> & {
   delayDuration?: number;

@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Step 1: Collect all descendant flashcards IDs
     const collectFolderIds = async (folderId: string): Promise<string[]> => {
       const childFolders = await prisma.folder.findMany({
         where: { parentId: folderId },
@@ -28,12 +27,10 @@ export async function POST(req: NextRequest) {
 
     const allFolderIds = await collectFolderIds(id);
 
-    // Step 2: Delete all notes belonging to those folders
     await prisma.note.deleteMany({
       where: { folderId: { in: allFolderIds } },
     });
 
-    // Step 3: Delete the folders themselves
     await prisma.folder.deleteMany({
       where: { id: { in: allFolderIds } },
     });

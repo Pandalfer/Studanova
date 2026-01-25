@@ -8,7 +8,6 @@ export default function Features() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Check scroll position
   const updateScrollButtons = () => {
     const container = carouselRef.current;
     if (container) {

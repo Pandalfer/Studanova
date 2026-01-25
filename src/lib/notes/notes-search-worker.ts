@@ -1,10 +1,9 @@
-// lib/notes/search.worker.ts
 import {
   calculateScores,
   tokenizeText,
   stripText,
   removeStopWords,
-} from "./search-score"; // Adjust paths as needed
+} from "./search-score";
 import { collectAllNotes } from "./note-and-folder-actions";
 
 addEventListener("message", (event) => {

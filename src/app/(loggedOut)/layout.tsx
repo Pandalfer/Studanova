@@ -10,7 +10,6 @@ export const metadata: Metadata = {
   description: "The best productivity tool for students",
 };
 
-// Renamed to NestedLayout to reflect its purpose
 export default function NestedLayout({
   children,
 }: {

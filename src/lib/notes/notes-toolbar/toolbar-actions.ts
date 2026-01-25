@@ -46,7 +46,6 @@ export function applyBold({ editorRef, setContent }: ToolbarActionProps) {
 
   document.execCommand("bold");
 
-  // Sync state with editor’s HTML
   if (editorRef.current) {
     setContent(editorRef.current.innerHTML);
   }
@@ -62,7 +61,6 @@ export function applyItalic({ editorRef, setContent }: ToolbarActionProps) {
 
   document.execCommand("italic");
 
-  // Sync state with editor’s HTML
   if (editorRef.current) {
     setContent(editorRef.current.innerHTML);
   }
@@ -134,10 +132,8 @@ export function applyColour({
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || !colour) return;
 
-  // Look up the CSS variable name
   const cssVar = colors[colour];
 
-  // Resolve it to an actual hex value from :root
   const resolved = getComputedStyle(document.documentElement)
     .getPropertyValue(cssVar)
     .trim();
@@ -147,7 +143,6 @@ export function applyColour({
     return;
   }
 
-  // Apply inline foreground colour
   document.execCommand("foreColor", false, resolved);
 
   if (editorRef.current) {
@@ -172,10 +167,8 @@ export function applyBackground({
   const selection = window.getSelection();
   if (!selection || selection.rangeCount === 0 || !backgroundColour) return;
 
-  // Look up the CSS variable name
   const cssVar = backgrounds[backgroundColour];
 
-  // Resolve it to an actual hex value from :root
   const resolved = getComputedStyle(document.documentElement)
     .getPropertyValue(cssVar)
     .trim();
@@ -185,7 +178,6 @@ export function applyBackground({
     return;
   }
 
-  // Apply inline foreground colour
   document.execCommand("backColor", false, resolved);
 
   if (editorRef.current) {
@@ -249,11 +241,7 @@ export function isBackground(): string | null {
   }
   while (node && node instanceof HTMLElement) {
     const bg = getComputedStyle(node).backgroundColor;
-    if (
-      bg &&
-      bg !== "rgba(0, 0, 0, 0)" && // ignore transparent
-      bg !== "transparent"
-    ) {
+    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
       return bg;
     }
     node = node.parentElement;
@@ -313,7 +301,6 @@ export function isBackgroundName(): BackgroundName | null {
   }
   return null;
 }
-//endregion
 
 export function applyBlock({
   blockType,
@@ -362,3 +349,5 @@ export function isBlock(): string | null {
   }
   return "Text";
 }
+
+//endregion

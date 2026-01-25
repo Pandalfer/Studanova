@@ -91,17 +91,14 @@ export function moveNote(
     let nextNotes: Note[];
 
     if (folderId) {
-      // Moving into a flashcards → remove from root
       nextNotes = prevNotes.filter((n) => n.id !== noteId);
     } else {
-      // Moving to root
       const isInRoot = prevNotes.some((n) => n.id === noteId);
       nextNotes = isInRoot
         ? prevNotes.map((n) => (n.id === noteId ? updatedNote : n))
         : [...prevNotes, updatedNote];
     }
 
-    // update folders tree
     setFolders((prevFolders) => {
       const updateFolders = (folders: Folder[]): Folder[] =>
         folders.map((folder) => {
@@ -194,7 +191,6 @@ export async function deleteNote(
     console.error("Failed to delete note from DB:", err);
   }
 
-  // Active note logic
   if (activeNote?.id === id) {
     setActiveNote?.(null);
     setTitle?.("");
@@ -202,7 +198,6 @@ export async function deleteNote(
     router?.push(`/${uuid}/notes`);
   }
 
-  // Remove note from state
   const noteToDelete = notes.find((n) => n.id === id);
   if (noteToDelete) {
     setNotes((prev) => prev.filter((n) => n.id !== id));
@@ -309,7 +304,6 @@ export async function selectNote(
     }
   }
 
-  // Temporarily clear activeNote so editor disappears
   setActiveNote?.(null);
   setTitle?.("");
 
@@ -424,7 +418,6 @@ export function moveFolder(
   const childrenFolders = collectAllFolders([oldFolder]);
   const childrenFolderIds = childrenFolders.map((f) => f.id);
   if (parentId && childrenFolderIds.includes(parentId)) {
-    // Prevent moving a flashcards into one of its own subfolders
     return;
   }
 
@@ -449,11 +442,9 @@ export function moveFolder(
     const cleaned = removeFolder(prevFolders);
 
     if (!parentId) {
-      // Moving to root
       return sortByTitle([...cleaned, updatedFolder]);
     }
 
-    // Moving inside another flashcards
     const addToParent = (folders: Folder[]): Folder[] =>
       folders.map((f) =>
         f.id === parentId
@@ -546,7 +537,6 @@ export async function processFilesIntoTree(files: FileList) {
 
   const rootFolderName = fileArray[0].webkitRelativePath.split("/")[0];
 
-  // We force a single root object to ensure the API always has a "tree" to loop through
   const mainRoot: ImportFolder = {
     title: rootFolderName,
     folders: [],
@@ -557,7 +547,7 @@ export async function processFilesIntoTree(files: FileList) {
     if (!file.name.endsWith(".md")) continue;
 
     const pathSegments = file.webkitRelativePath.split("/");
-    pathSegments.shift(); // Remove the top-level "MyVault" name
+    pathSegments.shift();
 
     const fileName = pathSegments.pop()?.replace(".md", "") || "Untitled";
     const content = await file.text();
@@ -568,13 +558,11 @@ export async function processFilesIntoTree(files: FileList) {
       lastEdited: Date.now(),
     };
 
-    // If no segments left, the note is in the vault root
     if (pathSegments.length === 0) {
       mainRoot.notes.push(newNote);
       continue;
     }
 
-    // Traverse the subfolders
     let currentLevel = mainRoot.folders;
     let targetFolder: ImportFolder | null = null;
 
@@ -591,8 +579,6 @@ export async function processFilesIntoTree(files: FileList) {
     if (targetFolder) targetFolder.notes.push(newNote);
   }
 
-  // We return mainRoot as the ONLY item in the tree.
-  // This guarantees the API sees 1 flashcards and starts recursing.
   return { rootFolderName: "", tree: [mainRoot] };
 }
 
@@ -624,12 +610,10 @@ export function deleteFolderFromFolders(
 }
 
 function isNoteInFolderTree(noteId: string, folder: Folder): boolean {
-  // Check notes in the current flashcards
   if ((folder.notes ?? []).some((n) => n.id === noteId)) {
     return true;
   }
 
-  // Check notes in child folders recursively
   for (const childFolder of folder.folders ?? []) {
     if (isNoteInFolderTree(noteId, childFolder)) {
       return true;
@@ -676,12 +660,10 @@ export async function deleteFolder(
 
 export function findFolderPath(folders: Folder[], noteId: string): string[] {
   for (const folder of folders) {
-    // Check direct children safely
     if ((folder.notes ?? []).some((n) => n.id === noteId)) {
       return [folder.id];
     }
 
-    // Check nested folders safely
     if (folder.folders && folder.folders.length > 0) {
       const path = findFolderPath(folder.folders, noteId);
       if (path.length > 0) {

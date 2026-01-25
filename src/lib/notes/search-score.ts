@@ -96,10 +96,10 @@ export function removeStopWords(tokens: string[]): string[] {
 }
 
 const getDynamicThreshold = (queryLength: number): number => {
-  if (queryLength <= 2) return 0; // Must be exact for very short strings
-  if (queryLength <= 5) return 1; // Allow 1 typo
-  if (queryLength <= 8) return 2; // Allow 2 typos
-  return 3; // Max 3 typos for long strings
+  if (queryLength <= 2) return 0;
+  if (queryLength <= 5) return 1;
+  if (queryLength <= 8) return 2;
+  return 3;
 };
 
 export function calculateScores(
@@ -114,20 +114,16 @@ export function calculateScores(
     let bestTokenScore = 0;
 
     for (const tToken of textTokens) {
-      // 1. Exact Match
       if (qToken === tToken) {
         bestTokenScore = 1;
         break;
       }
 
-      // If the word starts with the query, give it a high score (0.9)
       if (tToken.startsWith(qToken)) {
         const prefixScore = 0.9;
         bestTokenScore = Math.max(bestTokenScore, prefixScore);
-        // Don't break yet, an exact match might be later in the list
       }
 
-      // 3. Fuzzy Match (Typos)
       const threshold = getDynamicThreshold(qToken.length);
       const distance = calculateLevenshteinDistance(qToken, tToken);
 

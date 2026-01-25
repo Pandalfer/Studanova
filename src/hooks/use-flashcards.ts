@@ -17,7 +17,7 @@ export function useFlashcards(
   uuid: string,
   router: AppRouterInstance,
   flashcardsetIdFromPath?: string,
-  isDemo: boolean = false
+  isDemo: boolean = false,
 ) {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [trackedFlashcards, setTrackedFlashcards] = useState<Flashcard[]>([]);
@@ -39,7 +39,6 @@ export function useFlashcards(
     const flashcardsToSave = [...saveQueue.current];
     saveQueue.current = [];
 
-    // 2. Branching Logic for Saving
     const dataToSave = flashcardsToSave.map((fc) => ({ ...fc, progress: 1 }));
 
     let res;
@@ -51,7 +50,6 @@ export function useFlashcards(
 
     if (!res.success) {
       toast.error("Failed to save flashcards progress.");
-      // If fail, put them back in queue
       saveQueue.current.push(...flashcardsToSave);
     }
     scheduleFlush();
@@ -76,14 +74,12 @@ export function useFlashcards(
 
     toast.promise(
       (async () => {
-        // 3. Branching Logic for Resetting
         if (isDemo) {
           await resetDeckProgressDemo(flashcardSet.id!);
         } else {
           await resetDeckProgress(flashcardSet.id!);
         }
 
-        // Reset Local State (Same for both)
         setFlashcards((prev) => prev.map((fc) => ({ ...fc, progress: 0 })));
         setTrackedFlashcards(flashcards.map((fc) => ({ ...fc, progress: 0 })));
         setActiveFlashcard(0);
@@ -94,7 +90,7 @@ export function useFlashcards(
         loading: "Resetting progress...",
         success: (msg) => msg,
         error: "Could not reset deck.",
-      }
+      },
     );
   };
 
@@ -124,10 +120,9 @@ export function useFlashcards(
 
     setLoading(true);
     try {
-      // 4. Branching Logic for Loading
       let data;
       if (isDemo) {
-        data = await loadFlashcardSetDemo(flashcardsetIdFromPath, uuid);
+        data = await loadFlashcardSetDemo(flashcardsetIdFromPath);
       } else {
         data = await loadFlashcardSet(flashcardsetIdFromPath, uuid);
       }
@@ -150,7 +145,7 @@ export function useFlashcards(
 
   useEffect(() => {
     fetchCards();
-  }, [flashcardsetIdFromPath, uuid, isDemo]); // Add isDemo dependency
+  }, [flashcardsetIdFromPath, uuid, isDemo]);
 
   const trackedFlashcardRight = async (flashcard: Flashcard) => {
     setTrackedFlashcards((prev) => prev.filter((f) => f.id !== flashcard.id));
@@ -163,7 +158,10 @@ export function useFlashcards(
       if (saveQueue.current.length === 0) return;
       e.preventDefault();
       e.returnValue = "";
-      const dataToSave = saveQueue.current.map((fc) => ({ ...fc, progress: 1 }));
+      const dataToSave = saveQueue.current.map((fc) => ({
+        ...fc,
+        progress: 1,
+      }));
       if (isDemo) {
         saveFlashcardsBulkDemo(dataToSave);
       } else {

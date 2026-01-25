@@ -12,13 +12,13 @@ const groq = new Groq({
 
 export async function saveFlashcardsBulk(
   flashcards: Flashcard[],
-  idsToDelete: string[] = [] // New parameter
+  idsToDelete: string[] = [],
 ) {
   try {
     await prisma.$transaction(async (tx) => {
       if (idsToDelete.length > 0) {
         await tx.flashcard.deleteMany({
-          where: { id: { in: idsToDelete } }
+          where: { id: { in: idsToDelete } },
         });
       }
 
@@ -105,12 +105,10 @@ export async function generateFlashcardsFromNote(params: {
 
     const parsed = JSON.parse(raw);
 
-    // FIX 1: Use the correct key "cards" consistently
     if (!parsed.cards || !Array.isArray(parsed.cards)) {
       return { success: false, error: "AI returned malformed data" };
     }
 
-    // FIX 2: Ensure we are slicing the correct array
     const flashcards = parsed.cards.slice(0, params.count);
 
     if (flashcards.length === 0) {
@@ -120,7 +118,6 @@ export async function generateFlashcardsFromNote(params: {
     const result = await prisma.$transaction(async (tx) => {
       const set = await tx.flashcardSet.create({
         data: {
-
           title: params.noteTitle || "Untitled Set",
           description: `Generated from: ${params.noteTitle}`,
           studentId: params.uuid,
@@ -145,7 +142,6 @@ export async function generateFlashcardsFromNote(params: {
     return { success: false, error: "Failed to generate flashcards" };
   }
 }
-
 
 //endregion
 
@@ -242,7 +238,7 @@ export async function loadFlashcardSet(
 
 export async function saveFlashcardSet(
   setId: string,
-  data: { title: string; description?: string }
+  data: { title: string; description?: string },
 ) {
   try {
     const updatedSet = await prisma.flashcardSet.update({
@@ -262,7 +258,7 @@ export async function saveFlashcardSet(
 
 export async function createFlashcardSet(
   uuid: string,
-  data: { title: string; description?: string }
+  data: { title: string; description?: string },
 ): Promise<
   { success: true; data: FlashcardSet } | { success: false; error: string }
 > {
@@ -276,7 +272,7 @@ export async function createFlashcardSet(
         },
         include: {
           flashcards: true,
-        }
+        },
       });
 
       return set;
@@ -287,14 +283,17 @@ export async function createFlashcardSet(
       data: {
         ...result,
         description: result.description ?? "",
-        flashcards: []
-      }
+        flashcards: [],
+      },
     };
   } catch (error) {
     console.error("Create Set Error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create flashcard set"
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to create flashcard set",
     };
   }
 }

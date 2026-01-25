@@ -79,7 +79,7 @@ interface NotesSidebarProps {
 }
 
 interface NotesSidebarContentProps extends NotesSidebarProps {
-  activeId?: string | null; // for DragOverlay
+  activeId?: string | null;
   isDragLocked: boolean;
   setIsDragLocked: (locked: boolean) => void;
 }
@@ -112,18 +112,16 @@ function NotesSidebarContent({
   const scrollAreaRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    // Initialize the worker
     workerRef.current = new Worker(
       new URL("@/lib/notes/notes-search-worker.ts", import.meta.url),
     );
 
-    // Listen for results coming back from the worker
     workerRef.current.onmessage = (event) => {
       setMatchingNotes(event.data);
     };
 
     return () => {
-      workerRef.current?.terminate(); // Clean up on unmount
+      workerRef.current?.terminate();
     };
   }, []);
 
@@ -185,7 +183,6 @@ function NotesSidebarContent({
       const viewportRect = viewport.getBoundingClientRect();
       const elementRect = activeElement.getBoundingClientRect();
 
-      // Vertical Calculation
       const targetTop =
         viewport.scrollTop +
         (elementRect.top - viewportRect.top) -
@@ -198,7 +195,6 @@ function NotesSidebarContent({
 
       viewport.scrollTo({
         top: Math.max(0, Math.min(targetTop, maxScrollTop)),
-        // Change from 0 to targetLeft
         left: Math.max(0, Math.min(targetLeft, maxScrollLeft)),
         behavior: "smooth",
       });
@@ -315,8 +311,6 @@ function NotesSidebarContent({
                       onChange={async (e) => {
                         const files = e.target.files;
                         if (files && files.length > 0) {
-                          // This calls the function in your props
-                          // which will handle the processing and the API fetch
                           handleImport?.(files);
                         }
                       }}
@@ -376,14 +370,12 @@ function NotesSidebarContent({
           </div>
         </ScrollArea>
       ) : notes.length === 0 && folders.length === 0 ? (
-        // Empty state
         <NotesEmptyState
           message="No notes yet"
           buttonText="Create your first note"
           onButtonClick={createNewNote}
         />
       ) : (
-        // Folders + Notes
         <ScrollArea
           className={`pl-5 ${isDesktop ? "pr-5" : ""} 
           ${isSearching ? "h-[calc(100%-10.25rem)] " : "h-[calc(100%-8.5rem)] "}
@@ -528,7 +520,7 @@ export function NotesSidebar(props: NotesSidebarProps) {
 
         if (over.data?.current?.type !== "folder") return;
 
-        if (active.id === over.id) return; // no-op if dropped on itself
+        if (active.id === over.id) return;
 
         active.data?.current?.type === "note"
           ? props.moveNoteToFolder(

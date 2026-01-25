@@ -3,14 +3,14 @@ import {
   tokenizeText,
   stripText,
   removeStopWords,
-} from "../notes/search-score"; // Reusing your existing logic
+} from "../notes/search-score";
 import { FlashcardSet } from "../types";
 
 addEventListener("message", (event) => {
   const { searchQuery, sets } = event.data;
 
   if (!searchQuery.trim()) {
-    postMessage(sets); // Return all if no search
+    postMessage(sets);
     return;
   }
 
@@ -30,7 +30,7 @@ addEventListener("message", (event) => {
       let matchSource: "title" | "description" | "none" = "none";
 
       if (titleScore > 0.1) {
-        finalScore = titleScore * 2.5; // Heavy weight on title
+        finalScore = titleScore * 2.5;
         matchSource = "title";
       } else if (descScore > 0.1) {
         finalScore = descScore;

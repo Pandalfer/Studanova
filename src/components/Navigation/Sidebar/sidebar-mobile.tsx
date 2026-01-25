@@ -14,7 +14,7 @@ import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 
 interface SidebarMobileProps {
   sidebarItems: SidebarItems;
-  username: string; // add username prop
+  username: string;
 }
 
 export function SidebarMobile({ sidebarItems, username }: SidebarMobileProps) {

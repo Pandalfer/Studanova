@@ -30,7 +30,6 @@ export default function LoggedInHome({ params }: PageProps) {
   useEffect(() => {
     (async () => {
       try {
-        // Fetch user info
         const userResponse = await fetch("/api/user/get-info", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

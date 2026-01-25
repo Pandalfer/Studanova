@@ -1,4 +1,3 @@
-// Sidebar.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -12,7 +11,7 @@ interface SidebarProps {
   uuid?: string;
   isCollapsed: boolean;
   setIsCollapsed: (v: boolean) => void;
-  isDemo?: boolean; // new optional prop
+  isDemo?: boolean;
 }
 
 export function Sidebar({

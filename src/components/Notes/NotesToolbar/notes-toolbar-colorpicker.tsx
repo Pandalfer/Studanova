@@ -38,7 +38,7 @@ export default function NotesToolbarColorPicker({
   useEffect(() => {
     const handler = () => {
       setActiveColor(isColorName());
-      setBackgroundColor(isBackgroundName()); // <-- add this
+      setBackgroundColor(isBackgroundName());
     };
     document.addEventListener("selectionchange", handler);
     return () => document.removeEventListener("selectionchange", handler);

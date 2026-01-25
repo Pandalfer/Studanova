@@ -35,7 +35,6 @@ export function useNotes(
   const editorRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // Load notes and folders
   useEffect(() => {
     (async () => {
       try {
@@ -62,7 +61,6 @@ export function useNotes(
     })();
   }, [uuid, noteIdFromPath]);
 
-  // Auto Save Notes
   useEffect(() => {
     if (!isDirty || !activeNote) return;
 
@@ -79,7 +77,6 @@ export function useNotes(
         const savedNote = await saveNoteToDb(updatedNote, uuid);
         if (savedNote) {
           if (!savedNote.folderId) {
-            // Root-level note
             setNotes((prev) =>
               prev.map((n) => (n.id === savedNote.id ? savedNote : n)),
             );

@@ -81,7 +81,7 @@ function NoteItem({
     setRenameDialogOpen(false);
 
     if (!trimmed) {
-      setNewTitle(note.title); // revert if empty
+      setNewTitle(note.title);
       return;
     }
 

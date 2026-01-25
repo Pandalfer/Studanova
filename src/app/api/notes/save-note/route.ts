@@ -13,20 +13,17 @@ export async function POST(req: NextRequest) {
     let note;
 
     if (id) {
-      // Check if note exists first
       const existing = await prisma.note.findUnique({ where: { id } });
 
       if (existing) {
-        // update if it exists
         note = await prisma.note.update({
           where: { id },
           data: { title, content, folderId: folderId ?? null },
         });
       } else {
-        // otherwise, create a fresh one
         note = await prisma.note.create({
           data: {
-            id: id || nanoid(), // keep client ID if passed, else generate
+            id: id || nanoid(),
             title,
             content,
             studentId,
@@ -35,7 +32,6 @@ export async function POST(req: NextRequest) {
         });
       }
     } else {
-      // definitely a new note
       note = await prisma.note.create({
         data: {
           id: nanoid(),

@@ -115,7 +115,7 @@ function FolderItem({
     setRenameDialogOpen(false);
 
     if (!trimmed) {
-      setNewTitle(folder.title); // revert if empty
+      setNewTitle(folder.title);
       return;
     }
 
@@ -333,7 +333,7 @@ function FolderItem({
                         setIsDragLocked={setIsDragLocked}
                         activeNoteId={activeNoteId}
                         onSelectFolder={onSelectFolder}
-                        renderChildren={renderChildren} // propagate the flag
+                        renderChildren={renderChildren}
                       />
                     </div>
                   ))}

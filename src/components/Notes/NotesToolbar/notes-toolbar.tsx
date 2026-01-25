@@ -1,4 +1,3 @@
-// NotesToolbar.tsx
 "use client";
 
 import React, { useRef, useState } from "react";
