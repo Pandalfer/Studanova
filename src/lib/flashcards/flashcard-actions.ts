@@ -121,7 +121,7 @@ export async function saveFlashcardsBulkDemo(
           set.flashcards[cardIndex] = { ...set.flashcards[cardIndex], ...fc };
         } else {
           const newCard = { ...fc };
-          if (newCard.id?.startsWith("temp-")) {
+          if (newCard.id?.startsWith("temp-") || !newCard.id) {
             newCard.id = v4();
           }
           set.flashcards.push(newCard);

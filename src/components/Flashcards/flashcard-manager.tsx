@@ -6,6 +6,7 @@ import {
   createFlashcardSet,
   generateFlashcardsFromNote,
   loadFlashcardSets,
+  getFlashcardUsage,
 } from "@/lib/server-actions/flashcards";
 import {
   loadDemoFolders,
@@ -16,7 +17,7 @@ import {
 import { collectAllNotes } from "@/lib/notes/note-and-folder-actions";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
+import {Loader2, Plus, Search, X} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -37,7 +38,7 @@ import {
 } from "@/components/Flashcards/flashcard-set";
 import {
   createFlashcardSetDemo,
-  loadFlashcardSetsDemo,
+  loadFlashcardSetsDemo, saveFlashcardsBulkDemo,
 } from "@/lib/flashcards/flashcard-actions";
 
 interface FlashcardsContentProps {
@@ -54,6 +55,7 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
   const [flashcardSets, setFlashcardSets] = useState<FlashcardSet[]>([]);
   const [filteredSets, setFilteredSets] = useState<FlashcardSet[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [usage, setUsage] = useState<{ remaining: number | null, limit: number | null }>({ remaining: null, limit: null });
 
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [isLoadingSets, setIsLoadingSets] = useState(true);
@@ -78,6 +80,12 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
       setIsLoadingNotes(true);
 
       try {
+        const usageResult = await getFlashcardUsage(uuid);
+        setUsage({
+          remaining: usageResult.remaining,
+          limit: usageResult.limit
+        });
+
         const setsResult = isDemo
           ? await loadFlashcardSetsDemo()
           : await loadFlashcardSets(uuid);
@@ -118,32 +126,60 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
       toast.error("Failed to create new set.");
     }
   };
+
   const handleAiGenerate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!note) return;
 
     const formData = new FormData(e.currentTarget);
     const count = Number(formData.get("count"));
-
     setAiGenerateOpen(false);
 
     toast.promise(
       (async () => {
         const res = await generateFlashcardsFromNote({
-          uuid,
+          uuid, // "demo"
           noteTitle: note.title,
           noteContent: note.content,
           count,
         });
 
         if (!res.success) throw new Error(res.error);
-        router.push(`/${uuid}/flashcards/${res.data.setId}`);
+
+        const usageUpdate = await getFlashcardUsage(uuid);
+        setUsage({ remaining: usageUpdate.remaining, limit: usageUpdate.limit });
+
+
+        if (res.data.isDemo) {
+
+          const setRes = await createFlashcardSetDemo("demo", {
+            title: note.title,
+            description: `Generated from: ${note.title}`
+          });
+
+          if (!setRes.success) throw new Error("Failed to save demo set");
+
+          // 2. Add the AI cards to that Set
+          const cardsToSave = res.data.cards.map(c => ({
+            ...c,
+            setId: setRes.data.id!,
+            progress: 0,
+            id: "temp-id"
+          }));
+
+          await saveFlashcardsBulkDemo(cardsToSave);
+
+          router.push(`/demo/flashcards/${setRes.data.id}`);
+        } else {
+
+          router.push(`/${uuid}/flashcards/${res.data.setId}`);
+        }
       })(),
       {
         loading: "AI is thinking...",
         success: "Flashcards generated!",
         error: (err) => err.message || "Failed to generate.",
-      },
+      }
     );
   };
 
@@ -176,12 +212,19 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
             </DialogTrigger>
             <DialogContent>
               <DialogTitle>Create flashcards with AI</DialogTitle>
-              {isDemo && (
-                <p className="text-xs text-muted-foreground">
-                  Demo users: 3 generations per month.
-                </p>
-              )}
-              <form onSubmit={handleAiGenerate} className="space-y-6 pt-4">
+
+              <div className="text-xs text-muted-foreground mt-1 flex flex-col gap-0.5">
+                <p>{isDemo ? "Log In for more uses" : ""}</p>
+                {usage.remaining !== null ? (
+                  <p className={usage.remaining === 0 ? "text-red-500 font-medium" : ""}>
+                    {usage.remaining} / {usage.limit} generations left this month
+                  </p>
+                ) : (
+                  <Loader2 className="h-3 w-3 animate-spin mt-1"/>
+                )}
+              </div>
+
+              <form onSubmit={handleAiGenerate} className="space-y-6 pt-2">
                 <div className="space-y-2">
                   <Label>Source Note</Label>
                   <NoteSearcher
@@ -210,8 +253,8 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={!note}>
-                    Generate
+                  <Button type="submit" disabled={!note || usage.remaining === 0}>
+                    {usage.remaining === 0 ? "Limit Reached" : "Generate"}
                   </Button>
                 </div>
               </form>
@@ -264,9 +307,9 @@ export function FlashcardsManager({ uuid, isDemo }: FlashcardsContentProps) {
 }
 
 function FlashcardManagerEmptyState({
-  onAiClick,
-  hasQuery,
-}: {
+                                      onAiClick,
+                                      hasQuery,
+                                    }: {
   onAiClick: () => void;
   hasQuery: boolean;
 }) {

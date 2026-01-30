@@ -3,6 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { Flashcard, FlashcardSet } from "@/lib/types";
 import Groq from "groq-sdk";
+import {GUEST_LIMIT, guestRateLimit, MEMBER_LIMIT, memberRateLimit} from "@/lib/data/rate-limit";
+import { headers } from "next/headers";
 
 const groq = new Groq({
   apiKey: process.env.FLASHCARD_API_KEY!,
@@ -75,15 +77,61 @@ export async function resetDeckProgress(
   }
 }
 
+export async function getFlashcardUsage(uuid: string) {
+  const headerList = await headers();
+  const ip = headerList.get("x-forwarded-for") || "anonymous";
+  const isDemo = uuid === "demo";
+
+  const identifier = isDemo ? `guest_${ip}` : uuid;
+  const limiter = isDemo ? guestRateLimit : memberRateLimit;
+
+  // Most rate limit libraries (like Upstash) have a getRemaining method.
+  // We try to fetch the current state.
+  try {
+    const state = await limiter.getRemaining(identifier);
+
+    // If your rate limit library returns a number directly:
+    // return { remaining: state, isDemo };
+
+    // If it returns an object (common in Upstash):
+    return {
+      remaining: state.remaining,
+      limit: isDemo ? GUEST_LIMIT : MEMBER_LIMIT, // Adjust 50 to your member limit
+      reset: state.reset,
+      isDemo
+    };
+  } catch (error) {
+    // Fallback if getRemaining isn't supported by your adapter
+    return { remaining: null, limit: null, isDemo };
+  }
+}
+
 export async function generateFlashcardsFromNote(params: {
   uuid: string;
   noteTitle: string;
   noteContent: string;
   count: number;
 }): Promise<
-  { success: true; data: { setId: string } } | { success: false; error: string }
+  { success: true; data: { isDemo: true; cards: { question: string; answer: string }[] } | { setId: string; isDemo: false } } | { success: false; error: string }
 > {
   if (!params.uuid) return { success: false, error: "Invalid user ID" };
+  const headerList = await headers();
+  const ip = headerList.get("x-forwarded-for") || "anonymous";
+
+  const isDemo = params.uuid === "demo";
+  const identifier = isDemo ? `guest_${ip}` : params.uuid;
+  const limiter = isDemo ? guestRateLimit : memberRateLimit;
+
+  const { success, remaining } = await limiter.limit(identifier);
+
+  if (!success) {
+    return {
+      success: false,
+      error: isDemo
+        ? "Demo limit reached (3 per month). Please sign up for more!"
+        : "Member limit reached. Try again later.",
+    };
+  }
 
   try {
     const completion = await groq.chat.completions.create({
@@ -91,13 +139,15 @@ export async function generateFlashcardsFromNote(params: {
       messages: [
         {
           role: "system",
-          content: `You are an expert tutor. Create flashcards for: ${params.noteTitle}.
+          content: `You are an expert tutor. Create exactly ${params.count} flashcards for the following note.
           Return ONLY a JSON object with a key "cards".
+          The "cards" array must contain exactly ${params.count} items.
           Format: {"cards": [{"question": "string", "answer": "string"}]}`,
         },
-        { role: "user", content: params.noteContent },
+        { role: "user", content: `Note Title: ${params.noteTitle}\n\nContent:\n${params.noteContent}` },
       ],
       response_format: { type: "json_object" },
+      temperature: 0.5,
     });
 
     const raw = completion.choices[0].message.content;
@@ -113,6 +163,10 @@ export async function generateFlashcardsFromNote(params: {
 
     if (flashcards.length === 0) {
       return { success: false, error: "No flashcards generated" };
+    }
+
+    if (params.uuid == "demo") {
+      return { success: true, data: { isDemo: true, cards: flashcards } };
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -136,7 +190,7 @@ export async function generateFlashcardsFromNote(params: {
       return set.id;
     });
 
-    return { success: true, data: { setId: result } };
+    return { success: true, data: { setId: result, isDemo: false } };
   } catch (error) {
     console.error("Flashcard Gen Error:", error);
     return { success: false, error: "Failed to generate flashcards" };

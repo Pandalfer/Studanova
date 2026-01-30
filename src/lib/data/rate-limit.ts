@@ -6,14 +6,17 @@ export const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
+export const GUEST_LIMIT = 3;
+export const MEMBER_LIMIT = 50;
+
 export const guestRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(3, "30 d"),
+  limiter: Ratelimit.slidingWindow(GUEST_LIMIT, "30 d"),
   prefix: "ratelimit_guest",
 });
 
 export const memberRateLimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(20, "30 d"),
+  limiter: Ratelimit.slidingWindow(MEMBER_LIMIT, "30 d"),
   prefix: "ratelimit_member",
 });
