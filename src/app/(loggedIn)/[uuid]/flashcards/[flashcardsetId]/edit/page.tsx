@@ -47,10 +47,10 @@ export default function EditPage({ params }: PageProps) {
 }
 
 export function EditFlashcards({
-  uuid,
-  flashcardsetId,
-  isDemo = false,
-}: EditFlashcardsProps) {
+                                 uuid,
+                                 flashcardsetId,
+                                 isDemo = false,
+                               }: EditFlashcardsProps) {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -119,15 +119,10 @@ export function EditFlashcards({
 
       if (setRes.success && cardsRes.success) {
         toast.success("Everything saved!");
-        const updatedData = isDemo
-          ? await loadFlashcardSetDemo(flashcardsetId)
-          : await loadFlashcardSet(flashcardsetId, uuid);
-        if (updatedData.success && updatedData.data) {
-          setFlashcards(updatedData.data.flashcards || []);
-          flashcardsToDelete.current = (updatedData.data.flashcards || [])
-            .map((c) => c.id)
-            .filter((id): id is string => !!id);
-        }
+
+        router.push(
+          `/${uuid}/flashcards/${flashcardsetId}${isDemo ? "?demo=true" : ""}`
+        );
       } else {
         toast.error("Failed to save some changes");
       }
@@ -186,7 +181,7 @@ export function EditFlashcards({
               size="sm"
               onClick={() =>
                 router.push(
-                  `/${uuid}/flashcards/${flashcardsetId}${isDemo ? "?demo=true" : ""}`,
+                  `/${uuid}/flashcards/${isDemo ? "?demo=true" : ""}`,
                 )
               }
               className="gap-2 shrink-0"

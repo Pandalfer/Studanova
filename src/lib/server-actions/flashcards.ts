@@ -6,6 +6,12 @@ import Groq from "groq-sdk";
 import {GUEST_LIMIT, guestRateLimit, MEMBER_LIMIT, memberRateLimit} from "@/lib/data/rate-limit";
 import { headers } from "next/headers";
 
+const flashcardModel = process.env.FLASHCARD_MODEL ?? "openai/gpt-oss-120b";
+
+if (!flashcardModel) {
+  throw new Error("FLASHCARD_MODEL is not configured");
+}
+
 const groq = new Groq({
   apiKey: process.env.FLASHCARD_API_KEY!,
 });
@@ -133,9 +139,10 @@ export async function generateFlashcardsFromNote(params: {
     };
   }
 
+
   try {
     const completion = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
+      model: flashcardModel,
       messages: [
         {
           role: "system",
@@ -202,13 +209,13 @@ export async function generateFlashcardsFromNote(params: {
 //region Flashcard Sets
 export async function loadFlashcardSets(uuid: string): Promise<
   | {
-      success: true;
-      data: FlashcardSet[];
-    }
+  success: true;
+  data: FlashcardSet[];
+}
   | {
-      success: false;
-      error: string;
-    }
+  success: false;
+  error: string;
+}
 > {
   try {
     const flashcardSetsFromDb = await prisma.flashcardSet.findMany({
@@ -228,12 +235,12 @@ export async function loadFlashcardSets(uuid: string): Promise<
       studentId: set.studentId,
       flashcards: Array.isArray(set.flashcards)
         ? set.flashcards.map((f) => ({
-            id: f.id,
-            question: f.question,
-            answer: f.answer,
-            setId: f.setId,
-            progress: f.progress ?? 0,
-          }))
+          id: f.id,
+          question: f.question,
+          answer: f.answer,
+          setId: f.setId,
+          progress: f.progress ?? 0,
+        }))
         : [],
     }));
 
