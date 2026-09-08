@@ -1,0 +1,73 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String         @unique
+  email        String
+  password     String
+  assignments  Assignment[]
+  Note         Note[]
+  Folder       Folder[]
+  FlashcardSet FlashcardSet[]
+}
+
+model Assignment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title     String
+  text      String
+  dueDate   DateTime
+  lesson    String
+  studentId String   @db.Uuid
+  teacher   String
+  student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model Note {
+  id         String   @id
+  title      String
+  studentId  String   @db.Uuid
+  content    String
+  student    Student  @relation(fields: [studentId], references: [id])
+  lastEdited DateTime @default(now()) @updatedAt
+
+  folderId String? @db.Uuid
+  folder   Folder? @relation(fields: [folderId], references: [id])
+}
+
+model Folder {
+  id       String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title    String
+  notes    Note[]
+  parentId String?  @db.Uuid
+  parent   Folder?  @relation("FolderToFolder", fields: [parentId], references: [id])
+  folders  Folder[] @relation("FolderToFolder")
+
+  studentId String  @db.Uuid
+  student   Student @relation(fields: [studentId], references: [id])
+}
+
+model Flashcard {
+  id       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question String
+  answer   String
+  setId    String       @db.Uuid
+  set      FlashcardSet @relation(fields: [setId], references: [id])
+  progress Int          @default(0)
+}
+
+model FlashcardSet {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String
+  description String?
+  studentId   String      @db.Uuid
+  student     Student     @relation(fields: [studentId], references: [id])
+  flashcards  Flashcard[]
+}

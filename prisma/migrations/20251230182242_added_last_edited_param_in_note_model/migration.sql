@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "public"."Note" ADD COLUMN     "lastEdited" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
