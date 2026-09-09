@@ -17,7 +17,7 @@ export default function CTAHOME() {
             students.
           </p>
           <div className="inline-flex gap-4 mt-8 self-center lg:self-start">
-            <Link href={"/demo/home"}>
+            <Link href={"/demo/notes"}>
               <PrimaryActionButton text="Free Demo" />
             </Link>
           </div>

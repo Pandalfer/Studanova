@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { SidebarDesktop } from "@/components/Navigation/Sidebar/sidebar-desktop";
-import { Home, Notebook, SquareStack } from "lucide-react";
+import {AlarmClockCheckIcon, Home, Notebook, SquareStack} from "lucide-react";
 import { SidebarMobile } from "@/components/Navigation/Sidebar/sidebar-mobile";
 import { SidebarButton } from "@/components/Navigation/Sidebar/sidebar-button";
 import { useIsDesktop } from "@/lib/utils";
@@ -65,6 +65,11 @@ export function Sidebar({
         href: `${basePath}/flashcards`,
         icon: SquareStack,
       },
+      {
+        label: "Pomodoro",
+        href: `${basePath}/pomodoro`,
+        icon: AlarmClockCheckIcon,
+      }
     ],
     extras: (
       <div className={"flex flex-col gap-2"}>
