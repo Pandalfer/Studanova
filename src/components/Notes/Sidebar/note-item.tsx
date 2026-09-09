@@ -104,6 +104,7 @@ function NoteItem({
       ref={setNodeRef}
       {...attributes}
       {...(!isDragLocked || isDesktop ? listeners : {})}
+      data-active-note={activeNoteId === note.id ? "true" : undefined}
       style={{}}
       className={`${!isDesktop ? "select-none" : ""}`}
     >

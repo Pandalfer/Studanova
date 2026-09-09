@@ -13,8 +13,8 @@ export function FlashcardSet({
         group/card flex items-center justify-between
         px-6 py-4
         bg-card
+        hover:bg-accent/60
         border rounded-xl
-        hover:border-primary
         transition
      "
     >

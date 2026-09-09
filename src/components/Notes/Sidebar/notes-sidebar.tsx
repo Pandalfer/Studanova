@@ -150,6 +150,7 @@ function NotesSidebarContent({
   });
 
   const firstRender = React.useRef(true);
+  const shouldScrollToNote = React.useRef(false);
 
   React.useEffect(() => {
     if (!activeNoteId) return;
@@ -157,26 +158,33 @@ function NotesSidebarContent({
     const path = findFolderPath(folders, activeNoteId);
 
     if (firstRender.current) {
+      // On initial page load, open the active note's folder path
+      // and scroll to the active note once it has rendered.
       setOpenFolders(path);
+      shouldScrollToNote.current = true;
       firstRender.current = false;
-    } else {
-      if (path.join("/") !== openFolders.join("/")) {
-        setOpenFolders(path);
-      }
+      return;
     }
-  }, [activeNoteId]);
+
+    // activeNoteId changed because the user selected a different note.
+    shouldScrollToNote.current = true;
+
+    if (path.join("/") !== openFolders.join("/")) {
+      setOpenFolders(path);
+    }
+  }, [activeNoteId, folders]);
 
   React.useEffect(() => {
-    if (!activeNoteId) return;
+    if (!shouldScrollToNote.current || !activeNoteId) return;
 
     const timeoutId = setTimeout(() => {
-      const activeElement = document.querySelector(
+      const activeElement = scrollAreaRef.current?.querySelector(
         '[data-active-note="true"]',
       ) as HTMLElement | null;
 
       const viewport = scrollAreaRef.current?.querySelector(
         '[data-slot="scroll-area-viewport"]',
-      );
+      ) as HTMLElement | null;
 
       if (!activeElement || !viewport) return;
 
@@ -186,22 +194,36 @@ function NotesSidebarContent({
       const targetTop =
         viewport.scrollTop +
         (elementRect.top - viewportRect.top) -
-        (viewportRect.height / 2 - elementRect.height / 2);
-      const targetLeft =
-        viewport.scrollLeft + (elementRect.left - viewportRect.left);
+        (viewportRect.height - elementRect.height) / 2;
 
-      const maxScrollTop = viewport.scrollHeight - viewportRect.height;
-      const maxScrollLeft = viewport.scrollWidth - viewportRect.width;
+      const targetLeft =
+        viewport.scrollLeft +
+        (elementRect.left - viewportRect.left);
+
+      const maxScrollTop = Math.max(
+        0,
+        viewport.scrollHeight - viewport.clientHeight,
+      );
+
+      const maxScrollLeft = Math.max(
+        0,
+        viewport.scrollWidth - viewport.clientWidth,
+      );
 
       viewport.scrollTo({
         top: Math.max(0, Math.min(targetTop, maxScrollTop)),
         left: Math.max(0, Math.min(targetLeft, maxScrollLeft)),
         behavior: "smooth",
       });
-    }, 200);
+
+      // CRITICAL:
+      // Once we've scrolled to the selected note, don't do it again
+      // just because folders subsequently open/close.
+      shouldScrollToNote.current = false;
+    }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [activeNoteId]);
+  }, [activeNoteId, openFolders]);
 
   const handleSelectFolder = (folder: Folder) => {
     const path = findFolderPathByFolderId(folders, folder.id);
